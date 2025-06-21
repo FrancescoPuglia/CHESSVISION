@@ -1,0 +1,41 @@
+{
+  "extends": ["@commitlint/config-conventional"],
+  "rules": {
+    "header-max-length": [2, "always", 100],
+    "subject-case": [2, "never", ["upper-case", "pascal-case", "start-case"]],
+    "type-enum": [
+      2,
+      "always",
+      [
+        "feat",
+        "fix",
+        "docs",
+        "style",
+        "refactor",
+        "perf",
+        "test",
+        "build",
+        "ci",
+        "chore",
+        "revert"
+      ]
+    ],
+    "scope-enum": [
+      2,
+      "always",
+      [
+        "core",
+        "ui",
+        "chess",
+        "pgn",
+        "stats",
+        "storage",
+        "speech",
+        "timer",
+        "tests",
+        "deps",
+        "config"
+      ]
+    ]
+  }
+}
