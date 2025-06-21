@@ -119,7 +119,7 @@
             color: var(--gold);
         }
 
-        /* Champion of the day */
+        /* Champion of the day - Updated styles */
         .champion-card {
             background: rgba(45, 53, 97, 0.6);
             border-radius: 15px;
@@ -129,6 +129,7 @@
             gap: 15px;
             border: 1px solid rgba(255, 215, 0, 0.3);
             transition: all 0.3s;
+            min-width: 280px;
         }
 
         .champion-card:hover {
@@ -136,18 +137,34 @@
             box-shadow: 0 10px 30px rgba(255, 215, 0, 0.2);
         }
 
-        .champion-image {
+        .champion-avatar {
             width: 80px;
             height: 80px;
             border-radius: 50%;
-            object-fit: cover;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 2em;
+            font-weight: bold;
+            color: white;
             border: 3px solid var(--gold);
             box-shadow: 0 0 20px rgba(255, 215, 0, 0.4);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .champion-avatar::before {
+            content: '♔';
+            position: absolute;
+            font-size: 3em;
+            opacity: 0.1;
+            transform: rotate(-15deg);
         }
 
         .champion-info h3 {
             color: var(--gold);
             margin-bottom: 5px;
+            font-size: 1.2em;
         }
 
         .champion-years {
@@ -1115,6 +1132,203 @@
             }
         }
 
+        /* Memory Mode Styles */
+        .memory-container {
+            text-align: center;
+        }
+
+        .memory-header {
+            margin-bottom: 30px;
+        }
+
+        .memory-title {
+            font-size: 2.5em;
+            color: var(--gold);
+            margin-bottom: 20px;
+            text-shadow: 0 0 20px rgba(255, 215, 0, 0.3);
+        }
+
+        .memory-timer {
+            font-size: 1.5em;
+            background: rgba(45, 53, 97, 0.6);
+            display: inline-block;
+            padding: 15px 30px;
+            border-radius: 30px;
+            border: 2px solid var(--gold);
+        }
+
+        .memory-timer-value {
+            font-size: 2em;
+            font-weight: bold;
+            color: var(--gold);
+            margin-left: 10px;
+            font-variant-numeric: tabular-nums;
+        }
+
+        .memory-board-wrapper {
+            position: relative;
+            display: inline-block;
+            margin: 30px auto;
+        }
+
+        #memoryBoard {
+            width: 600px;
+            transition: all 0.5s ease;
+        }
+
+        .memory-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(26, 26, 46, 0.98);
+            backdrop-filter: blur(20px);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 10px;
+            z-index: 100;
+        }
+
+        .memory-overlay-content {
+            text-align: center;
+            animation: fadeIn 0.5s ease;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: scale(0.9); }
+            to { opacity: 1; transform: scale(1); }
+        }
+
+        .memory-icon {
+            font-size: 5em;
+            margin-bottom: 20px;
+            animation: brainPulse 2s ease-in-out infinite;
+        }
+
+        @keyframes brainPulse {
+            0%, 100% { transform: scale(1); opacity: 0.8; }
+            50% { transform: scale(1.1); opacity: 1; }
+        }
+
+        .memory-instruction {
+            font-size: 1.3em;
+            color: var(--gold);
+            max-width: 400px;
+            margin: 0 auto;
+        }
+
+        .memory-controls {
+            margin: 30px 0;
+            display: flex;
+            gap: 15px;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+
+        .memory-stats {
+            display: flex;
+            gap: 30px;
+            justify-content: center;
+            margin: 30px 0;
+            flex-wrap: wrap;
+        }
+
+        .memory-stat-item {
+            background: rgba(45, 53, 97, 0.5);
+            padding: 15px 25px;
+            border-radius: 15px;
+            border: 1px solid rgba(255, 215, 0, 0.3);
+        }
+
+        .memory-stat-label {
+            opacity: 0.8;
+            margin-right: 10px;
+        }
+
+        .memory-stat-value {
+            font-size: 1.5em;
+            font-weight: bold;
+            color: var(--gold);
+        }
+
+        .memory-difficulty {
+            margin-top: 30px;
+            font-size: 1.1em;
+        }
+
+        .difficulty-select {
+            margin-left: 10px;
+            padding: 8px 15px;
+            background: rgba(45, 53, 97, 0.8);
+            border: 2px solid var(--gold);
+            border-radius: 20px;
+            color: var(--text);
+            font-size: 1em;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .difficulty-select:hover {
+            background: rgba(45, 53, 97, 1);
+            box-shadow: 0 0 15px rgba(255, 215, 0, 0.3);
+        }
+
+        .difficulty-select:focus {
+            outline: none;
+            box-shadow: 0 0 20px rgba(255, 215, 0, 0.5);
+        }
+
+        /* Memory mode animations */
+        .memory-board-flash {
+            animation: boardFlash 0.5s ease;
+        }
+
+        @keyframes boardFlash {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.3; }
+        }
+
+        .memory-correct-move {
+            animation: correctFlash 0.6s ease;
+        }
+
+        @keyframes correctFlash {
+            0%, 100% { box-shadow: none; }
+            50% { box-shadow: 0 0 30px rgba(76, 175, 80, 0.8); }
+        }
+
+        .memory-wrong-move {
+            animation: wrongShake 0.5s ease;
+        }
+
+        @keyframes wrongShake {
+            0%, 100% { transform: translateX(0); }
+            10%, 30%, 50%, 70%, 90% { transform: translateX(-5px); }
+            20%, 40%, 60%, 80% { transform: translateX(5px); }
+        }
+
+        /* Footer */
+        .footer {
+            text-align: center;
+            padding: 30px;
+            margin-top: 50px;
+            border-top: 1px solid rgba(255, 215, 0, 0.2);
+            color: var(--gold);
+            font-size: 0.9em;
+        }
+
+        .footer a {
+            color: var(--gold);
+            text-decoration: none;
+            font-weight: bold;
+            transition: all 0.3s;
+        }
+
+        .footer a:hover {
+            text-shadow: 0 0 10px rgba(255, 215, 0, 0.8);
+        }
         /* Custom scrollbar */
         ::-webkit-scrollbar {
             width: 10px;
@@ -1140,10 +1354,16 @@
         <header class="header">
             <div class="header-content">
                 <div class="champion-card">
-                    <img class="champion-image" id="championImage" src="" alt="Champion">
+                    <div class="champion-avatar" id="championAvatar">
+                        <span id="championInitials">MC</span>
+                    </div>
                     <div class="champion-info">
-                        <h3 id="championName">Caricamento...</h3>
-                        <p class="champion-years" id="championYears"></p>
+                        <h3 id="championName">Magnus Carlsen</h3>
+                        <p class="champion-years" id="championYears">2013-2023</p>
+                        <button class="mode-btn" data-mode="book">
+                            <div class="mode-title">📖 Lettura Libri</div>
+                            <div class="mode-description" data-i18n="bookDesc">Sfoglia libri PGN con commenti</div>
+                        </button>
                     </div>
                 </div>
 
@@ -1159,8 +1379,8 @@
             </div>
             
             <div class="quote-card">
-                <p class="quote-text" id="dailyQuote">Caricamento aforisma...</p>
-                <p class="quote-author" id="quoteAuthor">- Autore</p>
+                <p class="quote-text" id="dailyQuote">Gli scacchi sono la vita in miniatura.</p>
+                <p class="quote-author" id="quoteAuthor">- Garry Kasparov</p>
             </div>
         </header>
 
@@ -1177,7 +1397,7 @@
             </div>
             
             <div class="calendar-container">
-                <h3 class="calendar-header" id="calendarMonth">Dicembre 2024</h3>
+                <h3 class="calendar-header" id="calendarMonth">Giugno 2025</h3>
                 <div class="calendar-month" id="calendar">
                     <!-- Calendar will be generated here -->
                 </div>
@@ -1199,9 +1419,9 @@
                             <div class="mode-title">🎴 Modalità Anki</div>
                             <div class="mode-description" data-i18n="ankiDesc">Ripetizione spaziata con flashcard</div>
                         </button>
-                        <button class="mode-btn" data-mode="book">
-                            <div class="mode-title">📖 Lettura Libri</div>
-                            <div class="mode-description" data-i18n="bookDesc">Sfoglia libri PGN con commenti</div>
+                        <button class="mode-btn" data-mode="memory">
+                            <div class="mode-title">🧠 Memory Chess</div>
+                            <div class="mode-description" data-i18n="memoryDesc">Memorizza e risolvi alla cieca</div>
                         </button>
                     </div>
                 </div>
@@ -1307,6 +1527,60 @@
                     </div>
                 </div>
 
+                <!-- Memory Mode -->
+                <div id="memoryMode" class="mode-content" style="display: none;">
+                    <div class="memory-container">
+                        <div class="memory-header">
+                            <h2 class="memory-title" data-i18n="memoryTitle">Memory Chess Challenge</h2>
+                            <div class="memory-timer" id="memoryTimer">
+                                <span class="memory-timer-text" data-i18n="timeToMemorize">Tempo per memorizzare:</span>
+                                <span class="memory-timer-value" id="memoryTimerValue">10</span>
+                            </div>
+                        </div>
+                        
+                        <div class="memory-board-wrapper">
+                            <div id="memoryBoard"></div>
+                            <div class="memory-overlay" id="memoryOverlay" style="display: none;">
+                                <div class="memory-overlay-content">
+                                    <div class="memory-icon">🧠</div>
+                                    <p class="memory-instruction" data-i18n="memoryInstruction">Ricostruisci la posizione e trova la soluzione!</p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="memory-controls">
+                            <button class="btn gold" id="startMemory" data-i18n="startMemory">Inizia Memorizzazione</button>
+                            <button class="btn" id="showPosition" style="display: none;" data-i18n="showPosition">Mostra Posizione (3s)</button>
+                            <button class="btn" id="resetMemory" data-i18n="resetMemory">Ricomincia</button>
+                        </div>
+
+                        <div class="memory-stats">
+                            <div class="memory-stat-item">
+                                <span class="memory-stat-label" data-i18n="currentMove">Mossa attuale:</span>
+                                <span class="memory-stat-value" id="memoryMoveNumber">1</span>
+                            </div>
+                            <div class="memory-stat-item">
+                                <span class="memory-stat-label" data-i18n="movesRemaining">Mosse rimanenti:</span>
+                                <span class="memory-stat-value" id="memoryMovesLeft">-</span>
+                            </div>
+                            <div class="memory-stat-item">
+                                <span class="memory-stat-label" data-i18n="memoryScore">Punteggio:</span>
+                                <span class="memory-stat-value" id="memoryScore">0</span>
+                            </div>
+                        </div>
+
+                        <div class="memory-difficulty">
+                            <label data-i18n="difficultyLabel">Difficoltà:</label>
+                            <select id="memoryDifficulty" class="difficulty-select">
+                                <option value="15" data-i18n="easy">Facile (15s)</option>
+                                <option value="10" selected data-i18n="medium">Medio (10s)</option>
+                                <option value="5" data-i18n="hard">Difficile (5s)</option>
+                                <option value="3" data-i18n="expert">Esperto (3s)</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+
                 <!-- Book Reader Mode -->
                 <div id="bookMode" class="mode-content" style="display: none;">
                     <div class="book-reader">
@@ -1391,6 +1665,11 @@
         </div>
     </div>
 
+    <!-- Footer -->
+    <footer class="footer">
+        <p>Creato con ❤️ da <a href="https://github.com/francescopuglia" target="_blank">Francesco Puglia</a> • © 2025 Blindfold Chess Master</p>
+    </footer>
+
     <!-- Voice Indicator -->
     <div class="voice-indicator" id="voiceIndicator" title="Clicca per attivare il riconoscimento vocale">
         <span class="voice-icon">🎤</span>
@@ -1415,15 +1694,18 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/chess.js/0.10.3/chess.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/chessboard-js/1.0.0/chessboard-1.0.0.min.js"></script>
     <script>
-        // Chess champions data
+        // Chess champions data with color-coded avatars
         const champions = [
-            { name: "Wilhelm Steinitz", years: "1886-1894", image: "https://upload.wikimedia.org/wikipedia/commons/thumb/b/b2/Wilhelm_Steinitz2.jpg/220px-Wilhelm_Steinitz2.jpg" },
-            { name: "Emanuel Lasker", years: "1894-1921", image: "https://upload.wikimedia.org/wikipedia/commons/thumb/6/6e/Bundesarchiv_Bild_102-00457%2C_Emanuel_Lasker.jpg/220px-Bundesarchiv_Bild_102-00457%2C_Emanuel_Lasker.jpg" },
-            { name: "José Raúl Capablanca", years: "1921-1927", image: "https://upload.wikimedia.org/wikipedia/commons/thumb/2/24/Jos%C3%A9_Ra%C3%BAl_Capablanca_1931.jpg/220px-Jos%C3%A9_Ra%C3%BAl_Capablanca_1931.jpg" },
-            { name: "Alexander Alekhine", years: "1927-1935, 1937-1946", image: "https://upload.wikimedia.org/wikipedia/commons/thumb/0/0d/AlexanderAlekhine.jpg/220px-AlexanderAlekhine.jpg" },
-            { name: "Mikhail Botvinnik", years: "1948-1957, 1958-1960, 1961-1963", image: "https://upload.wikimedia.org/wikipedia/commons/thumb/0/0d/Botvinnik_1962.jpg/220px-Botvinnik_1962.jpg" },
-            { name: "Bobby Fischer", years: "1972-1975", image: "https://upload.wikimedia.org/wikipedia/commons/thumb/9/9d/Bobby_Fischer_1960_in_Leipzig_in_color.jpg/220px-Bobby_Fischer_1960_in_Leipzig_in_color.jpg" },
-            { name: "Garry Kasparov", years: "1985-2000", image: "https://upload.wikimedia.org/wikipedia/commons/thumb/8/84/Garry_Kasparov_IMG_0130.JPG/220px-Garry_Kasparov_IMG_0130.JPG" }
+            { name: "Wilhelm Steinitz", years: "1886-1894", initials: "WS", color: "#e91e63" },
+            { name: "Emanuel Lasker", years: "1894-1921", initials: "EL", color: "#9c27b0" },
+            { name: "José Raúl Capablanca", years: "1921-1927", initials: "JC", color: "#673ab7" },
+            { name: "Alexander Alekhine", years: "1927-1935, 1937-1946", initials: "AA", color: "#3f51b5" },
+            { name: "Mikhail Botvinnik", years: "1948-1957, 1958-1960, 1961-1963", initials: "MB", color: "#2196f3" },
+            { name: "Bobby Fischer", years: "1972-1975", initials: "BF", color: "#00bcd4" },
+            { name: "Garry Kasparov", years: "1985-2000", initials: "GK", color: "#009688" },
+            { name: "Anatoly Karpov", years: "1975-1985", initials: "AK", color: "#4caf50" },
+            { name: "Vladimir Kramnik", years: "2000-2007", initials: "VK", color: "#ff9800" },
+            { name: "Magnus Carlsen", years: "2013-2023", initials: "MC", color: "#ff5722" }
         ];
 
         // Chess quotes
@@ -1458,7 +1740,24 @@
                 modeTitle: "Modalità di Allenamento",
                 studyDesc: "Risolvi studi e composizioni",
                 ankiDesc: "Ripetizione spaziata con flashcard",
-                bookDesc: "Sfoglia libri PGN con commenti",
+                memoryDesc: "Memorizza e risolvi alla cieca",
+                memoryTitle: "Memory Chess Challenge",
+                timeToMemorize: "Tempo per memorizzare:",
+                memoryInstruction: "Ricostruisci la posizione e trova la soluzione!",
+                startMemory: "Inizia Memorizzazione",
+                showPosition: "Mostra Posizione (3s)",
+                resetMemory: "Ricomincia",
+                currentMove: "Mossa attuale:",
+                movesRemaining: "Mosse rimanenti:",
+                memoryScore: "Punteggio:",
+                difficultyLabel: "Difficoltà:",
+                easy: "Facile (15s)",
+                medium: "Medio (10s)",
+                hard: "Difficile (5s)",
+                expert: "Esperto (3s)",
+                memorySuccess: "Eccellente! Hai completato il puzzle!",
+                memoryFail: "Riprova! La posizione non è corretta.",
+                positionMemorized: "Posizione memorizzata! Ora risolvi!",
                 uploadTitle: "Carica File PGN",
                 uploadText: "Trascina qui o clicca per caricare",
                 studiesTitle: "Studi Caricati",
@@ -1518,7 +1817,24 @@
                 modeTitle: "Training Mode",
                 studyDesc: "Solve studies and compositions",
                 ankiDesc: "Spaced repetition with flashcards",
-                bookDesc: "Browse PGN books with comments",
+                memoryDesc: "Memorize and solve blindfolded",
+                memoryTitle: "Memory Chess Challenge",
+                timeToMemorize: "Time to memorize:",
+                memoryInstruction: "Reconstruct the position and find the solution!",
+                startMemory: "Start Memorization",
+                showPosition: "Show Position (3s)",
+                resetMemory: "Reset",
+                currentMove: "Current move:",
+                movesRemaining: "Moves remaining:",
+                memoryScore: "Score:",
+                difficultyLabel: "Difficulty:",
+                easy: "Easy (15s)",
+                medium: "Medium (10s)",
+                hard: "Hard (5s)",
+                expert: "Expert (3s)",
+                memorySuccess: "Excellent! You completed the puzzle!",
+                memoryFail: "Try again! The position is not correct.",
+                positionMemorized: "Position memorized! Now solve!",
                 uploadTitle: "Upload PGN File",
                 uploadText: "Drag here or click to upload",
                 studiesTitle: "Loaded Studies",
@@ -1580,10 +1896,18 @@
         let ankiBoard = null;
         let ankiBoardSolution = null;
         let bookBoard = null;
+        let memoryBoard = null;
+        let memoryGame = new Chess();
         let currentStudy = null;
         let moveIndex = 0;
         let startTime = null;
         let timerInterval = null;
+        let memoryTimerInterval = null;
+        let memoryPhase = 'waiting'; // waiting, memorizing, solving
+        let memoryMoves = [];
+        let memoryMoveIndex = 0;
+        let memoryScore = 0;
+        let originalPosition = null;
         let stats = {
             correct: 0,
             total: 0,
@@ -1591,7 +1915,8 @@
             studiesCompleted: 0,
             streak: 0,
             rating: 1200,
-            lastPlayed: null
+            lastPlayed: null,
+            memoryHighScore: 0
         };
         let blindfoldMode = true;
         let soundEnabled = true;
@@ -1668,6 +1993,14 @@
                 pieceTheme: 'https://chessboardjs.com/img/chesspieces/wikipedia/{piece}.png'
             });
 
+            // Memory board
+            memoryBoard = Chessboard('memoryBoard', {
+                draggable: true,
+                position: 'start',
+                onDrop: handleMemoryMove,
+                pieceTheme: 'https://chessboardjs.com/img/chesspieces/wikipedia/{piece}.png'
+            });
+
             // Book reader board
             bookBoard = Chessboard('bookBoard', {
                 draggable: false,
@@ -1682,12 +2015,16 @@
             const championIndex = today.getDate() % champions.length;
             const champion = champions[championIndex];
             
+            // Update champion info immediately
             document.getElementById('championName').textContent = champion.name;
             document.getElementById('championYears').textContent = champion.years;
-            document.getElementById('championImage').src = champion.image;
-            document.getElementById('championImage').alt = champion.name;
+            document.getElementById('championInitials').textContent = champion.initials;
             
-            // Update daily quote
+            // Update avatar color
+            const avatar = document.getElementById('championAvatar');
+            avatar.style.background = champion.color;
+            
+            // Update daily quote immediately
             const quoteIndex = today.getDate() % quotes[currentLang].length;
             const quote = quotes[currentLang][quoteIndex];
             document.getElementById('dailyQuote').textContent = quote.text;
@@ -1701,7 +2038,7 @@
             const currentYear = today.getFullYear();
             const currentDay = today.getDate();
             
-            // Update month header
+            // Update month header with current date
             const monthNames = currentLang === 'it' ? 
                 ['Gennaio', 'Febbraio', 'Marzo', 'Aprile', 'Maggio', 'Giugno', 'Luglio', 'Agosto', 'Settembre', 'Ottobre', 'Novembre', 'Dicembre'] :
                 ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
@@ -1907,6 +2244,12 @@
                 });
             });
 
+            // Memory mode controls
+            document.getElementById('startMemory').addEventListener('click', startMemoryChallenge);
+            document.getElementById('showPosition').addEventListener('click', showPositionBriefly);
+            document.getElementById('resetMemory').addEventListener('click', resetMemoryChallenge);
+            document.getElementById('memoryDifficulty').addEventListener('change', resetMemoryChallenge);
+
             // Book reader controls
             document.getElementById('prevMove').addEventListener('click', previousBookMove);
             document.getElementById('nextMove').addEventListener('click', nextBookMove);
@@ -1954,6 +2297,7 @@
                 if (ankiBoard) ankiBoard.resize();
                 if (ankiBoardSolution) ankiBoardSolution.resize();
                 if (bookBoard) bookBoard.resize();
+                if (memoryBoard) memoryBoard.resize();
             });
         }
 
@@ -1975,6 +2319,10 @@
                     if (ankiCards.length > 0) {
                         loadAnkiCard(currentAnkiCard);
                     }
+                }
+                if (mode === 'memory' && memoryBoard) {
+                    memoryBoard.resize();
+                    resetMemoryChallenge();
                 }
                 if (mode === 'book' && bookBoard) bookBoard.resize();
             }, 100);
@@ -2500,6 +2848,247 @@
             
             // Load next card
             loadAnkiCard(currentAnkiCard + 1);
+        }
+
+        // Memory Chess Functions
+        function startMemoryChallenge() {
+            if (!currentStudy) {
+                showNotification('Carica prima uno studio PGN!', 'error');
+                return;
+            }
+
+            memoryPhase = 'memorizing';
+            memoryScore = 0;
+            memoryMoveIndex = 0;
+            
+            // Set up the position
+            memoryGame.reset();
+            if (currentStudy.headers.FEN) {
+                memoryGame.load(currentStudy.headers.FEN);
+            }
+            
+            // Store original position and moves
+            originalPosition = memoryGame.fen();
+            memoryMoves = currentStudy.movesArray.slice(0, 6); // Limit to first 6 moves for memory challenge
+            
+            // Show the target position (after the first move)
+            if (memoryMoves.length > 0) {
+                memoryGame.move(memoryMoves[0]);
+                memoryBoard.position(memoryGame.fen());
+                memoryMoveIndex = 1;
+            }
+            
+            // Update UI
+            document.getElementById('startMemory').style.display = 'none';
+            document.getElementById('showPosition').style.display = 'inline-block';
+            document.getElementById('memoryMovesLeft').textContent = memoryMoves.length - 1;
+            document.getElementById('memoryScore').textContent = memoryScore;
+            
+            // Start countdown
+            const difficulty = parseInt(document.getElementById('memoryDifficulty').value);
+            startMemoryCountdown(difficulty);
+        }
+
+        function startMemoryCountdown(seconds) {
+            let timeLeft = seconds;
+            document.getElementById('memoryTimerValue').textContent = timeLeft;
+            
+            memoryTimerInterval = setInterval(() => {
+                timeLeft--;
+                document.getElementById('memoryTimerValue').textContent = timeLeft;
+                
+                if (timeLeft <= 3) {
+                    document.getElementById('memoryTimerValue').style.color = '#f44336';
+                    document.getElementById('memoryTimerValue').classList.add('warning');
+                }
+                
+                if (timeLeft <= 0) {
+                    clearInterval(memoryTimerInterval);
+                    hidePosition();
+                }
+            }, 1000);
+        }
+
+        function hidePosition() {
+            memoryPhase = 'solving';
+            
+            // Hide the board and show overlay
+            document.getElementById('memoryOverlay').style.display = 'flex';
+            
+            // Reset to starting position
+            memoryGame.load(originalPosition);
+            memoryBoard.position(memoryGame.fen());
+            
+            // Clear the board visually
+            setTimeout(() => {
+                memoryBoard.clear();
+                showNotification(i18n[currentLang].positionMemorized, 'success');
+            }, 500);
+            
+            // Update timer
+            document.getElementById('memoryTimerValue').textContent = '∞';
+            document.getElementById('memoryTimerValue').style.color = 'var(--gold)';
+            document.getElementById('memoryTimerValue').classList.remove('warning');
+        }
+
+        function showPositionBriefly() {
+            if (memoryPhase !== 'solving') return;
+            
+            // Show position for 3 seconds
+            document.getElementById('memoryOverlay').style.display = 'none';
+            memoryBoard.position(memoryGame.fen());
+            
+            // Penalty for peeking
+            memoryScore = Math.max(0, memoryScore - 50);
+            document.getElementById('memoryScore').textContent = memoryScore;
+            
+            let countdown = 3;
+            const peekInterval = setInterval(() => {
+                countdown--;
+                if (countdown <= 0) {
+                    clearInterval(peekInterval);
+                    document.getElementById('memoryOverlay').style.display = 'flex';
+                    memoryBoard.clear();
+                }
+            }, 1000);
+        }
+
+        function handleMemoryMove(source, target) {
+            if (memoryPhase !== 'solving') return 'snapback';
+            
+            const move = memoryGame.move({
+                from: source,
+                to: target,
+                promotion: 'q'
+            });
+            
+            if (move === null) return 'snapback';
+            
+            // Check if this is the correct move
+            if (memoryMoveIndex < memoryMoves.length && move.san === memoryMoves[memoryMoveIndex]) {
+                // Correct move!
+                memoryScore += 100;
+                memoryMoveIndex++;
+                
+                document.getElementById('memoryScore').textContent = memoryScore;
+                document.getElementById('memoryMoveNumber').textContent = memoryMoveIndex + 1;
+                document.getElementById('memoryMovesLeft').textContent = memoryMoves.length - memoryMoveIndex;
+                
+                // Visual feedback
+                const boardElement = document.querySelector('#memoryBoard');
+                boardElement.classList.add('memory-correct-move');
+                setTimeout(() => boardElement.classList.remove('memory-correct-move'), 600);
+                
+                if (soundEnabled) playSound('success');
+                
+                // Check if puzzle completed
+                if (memoryMoveIndex >= memoryMoves.length) {
+                    memorySuccess();
+                } else {
+                    // Computer plays response
+                    setTimeout(() => {
+                        if (memoryMoveIndex < memoryMoves.length) {
+                            const computerMove = memoryGame.move(memoryMoves[memoryMoveIndex]);
+                            if (computerMove) {
+                                memoryBoard.position(memoryGame.fen());
+                                memoryMoveIndex++;
+                                document.getElementById('memoryMovesLeft').textContent = memoryMoves.length - memoryMoveIndex;
+                            }
+                        }
+                    }, 500);
+                }
+            } else {
+                // Wrong move
+                memoryGame.undo();
+                memoryScore = Math.max(0, memoryScore - 25);
+                document.getElementById('memoryScore').textContent = memoryScore;
+                
+                // Visual feedback
+                const boardElement = document.querySelector('#memoryBoard');
+                boardElement.classList.add('memory-wrong-move');
+                setTimeout(() => boardElement.classList.remove('memory-wrong-move'), 500);
+                
+                if (soundEnabled) playSound('error');
+                showNotification(i18n[currentLang].incorrect, 'error');
+                
+                return 'snapback';
+            }
+        }
+
+        function memorySuccess() {
+            memoryPhase = 'completed';
+            
+            // Update high score
+            if (memoryScore > stats.memoryHighScore) {
+                stats.memoryHighScore = memoryScore;
+                saveStats();
+            }
+            
+            // Show success message
+            document.getElementById('memoryOverlay').style.display = 'none';
+            showNotification(i18n[currentLang].memorySuccess, 'success');
+            
+            // Confetti effect
+            createConfetti();
+            
+            // Reset button
+            document.getElementById('startMemory').style.display = 'inline-block';
+            document.getElementById('startMemory').textContent = i18n[currentLang].continue;
+            document.getElementById('showPosition').style.display = 'none';
+        }
+
+        function resetMemoryChallenge() {
+            memoryPhase = 'waiting';
+            memoryScore = 0;
+            memoryMoveIndex = 0;
+            
+            clearInterval(memoryTimerInterval);
+            
+            // Reset UI
+            document.getElementById('memoryOverlay').style.display = 'none';
+            document.getElementById('startMemory').style.display = 'inline-block';
+            document.getElementById('startMemory').textContent = i18n[currentLang].startMemory;
+            document.getElementById('showPosition').style.display = 'none';
+            document.getElementById('memoryTimerValue').textContent = document.getElementById('memoryDifficulty').value;
+            document.getElementById('memoryTimerValue').style.color = 'var(--gold)';
+            document.getElementById('memoryTimerValue').classList.remove('warning');
+            document.getElementById('memoryScore').textContent = '0';
+            document.getElementById('memoryMoveNumber').textContent = '1';
+            document.getElementById('memoryMovesLeft').textContent = '-';
+            
+            // Reset board
+            memoryGame.reset();
+            memoryBoard.position('start');
+        }
+
+        function createConfetti() {
+            // Simple confetti effect
+            const colors = ['#e94560', '#ffd700', '#4caf50', '#2196f3', '#9c27b0'];
+            const confettiCount = 50;
+            
+            for (let i = 0; i < confettiCount; i++) {
+                const confetti = document.createElement('div');
+                confetti.style.position = 'fixed';
+                confetti.style.width = '10px';
+                confetti.style.height = '10px';
+                confetti.style.backgroundColor = colors[Math.floor(Math.random() * colors.length)];
+                confetti.style.left = Math.random() * window.innerWidth + 'px';
+                confetti.style.top = '-20px';
+                confetti.style.opacity = '0.8';
+                confetti.style.transform = `rotate(${Math.random() * 360}deg)`;
+                confetti.style.transition = 'all 3s ease-out';
+                confetti.style.zIndex = '9999';
+                
+                document.body.appendChild(confetti);
+                
+                setTimeout(() => {
+                    confetti.style.top = window.innerHeight + 20 + 'px';
+                    confetti.style.transform = `rotate(${Math.random() * 720}deg)`;
+                    confetti.style.opacity = '0';
+                }, 100);
+                
+                setTimeout(() => confetti.remove(), 3100);
+            }
         }
 
         // Book reader functions
