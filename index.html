@@ -13,136 +13,446 @@
         }
 
         :root {
-            --primary: #1a1a2e;
-            --secondary: #16213e;
-            --accent: #0f3460;
+            --primary: #0a0e27;
+            --secondary: #1a1f3a;
+            --accent: #2d3561;
             --highlight: #e94560;
+            --gold: #ffd700;
             --text: #eee;
             --success: #4caf50;
             --error: #f44336;
             --warning: #ff9800;
+            --card-bg: rgba(26, 31, 58, 0.9);
         }
 
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
+            background: linear-gradient(135deg, #0a0e27 0%, #1a1f3a 50%, #0a0e27 100%);
             color: var(--text);
             min-height: 100vh;
             overflow-x: hidden;
         }
 
+        /* Animated background */
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-image: 
+                radial-gradient(circle at 20% 50%, rgba(233, 69, 96, 0.1) 0%, transparent 50%),
+                radial-gradient(circle at 80% 80%, rgba(255, 215, 0, 0.05) 0%, transparent 50%),
+                radial-gradient(circle at 40% 20%, rgba(76, 175, 80, 0.05) 0%, transparent 50%);
+            z-index: -1;
+            animation: backgroundShift 20s ease-in-out infinite;
+        }
+
+        @keyframes backgroundShift {
+            0%, 100% { transform: translate(0, 0); }
+            33% { transform: translate(-20px, -20px); }
+            66% { transform: translate(20px, -10px); }
+        }
+
         .app-container {
-            max-width: 1400px;
+            max-width: 1600px;
             margin: 0 auto;
             padding: 20px;
         }
 
-        /* Header animato */
+        /* Header with daily content */
         .header {
-            text-align: center;
+            background: var(--card-bg);
+            backdrop-filter: blur(20px);
+            border-radius: 20px;
+            padding: 30px;
             margin-bottom: 30px;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
             position: relative;
             overflow: hidden;
         }
 
-        .header h1 {
-            font-size: 3.5em;
-            background: linear-gradient(45deg, #fff, var(--highlight), #fff);
+        .header::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            right: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle, rgba(255, 215, 0, 0.1) 0%, transparent 70%);
+            animation: rotate 30s linear infinite;
+        }
+
+        @keyframes rotate {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+
+        .header-content {
+            position: relative;
+            z-index: 1;
+            display: grid;
+            grid-template-columns: auto 1fr auto;
+            gap: 30px;
+            align-items: center;
+        }
+
+        .title-section {
+            text-align: center;
+        }
+
+        .main-title {
+            font-size: 3em;
+            background: linear-gradient(45deg, #fff, var(--gold), #fff);
             background-size: 200% 200%;
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
             animation: gradient 3s ease infinite;
-            text-shadow: 0 0 30px rgba(233, 69, 96, 0.5);
-        }
-
-        @keyframes gradient {
-            0% { background-position: 0% 50%; }
-            50% { background-position: 100% 50%; }
-            100% { background-position: 0% 50%; }
+            margin-bottom: 10px;
+            text-shadow: 0 0 30px rgba(255, 215, 0, 0.3);
         }
 
         .subtitle {
             font-size: 1.2em;
+            opacity: 0.9;
+            color: var(--gold);
+        }
+
+        /* Champion of the day */
+        .champion-card {
+            background: rgba(45, 53, 97, 0.6);
+            border-radius: 15px;
+            padding: 20px;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            border: 1px solid rgba(255, 215, 0, 0.3);
+            transition: all 0.3s;
+        }
+
+        .champion-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 30px rgba(255, 215, 0, 0.2);
+        }
+
+        .champion-image {
+            width: 80px;
+            height: 80px;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 3px solid var(--gold);
+            box-shadow: 0 0 20px rgba(255, 215, 0, 0.4);
+        }
+
+        .champion-info h3 {
+            color: var(--gold);
+            margin-bottom: 5px;
+        }
+
+        .champion-years {
+            font-size: 0.9em;
             opacity: 0.8;
-            margin-top: 10px;
+        }
+
+        /* Daily quote */
+        .quote-card {
+            background: rgba(45, 53, 97, 0.6);
+            border-radius: 15px;
+            padding: 20px;
+            border-left: 4px solid var(--gold);
+            font-style: italic;
+            position: relative;
+            max-width: 500px;
+        }
+
+        .quote-card::before {
+            content: '"';
+            position: absolute;
+            top: -10px;
+            left: 10px;
+            font-size: 4em;
+            color: var(--gold);
+            opacity: 0.3;
+        }
+
+        .quote-text {
+            font-size: 1.1em;
+            margin-bottom: 10px;
+            position: relative;
+            z-index: 1;
+        }
+
+        .quote-author {
+            text-align: right;
+            color: var(--gold);
+            font-size: 0.9em;
         }
 
         /* Language switcher */
         .lang-switcher {
-            position: absolute;
-            top: 20px;
-            right: 20px;
             display: flex;
             gap: 10px;
         }
 
         .lang-btn {
-            padding: 8px 16px;
-            border: 2px solid var(--highlight);
+            padding: 10px 20px;
+            border: 2px solid var(--gold);
             background: transparent;
             color: var(--text);
-            border-radius: 20px;
+            border-radius: 25px;
             cursor: pointer;
             transition: all 0.3s;
+            font-weight: bold;
         }
 
         .lang-btn.active {
-            background: var(--highlight);
+            background: var(--gold);
+            color: var(--primary);
             transform: scale(1.1);
+        }
+
+        /* Streak counter */
+        .streak-section {
+            background: var(--card-bg);
+            backdrop-filter: blur(20px);
+            border-radius: 20px;
+            padding: 25px;
+            margin-bottom: 30px;
+            text-align: center;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
+        }
+
+        .streak-title {
+            font-size: 1.3em;
+            color: var(--gold);
+            margin-bottom: 20px;
+        }
+
+        .streak-display {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 40px;
+            margin-bottom: 25px;
+        }
+
+        .streak-counter {
+            text-align: center;
+        }
+
+        .streak-number {
+            font-size: 4em;
+            font-weight: bold;
+            background: linear-gradient(45deg, var(--success), var(--gold));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+        }
+
+        .streak-label {
+            font-size: 1.1em;
+            opacity: 0.9;
+        }
+
+        .fire-emoji {
+            font-size: 3em;
+            animation: fireAnimation 1.5s ease-in-out infinite;
+        }
+
+        @keyframes fireAnimation {
+            0%, 100% { transform: scale(1) rotate(0deg); }
+            25% { transform: scale(1.1) rotate(-5deg); }
+            75% { transform: scale(1.1) rotate(5deg); }
+        }
+
+        /* Calendar grid */
+        .calendar-container {
+            background: rgba(45, 53, 97, 0.3);
+            border-radius: 15px;
+            padding: 20px;
+        }
+
+        .calendar-month {
+            display: grid;
+            grid-template-columns: repeat(7, 1fr);
+            gap: 8px;
+            margin-bottom: 10px;
+        }
+
+        .calendar-header {
+            font-size: 1.2em;
+            color: var(--gold);
+            margin-bottom: 15px;
+            text-align: center;
+        }
+
+        .day-label {
+            text-align: center;
+            font-size: 0.8em;
+            opacity: 0.7;
+            margin-bottom: 5px;
+        }
+
+        .calendar-day {
+            aspect-ratio: 1;
+            background: rgba(45, 53, 97, 0.5);
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.9em;
+            cursor: pointer;
+            transition: all 0.3s;
+            position: relative;
+        }
+
+        .calendar-day.active {
+            background: var(--success);
+            box-shadow: 0 0 15px rgba(76, 175, 80, 0.6);
+            font-weight: bold;
+        }
+
+        .calendar-day.today {
+            border: 2px solid var(--gold);
+        }
+
+        .calendar-day.future {
+            opacity: 0.3;
+        }
+
+        .calendar-day:hover:not(.future) {
+            transform: scale(1.15);
+            z-index: 10;
         }
 
         /* Main layout */
         .main-layout {
             display: grid;
-            grid-template-columns: 1fr 2fr 1fr;
-            gap: 20px;
+            grid-template-columns: 320px 1fr 320px;
+            gap: 25px;
             margin-top: 30px;
         }
 
-        /* Pannello laterale */
+        /* Side panels */
         .side-panel {
-            background: rgba(22, 33, 62, 0.8);
-            backdrop-filter: blur(10px);
-            border-radius: 15px;
-            padding: 20px;
-            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+            background: var(--card-bg);
+            backdrop-filter: blur(20px);
+            border-radius: 20px;
+            padding: 25px;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
         }
 
         .panel-section {
-            margin-bottom: 25px;
+            margin-bottom: 30px;
         }
 
         .panel-section h3 {
-            color: var(--highlight);
-            margin-bottom: 15px;
-            font-size: 1.3em;
+            color: var(--gold);
+            margin-bottom: 20px;
+            font-size: 1.4em;
+            display: flex;
+            align-items: center;
+            gap: 10px;
         }
 
-        /* File upload area */
+        .panel-section h3::before {
+            content: '';
+            width: 4px;
+            height: 20px;
+            background: var(--gold);
+            border-radius: 2px;
+        }
+
+        /* Mode selector */
+        .mode-selector {
+            display: grid;
+            gap: 15px;
+        }
+
+        .mode-btn {
+            padding: 20px;
+            background: rgba(45, 53, 97, 0.6);
+            border: 2px solid transparent;
+            border-radius: 15px;
+            color: var(--text);
+            cursor: pointer;
+            transition: all 0.3s;
+            text-align: left;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .mode-btn::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 215, 0, 0.3), transparent);
+            transition: left 0.5s;
+        }
+
+        .mode-btn:hover::before {
+            left: 100%;
+        }
+
+        .mode-btn:hover {
+            border-color: var(--gold);
+            transform: translateX(5px);
+        }
+
+        .mode-btn.active {
+            background: rgba(233, 69, 96, 0.3);
+            border-color: var(--highlight);
+        }
+
+        .mode-title {
+            font-size: 1.2em;
+            font-weight: bold;
+            margin-bottom: 5px;
+            color: var(--gold);
+        }
+
+        .mode-description {
+            font-size: 0.9em;
+            opacity: 0.8;
+        }
+
+        /* Upload area */
         .upload-area {
-            border: 2px dashed var(--highlight);
-            border-radius: 10px;
-            padding: 30px;
+            border: 3px dashed var(--gold);
+            border-radius: 15px;
+            padding: 40px 20px;
             text-align: center;
             transition: all 0.3s;
             cursor: pointer;
             position: relative;
             overflow: hidden;
+            background: rgba(255, 215, 0, 0.05);
         }
 
         .upload-area:hover {
-            background: rgba(233, 69, 96, 0.1);
+            background: rgba(255, 215, 0, 0.1);
             transform: scale(1.02);
+            border-color: var(--highlight);
         }
 
         .upload-area.dragover {
-            background: rgba(233, 69, 96, 0.2);
+            background: rgba(255, 215, 0, 0.2);
             border-color: var(--success);
+            transform: scale(1.05);
         }
 
         .upload-icon {
-            font-size: 3em;
-            margin-bottom: 10px;
+            font-size: 4em;
+            margin-bottom: 15px;
             animation: float 3s ease-in-out infinite;
         }
 
@@ -151,16 +461,135 @@
             50% { transform: translateY(-10px); }
         }
 
-        /* Chess board area */
+        /* Chess board container */
         .board-container {
-            background: rgba(15, 52, 96, 0.6);
+            background: var(--card-bg);
             backdrop-filter: blur(20px);
-            border-radius: 20px;
+            border-radius: 25px;
             padding: 30px;
-            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.5);
+            box-shadow: 0 15px 50px rgba(0, 0, 0, 0.4);
             position: relative;
         }
 
+        /* Timer */
+        .timer-display {
+            font-size: 3.5em;
+            text-align: center;
+            margin-bottom: 25px;
+            font-weight: bold;
+            background: linear-gradient(45deg, var(--success), var(--warning), var(--error));
+            background-size: 200% 200%;
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            animation: gradient 3s ease infinite;
+            font-variant-numeric: tabular-nums;
+        }
+
+        .timer-display.warning {
+            animation: timer-warning 1s infinite, gradient 3s ease infinite;
+        }
+
+        @keyframes timer-warning {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.1); }
+        }
+
+        /* Anki mode card */
+        .anki-card {
+            perspective: 1000px;
+            width: 100%;
+            height: 500px;
+            margin: 20px auto;
+        }
+
+        .anki-card-inner {
+            position: relative;
+            width: 100%;
+            height: 100%;
+            transition: transform 0.8s;
+            transform-style: preserve-3d;
+        }
+
+        .anki-card.flipped .anki-card-inner {
+            transform: rotateY(180deg);
+        }
+
+        .anki-card-face {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            backface-visibility: hidden;
+            background: rgba(45, 53, 97, 0.9);
+            border-radius: 20px;
+            padding: 30px;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            align-items: center;
+            border: 2px solid var(--gold);
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.4);
+        }
+
+        .anki-card-back {
+            transform: rotateY(180deg);
+        }
+
+        .anki-question {
+            font-size: 1.8em;
+            text-align: center;
+            color: var(--gold);
+            margin-bottom: 20px;
+        }
+
+        .anki-board {
+            width: 300px;
+            height: 300px;
+            margin: 0 auto;
+        }
+
+        .anki-controls {
+            display: flex;
+            gap: 15px;
+            margin-top: 20px;
+        }
+
+        .anki-rating-btn {
+            padding: 15px 25px;
+            border: none;
+            border-radius: 10px;
+            font-size: 1.1em;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-weight: bold;
+            text-transform: uppercase;
+        }
+
+        .anki-rating-btn.again {
+            background: var(--error);
+            color: white;
+        }
+
+        .anki-rating-btn.hard {
+            background: var(--warning);
+            color: white;
+        }
+
+        .anki-rating-btn.good {
+            background: var(--success);
+            color: white;
+        }
+
+        .anki-rating-btn.easy {
+            background: var(--gold);
+            color: var(--primary);
+        }
+
+        .anki-rating-btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 5px 20px rgba(0, 0, 0, 0.3);
+        }
+
+        /* Study mode */
         #board {
             width: 100%;
             max-width: 600px;
@@ -180,11 +609,12 @@
             left: 0;
             right: 0;
             bottom: 0;
-            background: radial-gradient(circle, transparent 30%, rgba(26, 26, 46, 0.95) 70%);
+            background: radial-gradient(circle at center, rgba(26, 26, 46, 0.8) 0%, rgba(26, 26, 46, 0.95) 50%, rgba(26, 26, 46, 1) 100%);
             display: none;
             align-items: center;
             justify-content: center;
             border-radius: 20px;
+            backdrop-filter: blur(10px);
         }
 
         .board-hidden .blindfold-overlay {
@@ -194,39 +624,47 @@
         .blindfold-text {
             font-size: 2.5em;
             font-weight: bold;
-            color: var(--highlight);
-            text-shadow: 0 0 20px rgba(233, 69, 96, 0.8);
-            animation: pulse 2s infinite;
+            color: var(--gold);
+            text-shadow: 0 0 30px rgba(255, 215, 0, 0.8);
+            animation: glow 2s ease-in-out infinite;
         }
 
-        @keyframes pulse {
-            0%, 100% { opacity: 0.8; }
-            50% { opacity: 1; }
+        @keyframes glow {
+            0%, 100% { 
+                text-shadow: 0 0 20px rgba(255, 215, 0, 0.8);
+                opacity: 0.9;
+            }
+            50% { 
+                text-shadow: 0 0 40px rgba(255, 215, 0, 1);
+                opacity: 1;
+            }
         }
 
-        /* Move input area */
+        /* Move input */
         .move-input-container {
             margin-top: 30px;
             text-align: center;
         }
 
         .move-input {
-            width: 300px;
-            padding: 15px 25px;
-            font-size: 1.5em;
-            background: rgba(22, 33, 62, 0.9);
-            border: 2px solid var(--accent);
-            border-radius: 30px;
+            width: 350px;
+            padding: 18px 30px;
+            font-size: 1.6em;
+            background: rgba(45, 53, 97, 0.8);
+            border: 3px solid var(--accent);
+            border-radius: 35px;
             color: var(--text);
             text-align: center;
             transition: all 0.3s;
+            letter-spacing: 2px;
         }
 
         .move-input:focus {
             outline: none;
-            border-color: var(--highlight);
-            box-shadow: 0 0 20px rgba(233, 69, 96, 0.5);
+            border-color: var(--gold);
+            box-shadow: 0 0 30px rgba(255, 215, 0, 0.4);
             transform: scale(1.05);
+            background: rgba(45, 53, 97, 0.9);
         }
 
         .move-input.correct {
@@ -241,90 +679,13 @@
 
         @keyframes correct-move {
             0%, 100% { transform: scale(1); }
-            50% { transform: scale(1.1); }
+            50% { transform: scale(1.15); }
         }
 
         @keyframes shake {
             0%, 100% { transform: translateX(0); }
-            25% { transform: translateX(-10px); }
-            75% { transform: translateX(10px); }
-        }
-
-        /* Timer display */
-        .timer-display {
-            font-size: 3em;
-            text-align: center;
-            margin: 20px 0;
-            font-weight: bold;
-            background: linear-gradient(45deg, var(--success), var(--warning), var(--error));
-            background-size: 200% 200%;
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            animation: gradient 3s ease infinite;
-        }
-
-        .timer-display.warning {
-            animation: timer-warning 1s infinite;
-        }
-
-        @keyframes timer-warning {
-            0%, 100% { transform: scale(1); }
-            50% { transform: scale(1.1); }
-        }
-
-        /* Stats panel */
-        .stats-grid {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 15px;
-        }
-
-        .stat-card {
-            background: rgba(15, 52, 96, 0.5);
-            padding: 15px;
-            border-radius: 10px;
-            text-align: center;
-            transition: all 0.3s;
-        }
-
-        .stat-card:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 5px 20px rgba(233, 69, 96, 0.3);
-        }
-
-        .stat-value {
-            font-size: 2em;
-            font-weight: bold;
-            color: var(--highlight);
-        }
-
-        .stat-label {
-            opacity: 0.8;
-            margin-top: 5px;
-        }
-
-        /* Streak calendar */
-        .streak-calendar {
-            display: grid;
-            grid-template-columns: repeat(7, 1fr);
-            gap: 3px;
-            margin-top: 15px;
-        }
-
-        .calendar-day {
-            aspect-ratio: 1;
-            background: rgba(15, 52, 96, 0.3);
-            border-radius: 3px;
-            transition: all 0.3s;
-        }
-
-        .calendar-day.active {
-            background: var(--success);
-            box-shadow: 0 0 10px rgba(76, 175, 80, 0.5);
-        }
-
-        .calendar-day:hover {
-            transform: scale(1.2);
+            10%, 30%, 50%, 70%, 90% { transform: translateX(-10px); }
+            20%, 40%, 60%, 80% { transform: translateX(10px); }
         }
 
         /* Control buttons */
@@ -332,21 +693,24 @@
             display: flex;
             gap: 15px;
             justify-content: center;
-            margin-top: 20px;
+            margin-top: 25px;
             flex-wrap: wrap;
         }
 
         .btn {
-            padding: 12px 24px;
-            background: linear-gradient(45deg, var(--accent), var(--highlight));
+            padding: 14px 28px;
+            background: linear-gradient(135deg, var(--accent), var(--highlight));
             border: none;
-            border-radius: 25px;
+            border-radius: 30px;
             color: white;
             font-size: 1.1em;
+            font-weight: bold;
             cursor: pointer;
             transition: all 0.3s;
             position: relative;
             overflow: hidden;
+            text-transform: uppercase;
+            letter-spacing: 1px;
         }
 
         .btn::before {
@@ -363,17 +727,182 @@
         }
 
         .btn:hover::before {
-            width: 300px;
-            height: 300px;
+            width: 400px;
+            height: 400px;
         }
 
         .btn:hover {
             transform: translateY(-3px);
-            box-shadow: 0 5px 20px rgba(233, 69, 96, 0.4);
+            box-shadow: 0 10px 30px rgba(233, 69, 96, 0.4);
         }
 
         .btn:active {
             transform: translateY(0);
+        }
+
+        .btn.gold {
+            background: linear-gradient(135deg, var(--gold), #ffed4e);
+            color: var(--primary);
+        }
+
+        /* Progress bar */
+        .progress-container {
+            margin-top: 30px;
+        }
+
+        .progress-label {
+            font-size: 0.9em;
+            margin-bottom: 8px;
+            opacity: 0.8;
+        }
+
+        .progress-bar {
+            width: 100%;
+            height: 12px;
+            background: rgba(45, 53, 97, 0.5);
+            border-radius: 6px;
+            overflow: hidden;
+            box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.3);
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, var(--success), var(--gold));
+            width: 0%;
+            transition: width 0.5s ease;
+            box-shadow: 0 0 10px rgba(255, 215, 0, 0.5);
+            position: relative;
+        }
+
+        .progress-fill::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            right: 0;
+            bottom: 0;
+            width: 20px;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.5));
+            animation: shimmer 2s infinite;
+        }
+
+        @keyframes shimmer {
+            0% { transform: translateX(-20px); }
+            100% { transform: translateX(20px); }
+        }
+
+        /* Stats cards */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+        }
+
+        .stat-card {
+            background: rgba(45, 53, 97, 0.6);
+            padding: 20px;
+            border-radius: 15px;
+            text-align: center;
+            transition: all 0.3s;
+            border: 1px solid transparent;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .stat-card::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle, rgba(255, 215, 0, 0.1) 0%, transparent 70%);
+            opacity: 0;
+            transition: opacity 0.3s;
+        }
+
+        .stat-card:hover::before {
+            opacity: 1;
+        }
+
+        .stat-card:hover {
+            transform: translateY(-5px);
+            border-color: var(--gold);
+            box-shadow: 0 10px 25px rgba(255, 215, 0, 0.2);
+        }
+
+        .stat-icon {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+        }
+
+        .stat-value {
+            font-size: 2.2em;
+            font-weight: bold;
+            color: var(--gold);
+            margin-bottom: 5px;
+        }
+
+        .stat-label {
+            opacity: 0.9;
+            font-size: 0.95em;
+        }
+
+        /* Study list */
+        .study-list {
+            max-height: 400px;
+            overflow-y: auto;
+            scrollbar-width: thin;
+            scrollbar-color: var(--gold) var(--secondary);
+        }
+
+        .study-item {
+            background: rgba(45, 53, 97, 0.5);
+            padding: 18px;
+            margin-bottom: 12px;
+            border-radius: 12px;
+            cursor: pointer;
+            transition: all 0.3s;
+            position: relative;
+            overflow: hidden;
+            border: 1px solid transparent;
+        }
+
+        .study-item::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 215, 0, 0.2), transparent);
+            transition: left 0.5s;
+        }
+
+        .study-item:hover::before {
+            left: 100%;
+        }
+
+        .study-item:hover {
+            background: rgba(45, 53, 97, 0.7);
+            transform: translateX(5px);
+            border-color: var(--gold);
+        }
+
+        .study-item.active {
+            background: rgba(233, 69, 96, 0.3);
+            border-color: var(--highlight);
+            border-left-width: 4px;
+        }
+
+        .study-title {
+            font-weight: bold;
+            color: var(--gold);
+            margin-bottom: 5px;
+        }
+
+        .study-info {
+            font-size: 0.9em;
+            opacity: 0.8;
         }
 
         /* Voice indicator */
@@ -390,50 +919,76 @@
             justify-content: center;
             cursor: pointer;
             transition: all 0.3s;
-            box-shadow: 0 5px 20px rgba(233, 69, 96, 0.5);
+            box-shadow: 0 5px 25px rgba(233, 69, 96, 0.5);
+            z-index: 1000;
+        }
+
+        .voice-indicator:hover {
+            transform: scale(1.1);
         }
 
         .voice-indicator.active {
             animation: voice-pulse 1.5s infinite;
+            background: var(--success);
         }
 
         @keyframes voice-pulse {
-            0% { box-shadow: 0 0 0 0 rgba(233, 69, 96, 0.7); }
-            70% { box-shadow: 0 0 0 20px rgba(233, 69, 96, 0); }
-            100% { box-shadow: 0 0 0 0 rgba(233, 69, 96, 0); }
+            0% { box-shadow: 0 0 0 0 rgba(76, 175, 80, 0.7); }
+            70% { box-shadow: 0 0 0 20px rgba(76, 175, 80, 0); }
+            100% { box-shadow: 0 0 0 0 rgba(76, 175, 80, 0); }
+        }
+
+        .voice-icon {
+            font-size: 2em;
         }
 
         /* Success modal */
-        .success-modal {
+        .modal {
             position: fixed;
             top: 0;
             left: 0;
             right: 0;
             bottom: 0;
-            background: rgba(0, 0, 0, 0.8);
+            background: rgba(0, 0, 0, 0.9);
             display: none;
             align-items: center;
             justify-content: center;
-            z-index: 1000;
+            z-index: 2000;
+            backdrop-filter: blur(5px);
         }
 
-        .success-modal.show {
+        .modal.show {
             display: flex;
         }
 
         .modal-content {
             background: linear-gradient(135deg, var(--secondary), var(--accent));
-            padding: 40px;
-            border-radius: 20px;
+            padding: 50px;
+            border-radius: 30px;
             text-align: center;
             animation: modal-appear 0.5s;
-            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.5);
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+            border: 2px solid var(--gold);
+            max-width: 500px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .modal-content::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle, rgba(255, 215, 0, 0.1) 0%, transparent 50%);
+            animation: rotate 10s linear infinite;
         }
 
         @keyframes modal-appear {
             from {
                 opacity: 0;
-                transform: scale(0.8) rotate(-5deg);
+                transform: scale(0.7) rotate(-10deg);
             }
             to {
                 opacity: 1;
@@ -443,224 +998,66 @@
 
         .success-icon {
             font-size: 5em;
-            color: var(--success);
             margin-bottom: 20px;
             animation: success-bounce 1s;
         }
 
         @keyframes success-bounce {
-            0%, 100% { transform: scale(1); }
-            50% { transform: scale(1.3); }
+            0%, 100% { transform: scale(1) rotate(0deg); }
+            25% { transform: scale(1.2) rotate(-5deg); }
+            50% { transform: scale(1.3) rotate(5deg); }
+            75% { transform: scale(1.2) rotate(-5deg); }
         }
 
-        /* Particles effect */
-        .particles {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            pointer-events: none;
-            overflow: hidden;
-            z-index: -1;
+        .trophy-icon {
+            color: var(--gold);
+            filter: drop-shadow(0 0 20px rgba(255, 215, 0, 0.8));
         }
 
-        .particle {
-            position: absolute;
-            width: 4px;
-            height: 4px;
-            background: var(--highlight);
-            border-radius: 50%;
-            opacity: 0.5;
-            animation: particle-float 10s linear infinite;
+        /* Settings */
+        .settings-group {
+            background: rgba(45, 53, 97, 0.3);
+            padding: 15px;
+            border-radius: 10px;
+            margin-bottom: 15px;
         }
 
-        @keyframes particle-float {
-            from {
-                transform: translateY(100vh) translateX(0);
-            }
-            to {
-                transform: translateY(-100px) translateX(100px);
-            }
+        .checkbox-label {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            cursor: pointer;
+            padding: 10px;
+            border-radius: 8px;
+            transition: background 0.3s;
         }
 
-        /* Responsive design */
-        @media (max-width: 1200px) {
-            .main-layout {
-                grid-template-columns: 1fr;
-            }
-            
-            .board-container {
-                order: -1;
-            }
+        .checkbox-label:hover {
+            background: rgba(255, 215, 0, 0.1);
         }
 
-        @media (max-width: 600px) {
-            .header h1 {
-                font-size: 2em;
-            }
-            
-            .move-input {
-                width: 100%;
-                max-width: 250px;
-            }
-        }
-
-        /* Loading animation */
-        .loading {
-            display: inline-block;
+        .checkbox-label input[type="checkbox"] {
             width: 20px;
             height: 20px;
-            border: 3px solid rgba(255, 255, 255, 0.3);
-            border-radius: 50%;
-            border-top-color: var(--highlight);
-            animation: spin 1s ease-in-out infinite;
-        }
-
-        @keyframes spin {
-            to { transform: rotate(360deg); }
-        }
-
-        /* Flashcard animation */
-        .flashcard {
-            perspective: 1000px;
-            margin: 20px auto;
-            max-width: 500px;
-        }
-
-        .flashcard-inner {
-            position: relative;
-            width: 100%;
-            height: 400px;
-            transition: transform 0.8s;
-            transform-style: preserve-3d;
-        }
-
-        .flashcard.flipped .flashcard-inner {
-            transform: rotateY(180deg);
-        }
-
-        .flashcard-face {
-            position: absolute;
-            width: 100%;
-            height: 100%;
-            backface-visibility: hidden;
-            background: rgba(22, 33, 62, 0.9);
-            border-radius: 20px;
-            padding: 30px;
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
-        }
-
-        .flashcard-back {
-            transform: rotateY(180deg);
-        }
-
-        /* Tooltip */
-        .tooltip {
-            position: relative;
-            display: inline-block;
-        }
-
-        .tooltip .tooltiptext {
-            visibility: hidden;
-            width: 200px;
-            background-color: var(--secondary);
-            color: var(--text);
-            text-align: center;
-            border-radius: 10px;
-            padding: 10px;
-            position: absolute;
-            z-index: 1;
-            bottom: 125%;
-            left: 50%;
-            margin-left: -100px;
-            opacity: 0;
-            transition: opacity 0.3s;
-            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
-        }
-
-        .tooltip:hover .tooltiptext {
-            visibility: visible;
-            opacity: 1;
-        }
-
-        /* Progress bar */
-        .progress-bar {
-            width: 100%;
-            height: 10px;
-            background: rgba(15, 52, 96, 0.5);
-            border-radius: 5px;
-            overflow: hidden;
-            margin: 20px 0;
-        }
-
-        .progress-fill {
-            height: 100%;
-            background: linear-gradient(90deg, var(--success), var(--highlight));
-            width: 0%;
-            transition: width 0.5s ease;
-            box-shadow: 0 0 10px rgba(233, 69, 96, 0.5);
-        }
-
-        /* Study list */
-        .study-list {
-            max-height: 300px;
-            overflow-y: auto;
-            scrollbar-width: thin;
-            scrollbar-color: var(--highlight) var(--secondary);
-        }
-
-        .study-item {
-            background: rgba(15, 52, 96, 0.4);
-            padding: 15px;
-            margin-bottom: 10px;
-            border-radius: 10px;
             cursor: pointer;
-            transition: all 0.3s;
-            position: relative;
-            overflow: hidden;
-        }
-
-        .study-item::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: -100%;
-            width: 100%;
-            height: 100%;
-            background: linear-gradient(90deg, transparent, rgba(233, 69, 96, 0.3), transparent);
-            transition: left 0.5s;
-        }
-
-        .study-item:hover::before {
-            left: 100%;
-        }
-
-        .study-item:hover {
-            background: rgba(15, 52, 96, 0.6);
-            transform: translateX(5px);
-        }
-
-        .study-item.active {
-            background: rgba(233, 69, 96, 0.2);
-            border-left: 3px solid var(--highlight);
+            accent-color: var(--gold);
         }
 
         /* Notification */
         .notification {
             position: fixed;
-            top: 20px;
+            top: 30px;
             left: 50%;
             transform: translateX(-50%) translateY(-100px);
             background: var(--secondary);
-            padding: 15px 30px;
-            border-radius: 30px;
-            box-shadow: 0 5px 20px rgba(0, 0, 0, 0.3);
+            padding: 20px 40px;
+            border-radius: 35px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4);
             transition: transform 0.3s;
-            z-index: 1001;
+            z-index: 3000;
+            border: 2px solid transparent;
+            font-weight: bold;
+            font-size: 1.1em;
         }
 
         .notification.show {
@@ -668,48 +1065,54 @@
         }
 
         .notification.success {
-            border-left: 4px solid var(--success);
+            border-color: var(--success);
+            box-shadow: 0 10px 30px rgba(76, 175, 80, 0.3);
         }
 
         .notification.error {
-            border-left: 4px solid var(--error);
+            border-color: var(--error);
+            box-shadow: 0 10px 30px rgba(244, 67, 54, 0.3);
         }
 
-        /* Keyboard shortcuts */
-        .shortcuts-modal {
-            display: none;
-            position: fixed;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            background: var(--secondary);
-            padding: 30px;
-            border-radius: 20px;
-            max-width: 500px;
-            max-height: 80vh;
-            overflow-y: auto;
-            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.5);
-            z-index: 1002;
+        /* Responsive */
+        @media (max-width: 1400px) {
+            .main-layout {
+                grid-template-columns: 1fr;
+            }
+            
+            .board-container {
+                order: -1;
+            }
+
+            .side-panel {
+                max-width: 800px;
+                margin: 0 auto;
+            }
         }
 
-        .shortcuts-modal.show {
-            display: block;
-        }
+        @media (max-width: 768px) {
+            .header-content {
+                grid-template-columns: 1fr;
+                text-align: center;
+                gap: 20px;
+            }
 
-        .shortcut-item {
-            display: flex;
-            justify-content: space-between;
-            padding: 10px;
-            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-        }
+            .main-title {
+                font-size: 2em;
+            }
 
-        .shortcut-key {
-            background: var(--accent);
-            padding: 5px 10px;
-            border-radius: 5px;
-            font-family: monospace;
-            min-width: 50px;
-            text-align: center;
+            .move-input {
+                width: 90%;
+                max-width: 300px;
+            }
+
+            .champion-card {
+                justify-content: center;
+            }
+
+            .quote-card {
+                max-width: 100%;
+            }
         }
 
         /* Custom scrollbar */
@@ -722,34 +1125,89 @@
         }
 
         ::-webkit-scrollbar-thumb {
-            background: var(--highlight);
+            background: var(--gold);
             border-radius: 5px;
         }
 
         ::-webkit-scrollbar-thumb:hover {
-            background: var(--error);
+            background: var(--highlight);
         }
     </style>
 </head>
 <body>
-    <div class="particles" id="particles"></div>
-    
     <div class="app-container">
+        <!-- Header with daily content -->
         <header class="header">
-            <h1 data-i18n="title">Blindfold Chess Master</h1>
-            <p class="subtitle" data-i18n="subtitle">Allena la tua visione scacchistica alla cieca</p>
+            <div class="header-content">
+                <div class="champion-card">
+                    <img class="champion-image" id="championImage" src="" alt="Champion">
+                    <div class="champion-info">
+                        <h3 id="championName">Caricamento...</h3>
+                        <p class="champion-years" id="championYears"></p>
+                    </div>
+                </div>
+
+                <div class="title-section">
+                    <h1 class="main-title" data-i18n="title">Blindfold Chess Master</h1>
+                    <p class="subtitle" data-i18n="subtitle">Allena la tua visione scacchistica alla cieca</p>
+                </div>
+
+                <div class="lang-switcher">
+                    <button class="lang-btn active" data-lang="it">IT</button>
+                    <button class="lang-btn" data-lang="en">EN</button>
+                </div>
+            </div>
             
-            <div class="lang-switcher">
-                <button class="lang-btn active" data-lang="it">IT</button>
-                <button class="lang-btn" data-lang="en">EN</button>
+            <div class="quote-card">
+                <p class="quote-text" id="dailyQuote">Caricamento aforisma...</p>
+                <p class="quote-author" id="quoteAuthor">- Autore</p>
             </div>
         </header>
 
+        <!-- Streak Section -->
+        <div class="streak-section">
+            <h2 class="streak-title" data-i18n="streakTitle">🔥 La Tua Serie di Allenamento 🔥</h2>
+            <div class="streak-display">
+                <div class="fire-emoji">🔥</div>
+                <div class="streak-counter">
+                    <div class="streak-number" id="streakNumber">0</div>
+                    <div class="streak-label" data-i18n="daysStreak">giorni consecutivi</div>
+                </div>
+                <div class="fire-emoji">🔥</div>
+            </div>
+            
+            <div class="calendar-container">
+                <h3 class="calendar-header" id="calendarMonth">Dicembre 2024</h3>
+                <div class="calendar-month" id="calendar">
+                    <!-- Calendar will be generated here -->
+                </div>
+            </div>
+        </div>
+
+        <!-- Main Layout -->
         <div class="main-layout">
-            <!-- Left Panel - Upload & Studies -->
+            <!-- Left Panel -->
             <div class="side-panel">
                 <div class="panel-section">
-                    <h3 data-i18n="uploadTitle">Carica PGN</h3>
+                    <h3 data-i18n="modeTitle">Modalità di Allenamento</h3>
+                    <div class="mode-selector">
+                        <button class="mode-btn active" data-mode="study">
+                            <div class="mode-title">📚 Studio Classico</div>
+                            <div class="mode-description" data-i18n="studyDesc">Risolvi studi e composizioni</div>
+                        </button>
+                        <button class="mode-btn" data-mode="anki">
+                            <div class="mode-title">🎴 Modalità Anki</div>
+                            <div class="mode-description" data-i18n="ankiDesc">Ripetizione spaziata con flashcard</div>
+                        </button>
+                        <button class="mode-btn" data-mode="book">
+                            <div class="mode-title">📖 Lettura Libri</div>
+                            <div class="mode-description" data-i18n="bookDesc">Sfoglia libri PGN con commenti</div>
+                        </button>
+                    </div>
+                </div>
+
+                <div class="panel-section">
+                    <h3 data-i18n="uploadTitle">Carica File PGN</h3>
                     <div class="upload-area" id="uploadArea">
                         <div class="upload-icon">📁</div>
                         <p data-i18n="uploadText">Trascina qui o clicca per caricare</p>
@@ -760,99 +1218,174 @@
                 <div class="panel-section">
                     <h3 data-i18n="studiesTitle">Studi Caricati</h3>
                     <div class="study-list" id="studyList">
-                        <!-- Studies will be dynamically added here -->
+                        <!-- Studies will be loaded here -->
                     </div>
                 </div>
 
                 <div class="panel-section">
                     <h3 data-i18n="settingsTitle">Impostazioni</h3>
-                    <label class="checkbox-label">
-                        <input type="checkbox" id="soundEnabled" checked>
-                        <span data-i18n="soundLabel">Suoni abilitati</span>
-                    </label>
-                    <br>
-                    <label class="checkbox-label">
-                        <input type="checkbox" id="voiceEnabled">
-                        <span data-i18n="voiceLabel">Comandi vocali</span>
-                    </label>
+                    <div class="settings-group">
+                        <label class="checkbox-label">
+                            <input type="checkbox" id="soundEnabled" checked>
+                            <span data-i18n="soundLabel">Suoni abilitati</span>
+                        </label>
+                        <label class="checkbox-label">
+                            <input type="checkbox" id="voiceEnabled">
+                            <span data-i18n="voiceLabel">Comandi vocali</span>
+                        </label>
+                        <label class="checkbox-label">
+                            <input type="checkbox" id="autoNext">
+                            <span data-i18n="autoNext">Prossimo studio automatico</span>
+                        </label>
+                    </div>
                 </div>
             </div>
 
-            <!-- Center - Chess Board -->
+            <!-- Center - Chess Board Area -->
             <div class="board-container" id="boardContainer">
-                <div class="timer-display" id="timer">00:00</div>
-                
-                <div id="board"></div>
-                
-                <div class="blindfold-overlay">
-                    <div class="blindfold-text" data-i18n="blindfoldText">MODALITÀ ALLA CIECA</div>
+                <!-- Study Mode -->
+                <div id="studyMode" class="mode-content">
+                    <div class="timer-display" id="timer">00:00</div>
+                    
+                    <div id="board"></div>
+                    
+                    <div class="blindfold-overlay">
+                        <div class="blindfold-text" data-i18n="blindfoldText">MODALITÀ ALLA CIECA</div>
+                    </div>
+
+                    <div class="move-input-container">
+                        <input type="text" class="move-input" id="moveInput" 
+                               placeholder="Inserisci la mossa..." 
+                               data-i18n-placeholder="moveInputPlaceholder">
+                    </div>
+
+                    <div class="controls">
+                        <button class="btn" id="toggleBlindfold" data-i18n="toggleBlindfold">
+                            Mostra/Nascondi (B)
+                        </button>
+                        <button class="btn" id="listPieces" data-i18n="listPieces">
+                            Elenca Pezzi (L)
+                        </button>
+                        <button class="btn gold" id="getHint" data-i18n="getHint">
+                            Suggerimento (H)
+                        </button>
+                        <button class="btn" id="resetPosition" data-i18n="resetPosition">
+                            Ricomincia (R)
+                        </button>
+                    </div>
+
+                    <div class="progress-container">
+                        <div class="progress-label" data-i18n="progressLabel">Progresso nello studio</div>
+                        <div class="progress-bar">
+                            <div class="progress-fill" id="progressFill"></div>
+                        </div>
+                    </div>
                 </div>
 
-                <div class="move-input-container">
-                    <input type="text" class="move-input" id="moveInput" 
-                           placeholder="Inserisci la mossa..." data-i18n-placeholder="moveInputPlaceholder">
+                <!-- Anki Mode -->
+                <div id="ankiMode" class="mode-content" style="display: none;">
+                    <div class="anki-card" id="ankiCard">
+                        <div class="anki-card-inner">
+                            <div class="anki-card-face">
+                                <h2 class="anki-question" data-i18n="ankiQuestion">Il Bianco muove e vince</h2>
+                                <div class="anki-board" id="ankiBoard"></div>
+                                <button class="btn gold" onclick="flipAnkiCard()" data-i18n="showSolution">
+                                    Mostra Soluzione
+                                </button>
+                            </div>
+                            <div class="anki-card-face anki-card-back">
+                                <h2 class="anki-question" data-i18n="solution">Soluzione</h2>
+                                <div class="anki-board" id="ankiBoardSolution"></div>
+                                <div class="anki-controls">
+                                    <button class="anki-rating-btn again" data-rating="1" data-i18n="again">Ancora</button>
+                                    <button class="anki-rating-btn hard" data-rating="2" data-i18n="hard">Difficile</button>
+                                    <button class="anki-rating-btn good" data-rating="3" data-i18n="good">Buono</button>
+                                    <button class="anki-rating-btn easy" data-rating="4" data-i18n="easy">Facile</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
                 </div>
 
-                <div class="controls">
-                    <button class="btn" id="toggleBlindfold" data-i18n="toggleBlindfold">
-                        Mostra/Nascondi Scacchiera (B)
-                    </button>
-                    <button class="btn" id="listPieces" data-i18n="listPieces">
-                        Elenca Pezzi (L)
-                    </button>
-                    <button class="btn" id="getHint" data-i18n="getHint">
-                        Suggerimento (H)
-                    </button>
-                    <button class="btn" id="resetPosition" data-i18n="resetPosition">
-                        Ricomincia (R)
-                    </button>
-                </div>
-
-                <div class="progress-bar">
-                    <div class="progress-fill" id="progressFill"></div>
+                <!-- Book Reader Mode -->
+                <div id="bookMode" class="mode-content" style="display: none;">
+                    <div class="book-reader">
+                        <h2 data-i18n="bookReader">Lettore Libri PGN</h2>
+                        <div id="bookBoard"></div>
+                        <div class="book-controls">
+                            <button class="btn" id="prevMove">← Precedente</button>
+                            <button class="btn" id="playPause">▶ Play</button>
+                            <button class="btn" id="nextMove">Successivo →</button>
+                        </div>
+                        <div class="book-comments" id="bookComments">
+                            <!-- Comments will appear here -->
+                        </div>
+                    </div>
                 </div>
             </div>
 
-            <!-- Right Panel - Stats & Progress -->
+            <!-- Right Panel - Stats -->
             <div class="side-panel">
                 <div class="panel-section">
-                    <h3 data-i18n="statsTitle">Statistiche</h3>
+                    <h3 data-i18n="statsTitle">Le Tue Statistiche</h3>
                     <div class="stats-grid">
-                        <div class="stat-card tooltip">
+                        <div class="stat-card">
+                            <div class="stat-icon">🎯</div>
                             <div class="stat-value" id="accuracy">0%</div>
                             <div class="stat-label" data-i18n="accuracy">Precisione</div>
-                            <span class="tooltiptext" data-i18n="accuracyTooltip">Percentuale di mosse corrette</span>
                         </div>
-                        <div class="stat-card tooltip">
+                        <div class="stat-card">
+                            <div class="stat-icon">⏱️</div>
                             <div class="stat-value" id="avgTime">0s</div>
                             <div class="stat-label" data-i18n="avgTime">Tempo Medio</div>
-                            <span class="tooltiptext" data-i18n="avgTimeTooltip">Tempo medio per mossa</span>
                         </div>
-                        <div class="stat-card tooltip">
+                        <div class="stat-card">
+                            <div class="stat-icon">📚</div>
                             <div class="stat-value" id="studiesCompleted">0</div>
                             <div class="stat-label" data-i18n="studiesCompleted">Studi Completati</div>
-                            <span class="tooltiptext" data-i18n="studiesCompletedTooltip">Numero totale di studi completati</span>
                         </div>
-                        <div class="stat-card tooltip">
-                            <div class="stat-value" id="currentStreak">0</div>
-                            <div class="stat-label" data-i18n="currentStreak">Serie Attuale</div>
-                            <span class="tooltiptext" data-i18n="streakTooltip">Giorni consecutivi di allenamento</span>
+                        <div class="stat-card">
+                            <div class="stat-icon">⭐</div>
+                            <div class="stat-value" id="rating">1200</div>
+                            <div class="stat-label" data-i18n="rating">Rating</div>
                         </div>
                     </div>
                 </div>
 
                 <div class="panel-section">
-                    <h3 data-i18n="calendarTitle">Calendario Attività</h3>
-                    <div class="streak-calendar" id="streakCalendar">
-                        <!-- Calendar days will be generated here -->
+                    <h3 data-i18n="achievementsTitle">Obiettivi del Giorno</h3>
+                    <div class="achievements">
+                        <div class="achievement-item">
+                            <span>🎯 Completa 5 studi</span>
+                            <span class="achievement-progress">2/5</span>
+                        </div>
+                        <div class="achievement-item">
+                            <span>⏱️ Risolvi in meno di 2 minuti</span>
+                            <span class="achievement-progress">✓</span>
+                        </div>
+                        <div class="achievement-item">
+                            <span>🔥 Mantieni la serie</span>
+                            <span class="achievement-progress">✓</span>
+                        </div>
                     </div>
                 </div>
 
                 <div class="panel-section">
-                    <h3 data-i18n="shortcutsTitle">Scorciatoie</h3>
-                    <button class="btn" id="showShortcuts" data-i18n="showShortcuts">
-                        Mostra Scorciatoie (?)
-                    </button>
+                    <h3 data-i18n="leaderboardTitle">Classifica</h3>
+                    <div class="leaderboard">
+                        <div class="leaderboard-item">
+                            <span>1. Magnus C.</span>
+                            <span>2850</span>
+                        </div>
+                        <div class="leaderboard-item">
+                            <span>2. Fabiano C.</span>
+                            <span>2795</span>
+                        </div>
+                        <div class="leaderboard-item you">
+                            <span>15. Tu</span>
+                            <span>1200</span>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
@@ -860,110 +1393,104 @@
 
     <!-- Voice Indicator -->
     <div class="voice-indicator" id="voiceIndicator" title="Clicca per attivare il riconoscimento vocale">
-        <span>🎤</span>
+        <span class="voice-icon">🎤</span>
     </div>
 
     <!-- Success Modal -->
-    <div class="success-modal" id="successModal">
+    <div class="modal" id="successModal">
         <div class="modal-content">
-            <div class="success-icon">🏆</div>
-            <h2 data-i18n="successTitle">Complimenti!</h2>
+            <div class="success-icon trophy-icon">🏆</div>
+            <h2 data-i18n="successTitle">Fantastico!</h2>
             <p data-i18n="successMessage">Hai completato lo studio con successo!</p>
             <div class="stats-summary" id="statsSummary">
                 <!-- Stats will be shown here -->
             </div>
-            <button class="btn" id="closeModal" data-i18n="continue">Continua</button>
+            <button class="btn gold" id="closeModal" data-i18n="continue">Continua</button>
         </div>
     </div>
 
-    <!-- Shortcuts Modal -->
-    <div class="shortcuts-modal" id="shortcutsModal">
-        <h2 data-i18n="keyboardShortcuts">Scorciatoie da Tastiera</h2>
-        <div class="shortcut-item">
-            <span data-i18n="shortcutB">Mostra/Nascondi scacchiera</span>
-            <span class="shortcut-key">B</span>
-        </div>
-        <div class="shortcut-item">
-            <span data-i18n="shortcutL">Elenca pezzi</span>
-            <span class="shortcut-key">L</span>
-        </div>
-        <div class="shortcut-item">
-            <span data-i18n="shortcutH">Suggerimento</span>
-            <span class="shortcut-key">H</span>
-        </div>
-        <div class="shortcut-item">
-            <span data-i18n="shortcutR">Ricomincia</span>
-            <span class="shortcut-key">R</span>
-        </div>
-        <div class="shortcut-item">
-            <span data-i18n="shortcutArrowR">Prossima mossa</span>
-            <span class="shortcut-key">→</span>
-        </div>
-        <div class="shortcut-item">
-            <span data-i18n="shortcutArrowL">Mossa precedente</span>
-            <span class="shortcut-key">←</span>
-        </div>
-        <div class="shortcut-item">
-            <span data-i18n="shortcutSpace">Mostra varianti</span>
-            <span class="shortcut-key">Space</span>
-        </div>
-        <div class="shortcut-item">
-            <span data-i18n="shortcutEsc">Chiudi modal</span>
-            <span class="shortcut-key">Esc</span>
-        </div>
-        <button class="btn" onclick="document.getElementById('shortcutsModal').classList.remove('show')">
-            <span data-i18n="close">Chiudi</span>
-        </button>
-    </div>
-
-    <!-- Notification Container -->
+    <!-- Notification -->
     <div class="notification" id="notification"></div>
 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/chess.js/0.10.3/chess.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/chessboard-js/1.0.0/chessboard-1.0.0.min.js"></script>
     <script>
+        // Chess champions data
+        const champions = [
+            { name: "Wilhelm Steinitz", years: "1886-1894", image: "https://upload.wikimedia.org/wikipedia/commons/thumb/b/b2/Wilhelm_Steinitz2.jpg/220px-Wilhelm_Steinitz2.jpg" },
+            { name: "Emanuel Lasker", years: "1894-1921", image: "https://upload.wikimedia.org/wikipedia/commons/thumb/6/6e/Bundesarchiv_Bild_102-00457%2C_Emanuel_Lasker.jpg/220px-Bundesarchiv_Bild_102-00457%2C_Emanuel_Lasker.jpg" },
+            { name: "José Raúl Capablanca", years: "1921-1927", image: "https://upload.wikimedia.org/wikipedia/commons/thumb/2/24/Jos%C3%A9_Ra%C3%BAl_Capablanca_1931.jpg/220px-Jos%C3%A9_Ra%C3%BAl_Capablanca_1931.jpg" },
+            { name: "Alexander Alekhine", years: "1927-1935, 1937-1946", image: "https://upload.wikimedia.org/wikipedia/commons/thumb/0/0d/AlexanderAlekhine.jpg/220px-AlexanderAlekhine.jpg" },
+            { name: "Mikhail Botvinnik", years: "1948-1957, 1958-1960, 1961-1963", image: "https://upload.wikimedia.org/wikipedia/commons/thumb/0/0d/Botvinnik_1962.jpg/220px-Botvinnik_1962.jpg" },
+            { name: "Bobby Fischer", years: "1972-1975", image: "https://upload.wikimedia.org/wikipedia/commons/thumb/9/9d/Bobby_Fischer_1960_in_Leipzig_in_color.jpg/220px-Bobby_Fischer_1960_in_Leipzig_in_color.jpg" },
+            { name: "Garry Kasparov", years: "1985-2000", image: "https://upload.wikimedia.org/wikipedia/commons/thumb/8/84/Garry_Kasparov_IMG_0130.JPG/220px-Garry_Kasparov_IMG_0130.JPG" }
+        ];
+
+        // Chess quotes
+        const quotes = {
+            it: [
+                { text: "Gli scacchi sono la vita in miniatura.", author: "Garry Kasparov" },
+                { text: "Negli scacchi, come nella vita, la mossa migliore è sempre quella che viene fatta.", author: "Savielly Tartakower" },
+                { text: "Gli scacchi sono l'arte che esprime la scienza della logica.", author: "Mikhail Botvinnik" },
+                { text: "Quando vedi una buona mossa, cercane una migliore.", author: "Emanuel Lasker" },
+                { text: "La bellezza di una mossa non sta nell'apparenza ma nel pensiero dietro di essa.", author: "Aaron Nimzowitsch" },
+                { text: "Gli scacchi sono una guerra su una scacchiera.", author: "Bobby Fischer" },
+                { text: "Ogni mossa di scacchi che fai crea o distrugge una possibilità.", author: "Anatoly Karpov" }
+            ],
+            en: [
+                { text: "Chess is life in miniature.", author: "Garry Kasparov" },
+                { text: "In chess, as in life, the best move is always the one that is made.", author: "Savielly Tartakower" },
+                { text: "Chess is the art which expresses the science of logic.", author: "Mikhail Botvinnik" },
+                { text: "When you see a good move, look for a better one.", author: "Emanuel Lasker" },
+                { text: "The beauty of a move lies not in its appearance but in the thought behind it.", author: "Aaron Nimzowitsch" },
+                { text: "Chess is war over the board.", author: "Bobby Fischer" },
+                { text: "Every chess move you make creates or destroys a possibility.", author: "Anatoly Karpov" }
+            ]
+        };
+
         // Internationalization
         const i18n = {
             it: {
                 title: "Blindfold Chess Master",
                 subtitle: "Allena la tua visione scacchistica alla cieca",
-                uploadTitle: "Carica PGN",
+                streakTitle: "🔥 La Tua Serie di Allenamento 🔥",
+                daysStreak: "giorni consecutivi",
+                modeTitle: "Modalità di Allenamento",
+                studyDesc: "Risolvi studi e composizioni",
+                ankiDesc: "Ripetizione spaziata con flashcard",
+                bookDesc: "Sfoglia libri PGN con commenti",
+                uploadTitle: "Carica File PGN",
                 uploadText: "Trascina qui o clicca per caricare",
                 studiesTitle: "Studi Caricati",
                 settingsTitle: "Impostazioni",
                 soundLabel: "Suoni abilitati",
                 voiceLabel: "Comandi vocali",
+                autoNext: "Prossimo studio automatico",
                 blindfoldText: "MODALITÀ ALLA CIECA",
                 moveInputPlaceholder: "Inserisci la mossa...",
-                toggleBlindfold: "Mostra/Nascondi Scacchiera (B)",
+                toggleBlindfold: "Mostra/Nascondi (B)",
                 listPieces: "Elenca Pezzi (L)",
                 getHint: "Suggerimento (H)",
                 resetPosition: "Ricomincia (R)",
-                statsTitle: "Statistiche",
+                progressLabel: "Progresso nello studio",
+                statsTitle: "Le Tue Statistiche",
                 accuracy: "Precisione",
-                accuracyTooltip: "Percentuale di mosse corrette",
                 avgTime: "Tempo Medio",
-                avgTimeTooltip: "Tempo medio per mossa",
                 studiesCompleted: "Studi Completati",
-                studiesCompletedTooltip: "Numero totale di studi completati",
-                currentStreak: "Serie Attuale",
-                streakTooltip: "Giorni consecutivi di allenamento",
-                calendarTitle: "Calendario Attività",
-                shortcutsTitle: "Scorciatoie",
-                showShortcuts: "Mostra Scorciatoie (?)",
-                successTitle: "Complimenti!",
+                rating: "Rating",
+                achievementsTitle: "Obiettivi del Giorno",
+                leaderboardTitle: "Classifica",
+                successTitle: "Fantastico!",
                 successMessage: "Hai completato lo studio con successo!",
                 continue: "Continua",
-                keyboardShortcuts: "Scorciatoie da Tastiera",
-                shortcutB: "Mostra/Nascondi scacchiera",
-                shortcutL: "Elenca pezzi",
-                shortcutH: "Suggerimento",
-                shortcutR: "Ricomincia",
-                shortcutArrowR: "Prossima mossa",
-                shortcutArrowL: "Mossa precedente",
-                shortcutSpace: "Mostra varianti",
-                shortcutEsc: "Chiudi modal",
-                close: "Chiudi",
+                ankiQuestion: "Il Bianco muove e vince",
+                showSolution: "Mostra Soluzione",
+                solution: "Soluzione",
+                again: "Ancora",
+                hard: "Difficile",
+                good: "Buono",
+                easy: "Facile",
+                bookReader: "Lettore Libri PGN",
                 whiteToMove: "Mossa al Bianco",
                 blackToMove: "Mossa al Nero",
                 correct: "Corretto!",
@@ -986,43 +1513,44 @@
             en: {
                 title: "Blindfold Chess Master",
                 subtitle: "Train your blindfold chess vision",
-                uploadTitle: "Upload PGN",
+                streakTitle: "🔥 Your Training Streak 🔥",
+                daysStreak: "consecutive days",
+                modeTitle: "Training Mode",
+                studyDesc: "Solve studies and compositions",
+                ankiDesc: "Spaced repetition with flashcards",
+                bookDesc: "Browse PGN books with comments",
+                uploadTitle: "Upload PGN File",
                 uploadText: "Drag here or click to upload",
                 studiesTitle: "Loaded Studies",
                 settingsTitle: "Settings",
                 soundLabel: "Sounds enabled",
                 voiceLabel: "Voice commands",
+                autoNext: "Auto next study",
                 blindfoldText: "BLINDFOLD MODE",
                 moveInputPlaceholder: "Enter move...",
-                toggleBlindfold: "Show/Hide Board (B)",
+                toggleBlindfold: "Show/Hide (B)",
                 listPieces: "List Pieces (L)",
                 getHint: "Hint (H)",
                 resetPosition: "Reset (R)",
-                statsTitle: "Statistics",
+                progressLabel: "Study progress",
+                statsTitle: "Your Statistics",
                 accuracy: "Accuracy",
-                accuracyTooltip: "Percentage of correct moves",
                 avgTime: "Average Time",
-                avgTimeTooltip: "Average time per move",
                 studiesCompleted: "Studies Completed",
-                studiesCompletedTooltip: "Total number of completed studies",
-                currentStreak: "Current Streak",
-                streakTooltip: "Consecutive days of training",
-                calendarTitle: "Activity Calendar",
-                shortcutsTitle: "Shortcuts",
-                showShortcuts: "Show Shortcuts (?)",
-                successTitle: "Congratulations!",
+                rating: "Rating",
+                achievementsTitle: "Daily Goals",
+                leaderboardTitle: "Leaderboard",
+                successTitle: "Fantastic!",
                 successMessage: "You successfully completed the study!",
                 continue: "Continue",
-                keyboardShortcuts: "Keyboard Shortcuts",
-                shortcutB: "Show/Hide board",
-                shortcutL: "List pieces",
-                shortcutH: "Hint",
-                shortcutR: "Reset",
-                shortcutArrowR: "Next move",
-                shortcutArrowL: "Previous move",
-                shortcutSpace: "Show variations",
-                shortcutEsc: "Close modal",
-                close: "Close",
+                ankiQuestion: "White to move and win",
+                showSolution: "Show Solution",
+                solution: "Solution",
+                again: "Again",
+                hard: "Hard",
+                good: "Good",
+                easy: "Easy",
+                bookReader: "PGN Book Reader",
                 whiteToMove: "White to move",
                 blackToMove: "Black to move",
                 correct: "Correct!",
@@ -1044,9 +1572,14 @@
             }
         };
 
+        // Global variables
         let currentLang = 'it';
+        let currentMode = 'study';
         let game = new Chess();
         let board = null;
+        let ankiBoard = null;
+        let ankiBoardSolution = null;
+        let bookBoard = null;
         let currentStudy = null;
         let moveIndex = 0;
         let startTime = null;
@@ -1056,34 +1589,212 @@
             total: 0,
             totalTime: 0,
             studiesCompleted: 0,
-            streak: 0
+            streak: 0,
+            rating: 1200,
+            lastPlayed: null
         };
         let blindfoldMode = true;
         let soundEnabled = true;
         let voiceEnabled = false;
         let recognition = null;
         let synthesis = window.speechSynthesis;
+        let ankiCards = [];
+        let currentAnkiCard = 0;
+
+        // Storage system with fallback
+        const storage = {
+            isAvailable: function() {
+                try {
+                    const test = '__storage_test__';
+                    window.localStorage.setItem(test, test);
+                    window.localStorage.removeItem(test);
+                    return true;
+                } catch(e) {
+                    return false;
+                }
+            },
+            
+            setItem: function(key, value) {
+                if (this.isAvailable()) {
+                    window.localStorage.setItem(key, value);
+                } else {
+                    window.__memoryStorage = window.__memoryStorage || {};
+                    window.__memoryStorage[key] = value;
+                }
+            },
+            
+            getItem: function(key) {
+                if (this.isAvailable()) {
+                    return window.localStorage.getItem(key);
+                } else {
+                    window.__memoryStorage = window.__memoryStorage || {};
+                    return window.__memoryStorage[key] || null;
+                }
+            }
+        };
 
         // Initialize
         document.addEventListener('DOMContentLoaded', function() {
-            initializeBoard();
+            initializeBoards();
             initializeEventListeners();
-            initializeParticles();
-            initializeCalendar();
             loadStats();
+            updateDailyContent();
+            updateCalendar();
             updateUI();
             
             // Set initial blindfold mode
             document.getElementById('boardContainer').classList.add('board-hidden');
         });
 
-        function initializeBoard() {
+        function initializeBoards() {
+            // Main board for study mode
             board = Chessboard('board', {
                 draggable: true,
                 position: 'start',
                 onDrop: handleMove,
                 pieceTheme: 'https://chessboardjs.com/img/chesspieces/wikipedia/{piece}.png'
             });
+
+            // Anki boards
+            ankiBoard = Chessboard('ankiBoard', {
+                draggable: false,
+                position: 'start',
+                pieceTheme: 'https://chessboardjs.com/img/chesspieces/wikipedia/{piece}.png'
+            });
+
+            ankiBoardSolution = Chessboard('ankiBoardSolution', {
+                draggable: false,
+                position: 'start',
+                pieceTheme: 'https://chessboardjs.com/img/chesspieces/wikipedia/{piece}.png'
+            });
+
+            // Book reader board
+            bookBoard = Chessboard('bookBoard', {
+                draggable: false,
+                position: 'start',
+                pieceTheme: 'https://chessboardjs.com/img/chesspieces/wikipedia/{piece}.png'
+            });
+        }
+
+        function updateDailyContent() {
+            // Update champion of the day
+            const today = new Date();
+            const championIndex = today.getDate() % champions.length;
+            const champion = champions[championIndex];
+            
+            document.getElementById('championName').textContent = champion.name;
+            document.getElementById('championYears').textContent = champion.years;
+            document.getElementById('championImage').src = champion.image;
+            document.getElementById('championImage').alt = champion.name;
+            
+            // Update daily quote
+            const quoteIndex = today.getDate() % quotes[currentLang].length;
+            const quote = quotes[currentLang][quoteIndex];
+            document.getElementById('dailyQuote').textContent = quote.text;
+            document.getElementById('quoteAuthor').textContent = `- ${quote.author}`;
+        }
+
+        function updateCalendar() {
+            const calendar = document.getElementById('calendar');
+            const today = new Date();
+            const currentMonth = today.getMonth();
+            const currentYear = today.getFullYear();
+            const currentDay = today.getDate();
+            
+            // Update month header
+            const monthNames = currentLang === 'it' ? 
+                ['Gennaio', 'Febbraio', 'Marzo', 'Aprile', 'Maggio', 'Giugno', 'Luglio', 'Agosto', 'Settembre', 'Ottobre', 'Novembre', 'Dicembre'] :
+                ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
+            
+            document.getElementById('calendarMonth').textContent = `${monthNames[currentMonth]} ${currentYear}`;
+            
+            // Clear calendar
+            calendar.innerHTML = '';
+            
+            // Add day labels
+            const dayLabels = currentLang === 'it' ? ['L', 'M', 'M', 'G', 'V', 'S', 'D'] : ['M', 'T', 'W', 'T', 'F', 'S', 'S'];
+            dayLabels.forEach(label => {
+                const dayLabel = document.createElement('div');
+                dayLabel.className = 'day-label';
+                dayLabel.textContent = label;
+                calendar.appendChild(dayLabel);
+            });
+            
+            // Get first day of month
+            const firstDay = new Date(currentYear, currentMonth, 1).getDay();
+            const daysInMonth = new Date(currentYear, currentMonth + 1, 0).getDate();
+            
+            // Add empty cells for days before month starts
+            const startDay = firstDay === 0 ? 6 : firstDay - 1; // Adjust for Monday start
+            for (let i = 0; i < startDay; i++) {
+                const emptyDay = document.createElement('div');
+                calendar.appendChild(emptyDay);
+            }
+            
+            // Add days of month
+            const activityData = getActivityData();
+            for (let day = 1; day <= daysInMonth; day++) {
+                const dayElement = document.createElement('div');
+                dayElement.className = 'calendar-day';
+                dayElement.textContent = day;
+                
+                if (day === currentDay) {
+                    dayElement.classList.add('today');
+                }
+                
+                if (day > currentDay) {
+                    dayElement.classList.add('future');
+                } else if (activityData[day]) {
+                    dayElement.classList.add('active');
+                }
+                
+                calendar.appendChild(dayElement);
+            }
+        }
+
+        function getActivityData() {
+            // Get activity data from storage or generate demo data
+            const savedActivity = storage.getItem('activityData');
+            if (savedActivity) {
+                return JSON.parse(savedActivity);
+            }
+            
+            // Demo data - random activity for past days
+            const data = {};
+            const today = new Date().getDate();
+            for (let i = 1; i < today; i++) {
+                if (Math.random() > 0.3) { // 70% chance of activity
+                    data[i] = true;
+                }
+            }
+            return data;
+        }
+
+        function updateStreak() {
+            const today = new Date().toDateString();
+            const lastPlayed = storage.getItem('lastPlayed');
+            
+            if (lastPlayed !== today) {
+                const yesterday = new Date();
+                yesterday.setDate(yesterday.getDate() - 1);
+                
+                if (lastPlayed === yesterday.toDateString()) {
+                    stats.streak++;
+                } else if (!lastPlayed || new Date(lastPlayed) < yesterday) {
+                    stats.streak = 1;
+                }
+                
+                storage.setItem('lastPlayed', today);
+                
+                // Update activity data
+                const activityData = getActivityData();
+                activityData[new Date().getDate()] = true;
+                storage.setItem('activityData', JSON.stringify(activityData));
+                
+                updateCalendar();
+            }
+            
+            document.getElementById('streakNumber').textContent = stats.streak;
         }
 
         function initializeEventListeners() {
@@ -1094,6 +1805,17 @@
                     this.classList.add('active');
                     currentLang = this.dataset.lang;
                     updateLanguage();
+                    updateDailyContent();
+                });
+            });
+
+            // Mode selector
+            document.querySelectorAll('.mode-btn').forEach(btn => {
+                btn.addEventListener('click', function() {
+                    document.querySelectorAll('.mode-btn').forEach(b => b.classList.remove('active'));
+                    this.classList.add('active');
+                    currentMode = this.dataset.mode;
+                    switchMode(currentMode);
                 });
             });
 
@@ -1123,11 +1845,16 @@
             document.getElementById('listPieces').addEventListener('click', listPieces);
             document.getElementById('getHint').addEventListener('click', getHint);
             document.getElementById('resetPosition').addEventListener('click', resetPosition);
-            document.getElementById('showShortcuts').addEventListener('click', () => {
-                document.getElementById('shortcutsModal').classList.add('show');
-            });
             document.getElementById('closeModal').addEventListener('click', () => {
                 document.getElementById('successModal').classList.remove('show');
+                if (document.getElementById('autoNext').checked && currentStudy) {
+                    // Load next study automatically
+                    const studyItems = document.querySelectorAll('.study-item');
+                    const currentIndex = Array.from(studyItems).findIndex(item => item.classList.contains('active'));
+                    if (currentIndex < studyItems.length - 1) {
+                        studyItems[currentIndex + 1].click();
+                    }
+                }
             });
 
             // Move input
@@ -1138,6 +1865,20 @@
                     if (move) {
                         handleMove(null, null, move);
                         moveInput.value = '';
+                    }
+                }
+            });
+
+            // Move input autocomplete
+            moveInput.addEventListener('input', (e) => {
+                const value = e.target.value;
+                if (value.length >= 2) {
+                    // Show legal moves that start with the input
+                    const legalMoves = game.moves();
+                    const matches = legalMoves.filter(move => move.toLowerCase().startsWith(value.toLowerCase()));
+                    if (matches.length === 1) {
+                        // Auto-complete if only one match
+                        moveInput.value = matches[0];
                     }
                 }
             });
@@ -1158,44 +1899,85 @@
             // Voice indicator
             document.getElementById('voiceIndicator').addEventListener('click', toggleVoiceRecognition);
 
+            // Anki rating buttons
+            document.querySelectorAll('.anki-rating-btn').forEach(btn => {
+                btn.addEventListener('click', function() {
+                    const rating = parseInt(this.dataset.rating);
+                    processAnkiRating(rating);
+                });
+            });
+
+            // Book reader controls
+            document.getElementById('prevMove').addEventListener('click', previousBookMove);
+            document.getElementById('nextMove').addEventListener('click', nextBookMove);
+            document.getElementById('playPause').addEventListener('click', toggleBookPlayback);
+
             // Keyboard shortcuts
             document.addEventListener('keydown', (e) => {
-                switch(e.key.toLowerCase()) {
-                    case 'b':
-                        toggleBlindfold();
-                        break;
-                    case 'l':
-                        listPieces();
-                        break;
-                    case 'h':
-                        getHint();
-                        break;
-                    case 'r':
-                        resetPosition();
-                        break;
-                    case 'arrowright':
-                        nextMove();
-                        break;
-                    case 'arrowleft':
-                        previousMove();
-                        break;
-                    case ' ':
-                        e.preventDefault();
-                        showVariations();
-                        break;
-                    case 'escape':
-                        closeModals();
-                        break;
-                    case '?':
-                        document.getElementById('shortcutsModal').classList.add('show');
-                        break;
+                if (currentMode === 'study') {
+                    switch(e.key.toLowerCase()) {
+                        case 'b':
+                            toggleBlindfold();
+                            break;
+                        case 'l':
+                            listPieces();
+                            break;
+                        case 'h':
+                            getHint();
+                            break;
+                        case 'r':
+                            resetPosition();
+                            break;
+                        case 'escape':
+                            document.getElementById('successModal').classList.remove('show');
+                            break;
+                    }
+                } else if (currentMode === 'book') {
+                    switch(e.key) {
+                        case 'ArrowLeft':
+                            previousBookMove();
+                            break;
+                        case 'ArrowRight':
+                            nextBookMove();
+                            break;
+                        case ' ':
+                            e.preventDefault();
+                            toggleBookPlayback();
+                            break;
+                    }
                 }
             });
 
             // Window resize
             window.addEventListener('resize', () => {
                 board.resize();
+                if (ankiBoard) ankiBoard.resize();
+                if (ankiBoardSolution) ankiBoardSolution.resize();
+                if (bookBoard) bookBoard.resize();
             });
+        }
+
+        function switchMode(mode) {
+            // Hide all mode contents
+            document.querySelectorAll('.mode-content').forEach(content => {
+                content.style.display = 'none';
+            });
+            
+            // Show selected mode
+            document.getElementById(mode + 'Mode').style.display = 'block';
+            
+            // Resize boards
+            setTimeout(() => {
+                if (mode === 'study' && board) board.resize();
+                if (mode === 'anki' && ankiBoard) {
+                    ankiBoard.resize();
+                    ankiBoardSolution.resize();
+                    if (ankiCards.length > 0) {
+                        loadAnkiCard(currentAnkiCard);
+                    }
+                }
+                if (mode === 'book' && bookBoard) bookBoard.resize();
+            }, 100);
         }
 
         function handleFileUpload(file) {
@@ -1214,7 +1996,6 @@
         }
 
         function parsePGN(pgn) {
-            // Simple PGN parser - in production, use a proper PGN parsing library
             const studies = pgn.split(/\n\n(?=\[)/);
             const studyList = document.getElementById('studyList');
             studyList.innerHTML = '';
@@ -1239,11 +2020,20 @@
                     const studyItem = document.createElement('div');
                     studyItem.className = 'study-item';
                     studyItem.innerHTML = `
-                        <strong>${headers.White || 'Unknown'} vs ${headers.Black || 'Unknown'}</strong>
-                        <br>${headers.Event || 'Study ' + (index + 1)}
+                        <div class="study-title">${headers.Event || 'Studio ' + (index + 1)}</div>
+                        <div class="study-info">${headers.White || 'Bianco'} vs ${headers.Black || 'Nero'}</div>
                     `;
                     studyItem.onclick = () => loadStudy({ headers, moves: moves.trim() }, studyItem);
                     studyList.appendChild(studyItem);
+
+                    // Create Anki card from study
+                    if (moves.trim()) {
+                        ankiCards.push({
+                            fen: headers.FEN || 'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1',
+                            solution: moves.trim(),
+                            title: headers.Event || 'Studio ' + (index + 1)
+                        });
+                    }
                 }
             });
         }
@@ -1258,6 +2048,9 @@
             currentStudy = study;
             moveIndex = 0;
             game.reset();
+            if (study.headers.FEN) {
+                game.load(study.headers.FEN);
+            }
             board.position(game.fen());
             
             // Parse moves
@@ -1265,6 +2058,7 @@
             currentStudy.movesArray = movesArray.filter(m => m && !m.match(/^[\{\}]/));
             
             startTimer();
+            updateStreak();
             showNotification('Study loaded. Make your move!', 'success');
             
             if (blindfoldMode) {
@@ -1308,11 +2102,18 @@
                 if (moveIndex >= currentStudy.movesArray.length) {
                     studyCompleted();
                 } else {
-                    // Wait for next move
-                    if (blindfoldMode) {
+                    // Computer makes next move if it's their turn
+                    if (moveIndex < currentStudy.movesArray.length) {
                         setTimeout(() => {
-                            speak(game.turn() === 'w' ? i18n[currentLang].whiteToMove : i18n[currentLang].blackToMove);
-                        }, 1000);
+                            const computerMove = game.move(currentStudy.movesArray[moveIndex]);
+                            if (computerMove) {
+                                board.position(game.fen());
+                                moveIndex++;
+                                if (blindfoldMode && voiceEnabled) {
+                                    speak(`${getPieceName(computerMove.piece)} ${computerMove.san}`);
+                                }
+                            }
+                        }, 500);
                     }
                 }
             } else {
@@ -1369,7 +2170,7 @@
             if (voiceEnabled) {
                 speak(message);
             } else {
-                alert(message);
+                showNotification(message.replace(/\n/g, ' - '), 'success');
             }
         }
 
@@ -1398,46 +2199,19 @@
             if (currentStudy) {
                 moveIndex = 0;
                 game.reset();
+                if (currentStudy.headers.FEN) {
+                    game.load(currentStudy.headers.FEN);
+                }
                 board.position(game.fen());
                 startTimer();
                 showNotification('Position reset', 'success');
             }
         }
 
-        function nextMove() {
-            if (currentStudy && moveIndex < currentStudy.movesArray.length) {
-                const move = game.move(currentStudy.movesArray[moveIndex]);
-                if (move) {
-                    moveIndex++;
-                    board.position(game.fen());
-                    updateProgress();
-                }
-            }
-        }
-
-        function previousMove() {
-            if (moveIndex > 0) {
-                game.undo();
-                moveIndex--;
-                board.position(game.fen());
-                updateProgress();
-            }
-        }
-
-        function showVariations() {
-            // This would show variations in the PGN - simplified for this demo
-            showNotification('Variations feature coming soon!', 'success');
-        }
-
-        function closeModals() {
-            document.querySelectorAll('.success-modal, .shortcuts-modal').forEach(modal => {
-                modal.classList.remove('show');
-            });
-        }
-
         function studyCompleted() {
             stopTimer();
             stats.studiesCompleted++;
+            stats.rating += 10; // Simple rating system
             updateStats();
             saveStats();
             
@@ -1445,9 +2219,10 @@
             const accuracy = Math.round((stats.correct / stats.total) * 100);
             
             document.getElementById('statsSummary').innerHTML = `
-                <p>Time: ${timeTaken}</p>
-                <p>Accuracy: ${accuracy}%</p>
-                <p>Moves: ${moveIndex}</p>
+                <p style="font-size: 1.3em; margin: 10px 0;">⏱️ Tempo: <strong>${timeTaken}</strong></p>
+                <p style="font-size: 1.3em; margin: 10px 0;">🎯 Precisione: <strong>${accuracy}%</strong></p>
+                <p style="font-size: 1.3em; margin: 10px 0;">♟️ Mosse: <strong>${moveIndex}</strong></p>
+                <p style="font-size: 1.2em; margin: 15px 0; color: var(--gold);">+10 Rating Points!</p>
             `;
             
             document.getElementById('successModal').classList.add('show');
@@ -1479,7 +2254,7 @@
             timerElement.textContent = display;
             
             // Warning at 10 seconds left (if time limit is set)
-            if (elapsed === 50) { // Example: 60 second time limit
+            if (elapsed === 110) { // Example: 120 second time limit
                 timerElement.classList.add('warning');
                 if (voiceEnabled) speak('10 seconds remaining');
             }
@@ -1496,7 +2271,7 @@
             const accuracy = stats.total > 0 ? Math.round((stats.correct / stats.total) * 100) : 0;
             document.getElementById('accuracy').textContent = accuracy + '%';
             document.getElementById('studiesCompleted').textContent = stats.studiesCompleted;
-            document.getElementById('currentStreak').textContent = stats.streak;
+            document.getElementById('rating').textContent = stats.rating;
             
             // Update average time
             if (stats.studiesCompleted > 0) {
@@ -1505,59 +2280,9 @@
             }
         }
 
-        // Storage system with fallback for different environments
-        const storage = {
-            isAvailable: function() {
-                try {
-                    const test = '__storage_test__';
-                    window.localStorage.setItem(test, test);
-                    window.localStorage.removeItem(test);
-                    return true;
-                } catch(e) {
-                    return false;
-                }
-            },
-            
-            setItem: function(key, value) {
-                if (this.isAvailable()) {
-                    window.localStorage.setItem(key, value);
-                } else {
-                    // Fallback for environments without localStorage
-                    window.__memoryStorage = window.__memoryStorage || {};
-                    window.__memoryStorage[key] = value;
-                }
-            },
-            
-            getItem: function(key) {
-                if (this.isAvailable()) {
-                    return window.localStorage.getItem(key);
-                } else {
-                    window.__memoryStorage = window.__memoryStorage || {};
-                    return window.__memoryStorage[key] || null;
-                }
-            }
-        };
-
         function saveStats() {
             storage.setItem('blindfoldChessStats', JSON.stringify(stats));
-            
-            // Update streak
-            const today = new Date().toDateString();
-            const lastPlayed = storage.getItem('lastPlayed');
-            
-            if (lastPlayed !== today) {
-                const yesterday = new Date();
-                yesterday.setDate(yesterday.getDate() - 1);
-                
-                if (lastPlayed === yesterday.toDateString()) {
-                    stats.streak++;
-                } else {
-                    stats.streak = 1;
-                }
-                
-                storage.setItem('lastPlayed', today);
-                updateCalendar();
-            }
+            updateStreak();
         }
 
         function loadStats() {
@@ -1566,6 +2291,7 @@
                 stats = JSON.parse(saved);
                 updateStats();
             }
+            updateStreak();
         }
 
         function updateLanguage() {
@@ -1582,11 +2308,14 @@
                     element.placeholder = i18n[currentLang][key];
                 }
             });
+            
+            updateCalendar();
         }
 
         function updateUI() {
             updateLanguage();
             updateStats();
+            document.getElementById('streakNumber').textContent = stats.streak;
         }
 
         function showNotification(message, type = 'success') {
@@ -1608,20 +2337,31 @@
         }
 
         function playSound(type) {
-            // In a real implementation, you would play actual sound files
-            const audio = new Audio();
+            // In production, you would play actual sound files
+            const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+            const oscillator = audioContext.createOscillator();
+            const gainNode = audioContext.createGain();
+            
+            oscillator.connect(gainNode);
+            gainNode.connect(audioContext.destination);
+            
             switch(type) {
                 case 'success':
-                    // audio.src = 'sounds/success.mp3';
+                    oscillator.frequency.value = 523.25; // C5
+                    gainNode.gain.value = 0.3;
                     break;
                 case 'error':
-                    // audio.src = 'sounds/error.mp3';
+                    oscillator.frequency.value = 220; // A3
+                    gainNode.gain.value = 0.3;
                     break;
                 case 'victory':
-                    // audio.src = 'sounds/victory.mp3';
+                    oscillator.frequency.value = 659.25; // E5
+                    gainNode.gain.value = 0.4;
                     break;
             }
-            // audio.play();
+            
+            oscillator.start();
+            oscillator.stop(audioContext.currentTime + 0.1);
         }
 
         function speak(text) {
@@ -1713,39 +2453,83 @@
             }
         }
 
-        function initializeParticles() {
-            const container = document.getElementById('particles');
-            for (let i = 0; i < 50; i++) {
-                const particle = document.createElement('div');
-                particle.className = 'particle';
-                particle.style.left = Math.random() * 100 + '%';
-                particle.style.animationDelay = Math.random() * 10 + 's';
-                particle.style.animationDuration = (10 + Math.random() * 10) + 's';
-                container.appendChild(particle);
-            }
+        // Anki mode functions
+        function flipAnkiCard() {
+            document.getElementById('ankiCard').classList.add('flipped');
         }
 
-        function initializeCalendar() {
-            const calendar = document.getElementById('streakCalendar');
-            const today = new Date();
-            const daysInMonth = 30;
+        function loadAnkiCard(index) {
+            if (ankiCards.length === 0) return;
             
-            for (let i = 0; i < daysInMonth; i++) {
-                const day = document.createElement('div');
-                day.className = 'calendar-day';
-                
-                // Random active days for demo
-                if (Math.random() > 0.6) {
-                    day.classList.add('active');
-                }
-                
-                calendar.appendChild(day);
+            currentAnkiCard = index % ankiCards.length;
+            const card = ankiCards[currentAnkiCard];
+            
+            // Reset card flip
+            document.getElementById('ankiCard').classList.remove('flipped');
+            
+            // Load position
+            const ankiGame = new Chess();
+            if (card.fen) {
+                ankiGame.load(card.fen);
+            }
+            
+            ankiBoard.position(ankiGame.fen());
+            ankiBoardSolution.position(ankiGame.fen());
+            
+            // TODO: Show solution moves on back
+        }
+
+        function processAnkiRating(rating) {
+            // Simple spaced repetition algorithm
+            const intervals = {
+                1: 1,     // Again - 1 day
+                2: 3,     // Hard - 3 days
+                3: 7,     // Good - 7 days
+                4: 21     // Easy - 21 days
+            };
+            
+            // Update card with next review date
+            if (ankiCards[currentAnkiCard]) {
+                ankiCards[currentAnkiCard].nextReview = new Date();
+                ankiCards[currentAnkiCard].nextReview.setDate(
+                    ankiCards[currentAnkiCard].nextReview.getDate() + intervals[rating]
+                );
+            }
+            
+            showNotification(`Next review in ${intervals[rating]} days`, 'success');
+            
+            // Load next card
+            loadAnkiCard(currentAnkiCard + 1);
+        }
+
+        // Book reader functions
+        let bookMoves = [];
+        let bookMoveIndex = 0;
+        let bookPlayInterval = null;
+
+        function previousBookMove() {
+            if (bookMoveIndex > 0) {
+                bookMoveIndex--;
+                // TODO: Update book board position
             }
         }
 
-        function updateCalendar() {
-            // Update calendar with actual activity data
-            // This would connect to your backend in production
+        function nextBookMove() {
+            if (bookMoveIndex < bookMoves.length - 1) {
+                bookMoveIndex++;
+                // TODO: Update book board position
+            }
+        }
+
+        function toggleBookPlayback() {
+            if (bookPlayInterval) {
+                clearInterval(bookPlayInterval);
+                bookPlayInterval = null;
+                document.getElementById('playPause').textContent = '▶ Play';
+            } else {
+                bookPlayInterval = setInterval(nextBookMove, 2000);
+                document.getElementById('playPause').textContent = '⏸ Pause';
+            }
         }
     </script>
 </body>
