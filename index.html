@@ -22,3155 +22,372 @@
             --success: #4caf50;
             --error: #f44336;
             --warning: #ff9800;
-            --card-bg: rgba(26, 31, 58, 0.9);
         }
 
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background: linear-gradient(135deg, #0a0e27 0%, #1a1f3a 50%, #0a0e27 100%);
+            background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
             color: var(--text);
             min-height: 100vh;
-            overflow-x: hidden;
         }
 
-        /* Animated background */
-        body::before {
-            content: '';
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background-image: 
-                radial-gradient(circle at 20% 50%, rgba(233, 69, 96, 0.1) 0%, transparent 50%),
-                radial-gradient(circle at 80% 80%, rgba(255, 215, 0, 0.05) 0%, transparent 50%),
-                radial-gradient(circle at 40% 20%, rgba(76, 175, 80, 0.05) 0%, transparent 50%);
-            z-index: -1;
-            animation: backgroundShift 20s ease-in-out infinite;
-        }
-
-        @keyframes backgroundShift {
-            0%, 100% { transform: translate(0, 0); }
-            33% { transform: translate(-20px, -20px); }
-            66% { transform: translate(20px, -10px); }
-        }
-
-        .app-container {
-            max-width: 1600px;
+        .container {
+            max-width: 1400px;
             margin: 0 auto;
             padding: 20px;
         }
 
-        /* Header with daily content */
+        /* Header */
         .header {
-            background: var(--card-bg);
-            backdrop-filter: blur(20px);
+            background: rgba(26, 31, 58, 0.9);
             border-radius: 20px;
             padding: 30px;
             margin-bottom: 30px;
-            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
-            position: relative;
-            overflow: hidden;
-        }
-
-        .header::before {
-            content: '';
-            position: absolute;
-            top: -50%;
-            right: -50%;
-            width: 200%;
-            height: 200%;
-            background: radial-gradient(circle, rgba(255, 215, 0, 0.1) 0%, transparent 70%);
-            animation: rotate 30s linear infinite;
-        }
-
-        @keyframes rotate {
-            from { transform: rotate(0deg); }
-            to { transform: rotate(360deg); }
-        }
-
-        .header-content {
-            position: relative;
-            z-index: 1;
-            display: grid;
-            grid-template-columns: auto 1fr auto;
-            gap: 30px;
-            align-items: center;
-        }
-
-        .title-section {
             text-align: center;
         }
 
-        .main-title {
+        .title {
             font-size: 3em;
-            background: linear-gradient(45deg, #fff, var(--gold), #fff);
-            background-size: 200% 200%;
+            background: linear-gradient(45deg, #fff, var(--gold));
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
-            animation: gradient 3s ease infinite;
             margin-bottom: 10px;
-            text-shadow: 0 0 30px rgba(255, 215, 0, 0.3);
         }
 
-        .subtitle {
-            font-size: 1.2em;
-            opacity: 0.9;
-            color: var(--gold);
-        }
-
-        /* Champion of the day - Updated styles */
-        .champion-card {
-            background: rgba(45, 53, 97, 0.6);
-            border-radius: 15px;
-            padding: 20px;
-            display: flex;
-            align-items: center;
-            gap: 15px;
-            border: 1px solid rgba(255, 215, 0, 0.3);
-            transition: all 0.3s;
-            min-width: 280px;
-        }
-
-        .champion-card:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 10px 30px rgba(255, 215, 0, 0.2);
-        }
-
-        .champion-avatar {
-            width: 80px;
-            height: 80px;
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 2em;
-            font-weight: bold;
-            color: white;
-            border: 3px solid var(--gold);
-            box-shadow: 0 0 20px rgba(255, 215, 0, 0.4);
-            position: relative;
-            overflow: hidden;
-        }
-
-        .champion-avatar::before {
-            content: '♔';
-            position: absolute;
-            font-size: 3em;
-            opacity: 0.1;
-            transform: rotate(-15deg);
-        }
-
-        .champion-info h3 {
-            color: var(--gold);
-            margin-bottom: 5px;
-            font-size: 1.2em;
-        }
-
-        .champion-years {
-            font-size: 0.9em;
-            opacity: 0.8;
-        }
-
-        /* Daily quote */
-        .quote-card {
-            background: rgba(45, 53, 97, 0.6);
-            border-radius: 15px;
-            padding: 20px;
-            border-left: 4px solid var(--gold);
-            font-style: italic;
-            position: relative;
-            max-width: 500px;
-        }
-
-        .quote-card::before {
-            content: '"';
-            position: absolute;
-            top: -10px;
-            left: 10px;
-            font-size: 4em;
-            color: var(--gold);
-            opacity: 0.3;
-        }
-
-        .quote-text {
-            font-size: 1.1em;
-            margin-bottom: 10px;
-            position: relative;
-            z-index: 1;
-        }
-
-        .quote-author {
-            text-align: right;
-            color: var(--gold);
-            font-size: 0.9em;
-        }
-
-        /* Language switcher */
+        /* Language Switcher */
         .lang-switcher {
-            display: flex;
-            gap: 10px;
+            position: absolute;
+            top: 20px;
+            right: 20px;
         }
 
         .lang-btn {
-            padding: 10px 20px;
+            padding: 8px 16px;
+            margin: 0 5px;
             border: 2px solid var(--gold);
             background: transparent;
             color: var(--text);
-            border-radius: 25px;
+            border-radius: 20px;
             cursor: pointer;
-            transition: all 0.3s;
-            font-weight: bold;
         }
 
         .lang-btn.active {
             background: var(--gold);
             color: var(--primary);
-            transform: scale(1.1);
         }
 
-        /* Streak counter */
-        .streak-section {
-            background: var(--card-bg);
-            backdrop-filter: blur(20px);
-            border-radius: 20px;
-            padding: 25px;
-            margin-bottom: 30px;
-            text-align: center;
-            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
-        }
-
-        .streak-title {
-            font-size: 1.3em;
-            color: var(--gold);
-            margin-bottom: 20px;
-        }
-
-        .streak-display {
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            gap: 40px;
-            margin-bottom: 25px;
-        }
-
-        .streak-counter {
-            text-align: center;
-        }
-
-        .streak-number {
-            font-size: 4em;
-            font-weight: bold;
-            background: linear-gradient(45deg, var(--success), var(--gold));
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            animation: pulse 2s infinite;
-        }
-
-        @keyframes pulse {
-            0%, 100% { transform: scale(1); }
-            50% { transform: scale(1.05); }
-        }
-
-        .streak-label {
-            font-size: 1.1em;
-            opacity: 0.9;
-        }
-
-        .fire-emoji {
-            font-size: 3em;
-            animation: fireAnimation 1.5s ease-in-out infinite;
-        }
-
-        @keyframes fireAnimation {
-            0%, 100% { transform: scale(1) rotate(0deg); }
-            25% { transform: scale(1.1) rotate(-5deg); }
-            75% { transform: scale(1.1) rotate(5deg); }
-        }
-
-        /* Calendar grid */
-        .calendar-container {
-            background: rgba(45, 53, 97, 0.3);
-            border-radius: 15px;
-            padding: 20px;
-        }
-
-        .calendar-month {
-            display: grid;
-            grid-template-columns: repeat(7, 1fr);
-            gap: 8px;
-            margin-bottom: 10px;
-        }
-
-        .calendar-header {
-            font-size: 1.2em;
-            color: var(--gold);
-            margin-bottom: 15px;
-            text-align: center;
-        }
-
-        .day-label {
-            text-align: center;
-            font-size: 0.8em;
-            opacity: 0.7;
-            margin-bottom: 5px;
-        }
-
-        .calendar-day {
-            aspect-ratio: 1;
-            background: rgba(45, 53, 97, 0.5);
-            border-radius: 8px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 0.9em;
-            cursor: pointer;
-            transition: all 0.3s;
-            position: relative;
-        }
-
-        .calendar-day.active {
-            background: var(--success);
-            box-shadow: 0 0 15px rgba(76, 175, 80, 0.6);
-            font-weight: bold;
-        }
-
-        .calendar-day.today {
-            border: 2px solid var(--gold);
-        }
-
-        .calendar-day.future {
-            opacity: 0.3;
-        }
-
-        .calendar-day:hover:not(.future) {
-            transform: scale(1.15);
-            z-index: 10;
-        }
-
-        /* Main layout */
+        /* Main Layout */
         .main-layout {
             display: grid;
-            grid-template-columns: 320px 1fr 320px;
-            gap: 25px;
-            margin-top: 30px;
+            grid-template-columns: 300px 1fr 300px;
+            gap: 20px;
         }
 
-        /* Side panels */
-        .side-panel {
-            background: var(--card-bg);
-            backdrop-filter: blur(20px);
-            border-radius: 20px;
-            padding: 25px;
-            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
-        }
-
-        .panel-section {
-            margin-bottom: 30px;
-        }
-
-        .panel-section h3 {
-            color: var(--gold);
-            margin-bottom: 20px;
-            font-size: 1.4em;
-            display: flex;
-            align-items: center;
-            gap: 10px;
-        }
-
-        .panel-section h3::before {
-            content: '';
-            width: 4px;
-            height: 20px;
-            background: var(--gold);
-            border-radius: 2px;
-        }
-
-        /* Mode selector */
-        .mode-selector {
-            display: grid;
-            gap: 15px;
-        }
-
-        .mode-btn {
+        /* Panels */
+        .panel {
+            background: rgba(26, 31, 58, 0.9);
+            border-radius: 15px;
             padding: 20px;
-            background: rgba(45, 53, 97, 0.6);
-            border: 2px solid transparent;
-            border-radius: 15px;
-            color: var(--text);
-            cursor: pointer;
-            transition: all 0.3s;
-            text-align: left;
-            position: relative;
-            overflow: hidden;
         }
 
-        .mode-btn::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: -100%;
-            width: 100%;
-            height: 100%;
-            background: linear-gradient(90deg, transparent, rgba(255, 215, 0, 0.3), transparent);
-            transition: left 0.5s;
-        }
-
-        .mode-btn:hover::before {
-            left: 100%;
-        }
-
-        .mode-btn:hover {
-            border-color: var(--gold);
-            transform: translateX(5px);
-        }
-
-        .mode-btn.active {
-            background: rgba(233, 69, 96, 0.3);
-            border-color: var(--highlight);
-        }
-
-        .mode-title {
-            font-size: 1.2em;
-            font-weight: bold;
-            margin-bottom: 5px;
+        .panel h3 {
             color: var(--gold);
+            margin-bottom: 15px;
         }
 
-        .mode-description {
-            font-size: 0.9em;
-            opacity: 0.8;
-        }
-
-        /* Upload area */
+        /* Upload Area */
         .upload-area {
-            border: 3px dashed var(--gold);
-            border-radius: 15px;
-            padding: 40px 20px;
+            border: 2px dashed var(--gold);
+            border-radius: 10px;
+            padding: 30px;
             text-align: center;
-            transition: all 0.3s;
             cursor: pointer;
-            position: relative;
-            overflow: hidden;
-            background: rgba(255, 215, 0, 0.05);
+            margin-bottom: 20px;
         }
 
         .upload-area:hover {
             background: rgba(255, 215, 0, 0.1);
-            transform: scale(1.02);
-            border-color: var(--highlight);
         }
 
-        .upload-area.dragover {
-            background: rgba(255, 215, 0, 0.2);
-            border-color: var(--success);
-            transform: scale(1.05);
-        }
-
-        .upload-icon {
-            font-size: 4em;
-            margin-bottom: 15px;
-            animation: float 3s ease-in-out infinite;
-        }
-
-        @keyframes float {
-            0%, 100% { transform: translateY(0); }
-            50% { transform: translateY(-10px); }
-        }
-
-        /* Chess board container */
-        .board-container {
-            background: var(--card-bg);
-            backdrop-filter: blur(20px);
-            border-radius: 25px;
-            padding: 30px;
-            box-shadow: 0 15px 50px rgba(0, 0, 0, 0.4);
-            position: relative;
-        }
-
-        /* Timer */
-        .timer-display {
-            font-size: 3.5em;
-            text-align: center;
-            margin-bottom: 25px;
-            font-weight: bold;
-            background: linear-gradient(45deg, var(--success), var(--warning), var(--error));
-            background-size: 200% 200%;
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            animation: gradient 3s ease infinite;
-            font-variant-numeric: tabular-nums;
-        }
-
-        .timer-display.warning {
-            animation: timer-warning 1s infinite, gradient 3s ease infinite;
-        }
-
-        @keyframes timer-warning {
-            0%, 100% { transform: scale(1); }
-            50% { transform: scale(1.1); }
-        }
-
-        /* Anki mode card */
-        .anki-card {
-            perspective: 1000px;
-            width: 100%;
-            height: 500px;
-            margin: 20px auto;
-        }
-
-        .anki-card-inner {
-            position: relative;
-            width: 100%;
-            height: 100%;
-            transition: transform 0.8s;
-            transform-style: preserve-3d;
-        }
-
-        .anki-card.flipped .anki-card-inner {
-            transform: rotateY(180deg);
-        }
-
-        .anki-card-face {
-            position: absolute;
-            width: 100%;
-            height: 100%;
-            backface-visibility: hidden;
-            background: rgba(45, 53, 97, 0.9);
-            border-radius: 20px;
-            padding: 30px;
-            display: flex;
-            flex-direction: column;
-            justify-content: space-between;
-            align-items: center;
-            border: 2px solid var(--gold);
-            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.4);
-        }
-
-        .anki-card-back {
-            transform: rotateY(180deg);
-        }
-
-        .anki-question {
-            font-size: 1.8em;
-            text-align: center;
-            color: var(--gold);
-            margin-bottom: 20px;
-        }
-
-        .anki-board {
-            width: 300px;
-            height: 300px;
-            margin: 0 auto;
-        }
-
-        .anki-controls {
-            display: flex;
-            gap: 15px;
-            margin-top: 20px;
-        }
-
-        .anki-rating-btn {
-            padding: 15px 25px;
-            border: none;
-            border-radius: 10px;
-            font-size: 1.1em;
-            cursor: pointer;
-            transition: all 0.3s;
-            font-weight: bold;
-            text-transform: uppercase;
-        }
-
-        .anki-rating-btn.again {
-            background: var(--error);
-            color: white;
-        }
-
-        .anki-rating-btn.hard {
-            background: var(--warning);
-            color: white;
-        }
-
-        .anki-rating-btn.good {
-            background: var(--success);
-            color: white;
-        }
-
-        .anki-rating-btn.easy {
-            background: var(--gold);
-            color: var(--primary);
-        }
-
-        .anki-rating-btn:hover {
-            transform: translateY(-3px);
-            box-shadow: 0 5px 20px rgba(0, 0, 0, 0.3);
-        }
-
-        /* Study mode */
+        /* Chess Board */
         #board {
             width: 100%;
             max-width: 600px;
             margin: 0 auto;
-            transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
         }
 
-        .board-hidden #board {
-            filter: blur(20px) brightness(0.3);
-            transform: scale(0.95);
-            pointer-events: none;
+        .blindfold-mode #board {
+            filter: blur(20px);
+            opacity: 0.3;
         }
 
-        .blindfold-overlay {
-            position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background: radial-gradient(circle at center, rgba(26, 26, 46, 0.8) 0%, rgba(26, 26, 46, 0.95) 50%, rgba(26, 26, 46, 1) 100%);
-            display: none;
-            align-items: center;
-            justify-content: center;
-            border-radius: 20px;
-            backdrop-filter: blur(10px);
-        }
-
-        .board-hidden .blindfold-overlay {
+        /* Controls */
+        .controls {
             display: flex;
+            gap: 10px;
+            justify-content: center;
+            margin-top: 20px;
+            flex-wrap: wrap;
         }
 
-        .blindfold-text {
-            font-size: 2.5em;
+        .btn {
+            padding: 10px 20px;
+            background: linear-gradient(135deg, var(--accent), var(--highlight));
+            border: none;
+            border-radius: 25px;
+            color: white;
+            cursor: pointer;
             font-weight: bold;
-            color: var(--gold);
-            text-shadow: 0 0 30px rgba(255, 215, 0, 0.8);
-            animation: glow 2s ease-in-out infinite;
         }
 
-        @keyframes glow {
-            0%, 100% { 
-                text-shadow: 0 0 20px rgba(255, 215, 0, 0.8);
-                opacity: 0.9;
-            }
-            50% { 
-                text-shadow: 0 0 40px rgba(255, 215, 0, 1);
-                opacity: 1;
-            }
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(233, 69, 96, 0.4);
         }
 
-        /* Move input */
-        .move-input-container {
-            margin-top: 30px;
-            text-align: center;
-        }
-
+        /* Move Input */
         .move-input {
-            width: 350px;
-            padding: 18px 30px;
-            font-size: 1.6em;
+            width: 300px;
+            padding: 15px;
+            font-size: 1.2em;
             background: rgba(45, 53, 97, 0.8);
-            border: 3px solid var(--accent);
-            border-radius: 35px;
+            border: 2px solid var(--accent);
+            border-radius: 25px;
             color: var(--text);
             text-align: center;
-            transition: all 0.3s;
-            letter-spacing: 2px;
+            margin: 20px auto;
+            display: block;
         }
 
         .move-input:focus {
             outline: none;
             border-color: var(--gold);
-            box-shadow: 0 0 30px rgba(255, 215, 0, 0.4);
-            transform: scale(1.05);
-            background: rgba(45, 53, 97, 0.9);
         }
 
-        .move-input.correct {
-            border-color: var(--success);
-            animation: correct-move 0.5s;
-        }
-
-        .move-input.incorrect {
-            border-color: var(--error);
-            animation: shake 0.5s;
-        }
-
-        @keyframes correct-move {
-            0%, 100% { transform: scale(1); }
-            50% { transform: scale(1.15); }
-        }
-
-        @keyframes shake {
-            0%, 100% { transform: translateX(0); }
-            10%, 30%, 50%, 70%, 90% { transform: translateX(-10px); }
-            20%, 40%, 60%, 80% { transform: translateX(10px); }
-        }
-
-        /* Control buttons */
-        .controls {
-            display: flex;
-            gap: 15px;
-            justify-content: center;
-            margin-top: 25px;
-            flex-wrap: wrap;
-        }
-
-        .btn {
-            padding: 14px 28px;
-            background: linear-gradient(135deg, var(--accent), var(--highlight));
-            border: none;
-            border-radius: 30px;
-            color: white;
-            font-size: 1.1em;
-            font-weight: bold;
-            cursor: pointer;
-            transition: all 0.3s;
-            position: relative;
-            overflow: hidden;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-        }
-
-        .btn::before {
-            content: '';
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            width: 0;
-            height: 0;
-            background: rgba(255, 255, 255, 0.3);
-            border-radius: 50%;
-            transform: translate(-50%, -50%);
-            transition: width 0.6s, height 0.6s;
-        }
-
-        .btn:hover::before {
-            width: 400px;
-            height: 400px;
-        }
-
-        .btn:hover {
-            transform: translateY(-3px);
-            box-shadow: 0 10px 30px rgba(233, 69, 96, 0.4);
-        }
-
-        .btn:active {
-            transform: translateY(0);
-        }
-
-        .btn.gold {
-            background: linear-gradient(135deg, var(--gold), #ffed4e);
-            color: var(--primary);
-        }
-
-        /* Progress bar */
-        .progress-container {
-            margin-top: 30px;
-        }
-
-        .progress-label {
-            font-size: 0.9em;
-            margin-bottom: 8px;
-            opacity: 0.8;
-        }
-
-        .progress-bar {
-            width: 100%;
-            height: 12px;
-            background: rgba(45, 53, 97, 0.5);
-            border-radius: 6px;
-            overflow: hidden;
-            box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.3);
-        }
-
-        .progress-fill {
-            height: 100%;
-            background: linear-gradient(90deg, var(--success), var(--gold));
-            width: 0%;
-            transition: width 0.5s ease;
-            box-shadow: 0 0 10px rgba(255, 215, 0, 0.5);
-            position: relative;
-        }
-
-        .progress-fill::after {
-            content: '';
-            position: absolute;
-            top: 0;
-            right: 0;
-            bottom: 0;
-            width: 20px;
-            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.5));
-            animation: shimmer 2s infinite;
-        }
-
-        @keyframes shimmer {
-            0% { transform: translateX(-20px); }
-            100% { transform: translateX(20px); }
-        }
-
-        /* Stats cards */
-        .stats-grid {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 15px;
-        }
-
+        /* Stats */
         .stat-card {
             background: rgba(45, 53, 97, 0.6);
-            padding: 20px;
-            border-radius: 15px;
+            padding: 15px;
+            border-radius: 10px;
             text-align: center;
-            transition: all 0.3s;
-            border: 1px solid transparent;
-            position: relative;
-            overflow: hidden;
-        }
-
-        .stat-card::before {
-            content: '';
-            position: absolute;
-            top: -50%;
-            left: -50%;
-            width: 200%;
-            height: 200%;
-            background: radial-gradient(circle, rgba(255, 215, 0, 0.1) 0%, transparent 70%);
-            opacity: 0;
-            transition: opacity 0.3s;
-        }
-
-        .stat-card:hover::before {
-            opacity: 1;
-        }
-
-        .stat-card:hover {
-            transform: translateY(-5px);
-            border-color: var(--gold);
-            box-shadow: 0 10px 25px rgba(255, 215, 0, 0.2);
-        }
-
-        .stat-icon {
-            font-size: 2.5em;
             margin-bottom: 10px;
         }
 
         .stat-value {
-            font-size: 2.2em;
-            font-weight: bold;
+            font-size: 2em;
             color: var(--gold);
-            margin-bottom: 5px;
+            font-weight: bold;
         }
 
-        .stat-label {
-            opacity: 0.9;
-            font-size: 0.95em;
-        }
-
-        /* Study list */
-        .study-list {
-            max-height: 400px;
-            overflow-y: auto;
-            scrollbar-width: thin;
-            scrollbar-color: var(--gold) var(--secondary);
-        }
-
+        /* Study List */
         .study-item {
             background: rgba(45, 53, 97, 0.5);
-            padding: 18px;
-            margin-bottom: 12px;
-            border-radius: 12px;
+            padding: 15px;
+            margin-bottom: 10px;
+            border-radius: 8px;
             cursor: pointer;
             transition: all 0.3s;
-            position: relative;
-            overflow: hidden;
-            border: 1px solid transparent;
-        }
-
-        .study-item::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: -100%;
-            width: 100%;
-            height: 100%;
-            background: linear-gradient(90deg, transparent, rgba(255, 215, 0, 0.2), transparent);
-            transition: left 0.5s;
-        }
-
-        .study-item:hover::before {
-            left: 100%;
         }
 
         .study-item:hover {
             background: rgba(45, 53, 97, 0.7);
             transform: translateX(5px);
-            border-color: var(--gold);
         }
 
         .study-item.active {
-            background: rgba(233, 69, 96, 0.3);
-            border-color: var(--highlight);
-            border-left-width: 4px;
+            border-left: 3px solid var(--gold);
         }
 
-        .study-title {
-            font-weight: bold;
-            color: var(--gold);
-            margin-bottom: 5px;
-        }
-
-        .study-info {
-            font-size: 0.9em;
-            opacity: 0.8;
-        }
-
-        /* Voice indicator */
-        .voice-indicator {
+        /* Modal */
+        .modal {
+            display: none;
             position: fixed;
-            bottom: 30px;
-            right: 30px;
-            width: 80px;
-            height: 80px;
-            background: var(--highlight);
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            cursor: pointer;
-            transition: all 0.3s;
-            box-shadow: 0 5px 25px rgba(233, 69, 96, 0.5);
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.8);
             z-index: 1000;
         }
 
-        .voice-indicator:hover {
-            transform: scale(1.1);
-        }
-
-        .voice-indicator.active {
-            animation: voice-pulse 1.5s infinite;
-            background: var(--success);
-        }
-
-        @keyframes voice-pulse {
-            0% { box-shadow: 0 0 0 0 rgba(76, 175, 80, 0.7); }
-            70% { box-shadow: 0 0 0 20px rgba(76, 175, 80, 0); }
-            100% { box-shadow: 0 0 0 0 rgba(76, 175, 80, 0); }
-        }
-
-        .voice-icon {
-            font-size: 2em;
-        }
-
-        /* Success modal */
-        .modal {
-            position: fixed;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background: rgba(0, 0, 0, 0.9);
-            display: none;
-            align-items: center;
-            justify-content: center;
-            z-index: 2000;
-            backdrop-filter: blur(5px);
-        }
-
-        .modal.show {
-            display: flex;
-        }
-
         .modal-content {
-            background: linear-gradient(135deg, var(--secondary), var(--accent));
-            padding: 50px;
-            border-radius: 30px;
-            text-align: center;
-            animation: modal-appear 0.5s;
-            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
-            border: 2px solid var(--gold);
-            max-width: 500px;
-            position: relative;
-            overflow: hidden;
-        }
-
-        .modal-content::before {
-            content: '';
             position: absolute;
-            top: -50%;
-            left: -50%;
-            width: 200%;
-            height: 200%;
-            background: radial-gradient(circle, rgba(255, 215, 0, 0.1) 0%, transparent 50%);
-            animation: rotate 10s linear infinite;
-        }
-
-        @keyframes modal-appear {
-            from {
-                opacity: 0;
-                transform: scale(0.7) rotate(-10deg);
-            }
-            to {
-                opacity: 1;
-                transform: scale(1) rotate(0);
-            }
-        }
-
-        .success-icon {
-            font-size: 5em;
-            margin-bottom: 20px;
-            animation: success-bounce 1s;
-        }
-
-        @keyframes success-bounce {
-            0%, 100% { transform: scale(1) rotate(0deg); }
-            25% { transform: scale(1.2) rotate(-5deg); }
-            50% { transform: scale(1.3) rotate(5deg); }
-            75% { transform: scale(1.2) rotate(-5deg); }
-        }
-
-        .trophy-icon {
-            color: var(--gold);
-            filter: drop-shadow(0 0 20px rgba(255, 215, 0, 0.8));
-        }
-
-        /* Settings */
-        .settings-group {
-            background: rgba(45, 53, 97, 0.3);
-            padding: 15px;
-            border-radius: 10px;
-            margin-bottom: 15px;
-        }
-
-        .checkbox-label {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            cursor: pointer;
-            padding: 10px;
-            border-radius: 8px;
-            transition: background 0.3s;
-        }
-
-        .checkbox-label:hover {
-            background: rgba(255, 215, 0, 0.1);
-        }
-
-        .checkbox-label input[type="checkbox"] {
-            width: 20px;
-            height: 20px;
-            cursor: pointer;
-            accent-color: var(--gold);
-        }
-
-        /* Notification */
-        .notification {
-            position: fixed;
-            top: 30px;
+            top: 50%;
             left: 50%;
-            transform: translateX(-50%) translateY(-100px);
+            transform: translate(-50%, -50%);
             background: var(--secondary);
-            padding: 20px 40px;
-            border-radius: 35px;
-            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4);
-            transition: transform 0.3s;
-            z-index: 3000;
-            border: 2px solid transparent;
-            font-weight: bold;
-            font-size: 1.1em;
-        }
-
-        .notification.show {
-            transform: translateX(-50%) translateY(0);
-        }
-
-        .notification.success {
-            border-color: var(--success);
-            box-shadow: 0 10px 30px rgba(76, 175, 80, 0.3);
-        }
-
-        .notification.error {
-            border-color: var(--error);
-            box-shadow: 0 10px 30px rgba(244, 67, 54, 0.3);
+            padding: 40px;
+            border-radius: 20px;
+            text-align: center;
         }
 
         /* Responsive */
-        @media (max-width: 1400px) {
+        @media (max-width: 1200px) {
             .main-layout {
                 grid-template-columns: 1fr;
             }
-            
-            .board-container {
-                order: -1;
-            }
-
-            .side-panel {
-                max-width: 800px;
-                margin: 0 auto;
-            }
-        }
-
-        @media (max-width: 768px) {
-            .header-content {
-                grid-template-columns: 1fr;
-                text-align: center;
-                gap: 20px;
-            }
-
-            .main-title {
-                font-size: 2em;
-            }
-
-            .move-input {
-                width: 90%;
-                max-width: 300px;
-            }
-
-            .champion-card {
-                justify-content: center;
-            }
-
-            .quote-card {
-                max-width: 100%;
-            }
-        }
-
-        /* Memory Mode Styles */
-        .memory-container {
-            text-align: center;
-        }
-
-        .memory-header {
-            margin-bottom: 30px;
-        }
-
-        .memory-title {
-            font-size: 2.5em;
-            color: var(--gold);
-            margin-bottom: 20px;
-            text-shadow: 0 0 20px rgba(255, 215, 0, 0.3);
-        }
-
-        .memory-timer {
-            font-size: 1.5em;
-            background: rgba(45, 53, 97, 0.6);
-            display: inline-block;
-            padding: 15px 30px;
-            border-radius: 30px;
-            border: 2px solid var(--gold);
-        }
-
-        .memory-timer-value {
-            font-size: 2em;
-            font-weight: bold;
-            color: var(--gold);
-            margin-left: 10px;
-            font-variant-numeric: tabular-nums;
-        }
-
-        .memory-board-wrapper {
-            position: relative;
-            display: inline-block;
-            margin: 30px auto;
-        }
-
-        #memoryBoard {
-            width: 600px;
-            transition: all 0.5s ease;
-        }
-
-        .memory-overlay {
-            position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background: rgba(26, 26, 46, 0.98);
-            backdrop-filter: blur(20px);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            border-radius: 10px;
-            z-index: 100;
-        }
-
-        .memory-overlay-content {
-            text-align: center;
-            animation: fadeIn 0.5s ease;
-        }
-
-        @keyframes fadeIn {
-            from { opacity: 0; transform: scale(0.9); }
-            to { opacity: 1; transform: scale(1); }
-        }
-
-        .memory-icon {
-            font-size: 5em;
-            margin-bottom: 20px;
-            animation: brainPulse 2s ease-in-out infinite;
-        }
-
-        @keyframes brainPulse {
-            0%, 100% { transform: scale(1); opacity: 0.8; }
-            50% { transform: scale(1.1); opacity: 1; }
-        }
-
-        .memory-instruction {
-            font-size: 1.3em;
-            color: var(--gold);
-            max-width: 400px;
-            margin: 0 auto;
-        }
-
-        .memory-controls {
-            margin: 30px 0;
-            display: flex;
-            gap: 15px;
-            justify-content: center;
-            flex-wrap: wrap;
-        }
-
-        .memory-stats {
-            display: flex;
-            gap: 30px;
-            justify-content: center;
-            margin: 30px 0;
-            flex-wrap: wrap;
-        }
-
-        .memory-stat-item {
-            background: rgba(45, 53, 97, 0.5);
-            padding: 15px 25px;
-            border-radius: 15px;
-            border: 1px solid rgba(255, 215, 0, 0.3);
-        }
-
-        .memory-stat-label {
-            opacity: 0.8;
-            margin-right: 10px;
-        }
-
-        .memory-stat-value {
-            font-size: 1.5em;
-            font-weight: bold;
-            color: var(--gold);
-        }
-
-        .memory-difficulty {
-            margin-top: 30px;
-            font-size: 1.1em;
-        }
-
-        .difficulty-select {
-            margin-left: 10px;
-            padding: 8px 15px;
-            background: rgba(45, 53, 97, 0.8);
-            border: 2px solid var(--gold);
-            border-radius: 20px;
-            color: var(--text);
-            font-size: 1em;
-            cursor: pointer;
-            transition: all 0.3s;
-        }
-
-        .difficulty-select:hover {
-            background: rgba(45, 53, 97, 1);
-            box-shadow: 0 0 15px rgba(255, 215, 0, 0.3);
-        }
-
-        .difficulty-select:focus {
-            outline: none;
-            box-shadow: 0 0 20px rgba(255, 215, 0, 0.5);
-        }
-
-        /* Memory mode animations */
-        .memory-board-flash {
-            animation: boardFlash 0.5s ease;
-        }
-
-        @keyframes boardFlash {
-            0%, 100% { opacity: 1; }
-            50% { opacity: 0.3; }
-        }
-
-        .memory-correct-move {
-            animation: correctFlash 0.6s ease;
-        }
-
-        @keyframes correctFlash {
-            0%, 100% { box-shadow: none; }
-            50% { box-shadow: 0 0 30px rgba(76, 175, 80, 0.8); }
-        }
-
-        .memory-wrong-move {
-            animation: wrongShake 0.5s ease;
-        }
-
-        @keyframes wrongShake {
-            0%, 100% { transform: translateX(0); }
-            10%, 30%, 50%, 70%, 90% { transform: translateX(-5px); }
-            20%, 40%, 60%, 80% { transform: translateX(5px); }
-        }
-
-        /* Footer */
-        .footer {
-            text-align: center;
-            padding: 30px;
-            margin-top: 50px;
-            border-top: 1px solid rgba(255, 215, 0, 0.2);
-            color: var(--gold);
-            font-size: 0.9em;
-        }
-
-        .footer a {
-            color: var(--gold);
-            text-decoration: none;
-            font-weight: bold;
-            transition: all 0.3s;
-        }
-
-        .footer a:hover {
-            text-shadow: 0 0 10px rgba(255, 215, 0, 0.8);
-        }
-        /* Custom scrollbar */
-        ::-webkit-scrollbar {
-            width: 10px;
-        }
-
-        ::-webkit-scrollbar-track {
-            background: var(--secondary);
-        }
-
-        ::-webkit-scrollbar-thumb {
-            background: var(--gold);
-            border-radius: 5px;
-        }
-
-        ::-webkit-scrollbar-thumb:hover {
-            background: var(--highlight);
         }
     </style>
 </head>
 <body>
-    <div class="app-container">
-        <!-- Header with daily content -->
-        <header class="header">
-            <div class="header-content">
-                <div class="champion-card">
-                    <div class="champion-avatar" id="championAvatar">
-                        <span id="championInitials">MC</span>
-                    </div>
-                    <div class="champion-info">
-                        <h3 id="championName">Magnus Carlsen</h3>
-                        <p class="champion-years" id="championYears">2013-2023</p>
-                        <button class="mode-btn" data-mode="book">
-                            <div class="mode-title">📖 Lettura Libri</div>
-                            <div class="mode-description" data-i18n="bookDesc">Sfoglia libri PGN con commenti</div>
-                        </button>
-                    </div>
-                </div>
-
-                <div class="title-section">
-                    <h1 class="main-title" data-i18n="title">Blindfold Chess Master</h1>
-                    <p class="subtitle" data-i18n="subtitle">Allena la tua visione scacchistica alla cieca</p>
-                </div>
-
-                <div class="lang-switcher">
-                    <button class="lang-btn active" data-lang="it">IT</button>
-                    <button class="lang-btn" data-lang="en">EN</button>
-                </div>
-            </div>
-            
-            <div class="quote-card">
-                <p class="quote-text" id="dailyQuote">Gli scacchi sono la vita in miniatura.</p>
-                <p class="quote-author" id="quoteAuthor">- Garry Kasparov</p>
-            </div>
-        </header>
-
-        <!-- Streak Section -->
-        <div class="streak-section">
-            <h2 class="streak-title" data-i18n="streakTitle">🔥 La Tua Serie di Allenamento 🔥</h2>
-            <div class="streak-display">
-                <div class="fire-emoji">🔥</div>
-                <div class="streak-counter">
-                    <div class="streak-number" id="streakNumber">0</div>
-                    <div class="streak-label" data-i18n="daysStreak">giorni consecutivi</div>
-                </div>
-                <div class="fire-emoji">🔥</div>
-            </div>
-            
-            <div class="calendar-container">
-                <h3 class="calendar-header" id="calendarMonth">Giugno 2025</h3>
-                <div class="calendar-month" id="calendar">
-                    <!-- Calendar will be generated here -->
-                </div>
-            </div>
-        </div>
-
-        <!-- Main Layout -->
-        <div class="main-layout">
-            <!-- Left Panel -->
-            <div class="side-panel">
-                <div class="panel-section">
-                    <h3 data-i18n="modeTitle">Modalità di Allenamento</h3>
-                    <div class="mode-selector">
-                        <button class="mode-btn active" data-mode="study">
-                            <div class="mode-title">📚 Studio Classico</div>
-                            <div class="mode-description" data-i18n="studyDesc">Risolvi studi e composizioni</div>
-                        </button>
-                        <button class="mode-btn" data-mode="anki">
-                            <div class="mode-title">🎴 Modalità Anki</div>
-                            <div class="mode-description" data-i18n="ankiDesc">Ripetizione spaziata con flashcard</div>
-                        </button>
-                        <button class="mode-btn" data-mode="memory">
-                            <div class="mode-title">🧠 Memory Chess</div>
-                            <div class="mode-description" data-i18n="memoryDesc">Memorizza e risolvi alla cieca</div>
-                        </button>
-                    </div>
-                </div>
-
-                <div class="panel-section">
-                    <h3 data-i18n="uploadTitle">Carica File PGN</h3>
-                    <div class="upload-area" id="uploadArea">
-                        <div class="upload-icon">📁</div>
-                        <p data-i18n="uploadText">Trascina qui o clicca per caricare</p>
-                        <input type="file" id="fileInput" accept=".pgn" style="display: none;">
-                    </div>
-                </div>
-
-                <div class="panel-section">
-                    <h3 data-i18n="studiesTitle">Studi Caricati</h3>
-                    <div class="study-list" id="studyList">
-                        <!-- Studies will be loaded here -->
-                    </div>
-                </div>
-
-                <div class="panel-section">
-                    <h3 data-i18n="settingsTitle">Impostazioni</h3>
-                    <div class="settings-group">
-                        <label class="checkbox-label">
-                            <input type="checkbox" id="soundEnabled" checked>
-                            <span data-i18n="soundLabel">Suoni abilitati</span>
-                        </label>
-                        <label class="checkbox-label">
-                            <input type="checkbox" id="voiceEnabled">
-                            <span data-i18n="voiceLabel">Comandi vocali</span>
-                        </label>
-                        <label class="checkbox-label">
-                            <input type="checkbox" id="autoNext">
-                            <span data-i18n="autoNext">Prossimo studio automatico</span>
-                        </label>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Center - Chess Board Area -->
-            <div class="board-container" id="boardContainer">
-                <!-- Study Mode -->
-                <div id="studyMode" class="mode-content">
-                    <div class="timer-display" id="timer">00:00</div>
-                    
-                    <div id="board"></div>
-                    
-                    <div class="blindfold-overlay">
-                        <div class="blindfold-text" data-i18n="blindfoldText">MODALITÀ ALLA CIECA</div>
-                    </div>
-
-                    <div class="move-input-container">
-                        <input type="text" class="move-input" id="moveInput" 
-                               placeholder="Inserisci la mossa..." 
-                               data-i18n-placeholder="moveInputPlaceholder">
-                    </div>
-
-                    <div class="controls">
-                        <button class="btn" id="toggleBlindfold" data-i18n="toggleBlindfold">
-                            Mostra/Nascondi (B)
-                        </button>
-                        <button class="btn" id="listPieces" data-i18n="listPieces">
-                            Elenca Pezzi (L)
-                        </button>
-                        <button class="btn gold" id="getHint" data-i18n="getHint">
-                            Suggerimento (H)
-                        </button>
-                        <button class="btn" id="resetPosition" data-i18n="resetPosition">
-                            Ricomincia (R)
-                        </button>
-                    </div>
-
-                    <div class="progress-container">
-                        <div class="progress-label" data-i18n="progressLabel">Progresso nello studio</div>
-                        <div class="progress-bar">
-                            <div class="progress-fill" id="progressFill"></div>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Anki Mode -->
-                <div id="ankiMode" class="mode-content" style="display: none;">
-                    <div class="anki-card" id="ankiCard">
-                        <div class="anki-card-inner">
-                            <div class="anki-card-face">
-                                <h2 class="anki-question" data-i18n="ankiQuestion">Il Bianco muove e vince</h2>
-                                <div class="anki-board" id="ankiBoard"></div>
-                                <button class="btn gold" onclick="flipAnkiCard()" data-i18n="showSolution">
-                                    Mostra Soluzione
-                                </button>
-                            </div>
-                            <div class="anki-card-face anki-card-back">
-                                <h2 class="anki-question" data-i18n="solution">Soluzione</h2>
-                                <div class="anki-board" id="ankiBoardSolution"></div>
-                                <div class="anki-controls">
-                                    <button class="anki-rating-btn again" data-rating="1" data-i18n="again">Ancora</button>
-                                    <button class="anki-rating-btn hard" data-rating="2" data-i18n="hard">Difficile</button>
-                                    <button class="anki-rating-btn good" data-rating="3" data-i18n="good">Buono</button>
-                                    <button class="anki-rating-btn easy" data-rating="4" data-i18n="easy">Facile</button>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Memory Mode -->
-                <div id="memoryMode" class="mode-content" style="display: none;">
-                    <div class="memory-container">
-                        <div class="memory-header">
-                            <h2 class="memory-title" data-i18n="memoryTitle">Memory Chess Challenge</h2>
-                            <div class="memory-timer" id="memoryTimer">
-                                <span class="memory-timer-text" data-i18n="timeToMemorize">Tempo per memorizzare:</span>
-                                <span class="memory-timer-value" id="memoryTimerValue">10</span>
-                            </div>
-                        </div>
-                        
-                        <div class="memory-board-wrapper">
-                            <div id="memoryBoard"></div>
-                            <div class="memory-overlay" id="memoryOverlay" style="display: none;">
-                                <div class="memory-overlay-content">
-                                    <div class="memory-icon">🧠</div>
-                                    <p class="memory-instruction" data-i18n="memoryInstruction">Ricostruisci la posizione e trova la soluzione!</p>
-                                </div>
-                            </div>
-                        </div>
-
-                        <div class="memory-controls">
-                            <button class="btn gold" id="startMemory" data-i18n="startMemory">Inizia Memorizzazione</button>
-                            <button class="btn" id="showPosition" style="display: none;" data-i18n="showPosition">Mostra Posizione (3s)</button>
-                            <button class="btn" id="resetMemory" data-i18n="resetMemory">Ricomincia</button>
-                        </div>
-
-                        <div class="memory-stats">
-                            <div class="memory-stat-item">
-                                <span class="memory-stat-label" data-i18n="currentMove">Mossa attuale:</span>
-                                <span class="memory-stat-value" id="memoryMoveNumber">1</span>
-                            </div>
-                            <div class="memory-stat-item">
-                                <span class="memory-stat-label" data-i18n="movesRemaining">Mosse rimanenti:</span>
-                                <span class="memory-stat-value" id="memoryMovesLeft">-</span>
-                            </div>
-                            <div class="memory-stat-item">
-                                <span class="memory-stat-label" data-i18n="memoryScore">Punteggio:</span>
-                                <span class="memory-stat-value" id="memoryScore">0</span>
-                            </div>
-                        </div>
-
-                        <div class="memory-difficulty">
-                            <label data-i18n="difficultyLabel">Difficoltà:</label>
-                            <select id="memoryDifficulty" class="difficulty-select">
-                                <option value="15" data-i18n="easy">Facile (15s)</option>
-                                <option value="10" selected data-i18n="medium">Medio (10s)</option>
-                                <option value="5" data-i18n="hard">Difficile (5s)</option>
-                                <option value="3" data-i18n="expert">Esperto (3s)</option>
-                            </select>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Book Reader Mode -->
-                <div id="bookMode" class="mode-content" style="display: none;">
-                    <div class="book-reader">
-                        <h2 data-i18n="bookReader">Lettore Libri PGN</h2>
-                        <div id="bookBoard"></div>
-                        <div class="book-controls">
-                            <button class="btn" id="prevMove">← Precedente</button>
-                            <button class="btn" id="playPause">▶ Play</button>
-                            <button class="btn" id="nextMove">Successivo →</button>
-                        </div>
-                        <div class="book-comments" id="bookComments">
-                            <!-- Comments will appear here -->
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Right Panel - Stats -->
-            <div class="side-panel">
-                <div class="panel-section">
-                    <h3 data-i18n="statsTitle">Le Tue Statistiche</h3>
-                    <div class="stats-grid">
-                        <div class="stat-card">
-                            <div class="stat-icon">🎯</div>
-                            <div class="stat-value" id="accuracy">0%</div>
-                            <div class="stat-label" data-i18n="accuracy">Precisione</div>
-                        </div>
-                        <div class="stat-card">
-                            <div class="stat-icon">⏱️</div>
-                            <div class="stat-value" id="avgTime">0s</div>
-                            <div class="stat-label" data-i18n="avgTime">Tempo Medio</div>
-                        </div>
-                        <div class="stat-card">
-                            <div class="stat-icon">📚</div>
-                            <div class="stat-value" id="studiesCompleted">0</div>
-                            <div class="stat-label" data-i18n="studiesCompleted">Studi Completati</div>
-                        </div>
-                        <div class="stat-card">
-                            <div class="stat-icon">⭐</div>
-                            <div class="stat-value" id="rating">1200</div>
-                            <div class="stat-label" data-i18n="rating">Rating</div>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="panel-section">
-                    <h3 data-i18n="achievementsTitle">Obiettivi del Giorno</h3>
-                    <div class="achievements">
-                        <div class="achievement-item">
-                            <span>🎯 Completa 5 studi</span>
-                            <span class="achievement-progress">2/5</span>
-                        </div>
-                        <div class="achievement-item">
-                            <span>⏱️ Risolvi in meno di 2 minuti</span>
-                            <span class="achievement-progress">✓</span>
-                        </div>
-                        <div class="achievement-item">
-                            <span>🔥 Mantieni la serie</span>
-                            <span class="achievement-progress">✓</span>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="panel-section">
-                    <h3 data-i18n="leaderboardTitle">Classifica</h3>
-                    <div class="leaderboard">
-                        <div class="leaderboard-item">
-                            <span>1. Magnus C.</span>
-                            <span>2850</span>
-                        </div>
-                        <div class="leaderboard-item">
-                            <span>2. Fabiano C.</span>
-                            <span>2795</span>
-                        </div>
-                        <div class="leaderboard-item you">
-                            <span>15. Tu</span>
-                            <span>1200</span>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
+    <div class="lang-switcher">
+        <button class="lang-btn active" onclick="setLanguage('it')">IT</button>
+        <button class="lang-btn" onclick="setLanguage('en')">EN</button>
     </div>
 
-    <!-- Footer -->
-    <footer class="footer">
-        <p>Creato con ❤️ da <a href="https://github.com/francescopuglia" target="_blank">Francesco Puglia</a> • © 2025 Blindfold Chess Master</p>
-    </footer>
+    <div class="container">
+        <header class="header">
+            <h1 class="title">Blindfold Chess Master</h1>
+            <p id="subtitle">Allena la tua visione scacchistica alla cieca</p>
+        </header>
 
-    <!-- Voice Indicator -->
-    <div class="voice-indicator" id="voiceIndicator" title="Clicca per attivare il riconoscimento vocale">
-        <span class="voice-icon">🎤</span>
+        <div class="main-layout">
+            <!-- Left Panel -->
+            <div class="panel">
+                <h3 id="uploadTitle">Carica File PGN</h3>
+                <div class="upload-area" id="uploadArea">
+                    <p id="uploadText">Clicca o trascina qui il file PGN</p>
+                    <input type="file" id="fileInput" accept=".pgn" style="display: none;">
+                </div>
+                
+                <h3 id="studiesTitle">Studi Caricati</h3>
+                <div id="studyList"></div>
+            </div>
+
+            <!-- Center - Board -->
+            <div class="panel">
+                <div id="board"></div>
+                
+                <input type="text" class="move-input" id="moveInput" placeholder="Inserisci la mossa...">
+                
+                <div class="controls">
+                    <button class="btn" onclick="toggleBlindfold()">
+                        <span id="btnToggle">Nascondi/Mostra</span> (B)
+                    </button>
+                    <button class="btn" onclick="listPieces()">
+                        <span id="btnList">Elenca Pezzi</span> (L)
+                    </button>
+                    <button class="btn" onclick="getHint()">
+                        <span id="btnHint">Suggerimento</span> (H)
+                    </button>
+                    <button class="btn" onclick="resetPosition()">
+                        <span id="btnReset">Ricomincia</span> (R)
+                    </button>
+                </div>
+            </div>
+
+            <!-- Right Panel -->
+            <div class="panel">
+                <h3 id="statsTitle">Statistiche</h3>
+                <div class="stat-card">
+                    <div class="stat-value" id="accuracy">0%</div>
+                    <div id="accuracyLabel">Precisione</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value" id="completed">0</div>
+                    <div id="completedLabel">Completati</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value" id="streak">0</div>
+                    <div id="streakLabel">Serie</div>
+                </div>
+            </div>
+        </div>
     </div>
 
     <!-- Success Modal -->
     <div class="modal" id="successModal">
         <div class="modal-content">
-            <div class="success-icon trophy-icon">🏆</div>
-            <h2 data-i18n="successTitle">Fantastico!</h2>
-            <p data-i18n="successMessage">Hai completato lo studio con successo!</p>
-            <div class="stats-summary" id="statsSummary">
-                <!-- Stats will be shown here -->
-            </div>
-            <button class="btn gold" id="closeModal" data-i18n="continue">Continua</button>
+            <h2 id="successTitle">Complimenti!</h2>
+            <p id="successText">Hai completato lo studio!</p>
+            <button class="btn" onclick="closeModal()">OK</button>
         </div>
     </div>
 
-    <!-- Notification -->
-    <div class="notification" id="notification"></div>
-
     <script src="https://cdnjs.cloudflare.com/ajax/libs/chess.js/0.10.3/chess.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/chessboard-js/1.0.0/chessboard-1.0.0.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+    
     <script>
-        // Chess champions data with color-coded avatars
-        const champions = [
-            { name: "Wilhelm Steinitz", years: "1886-1894", initials: "WS", color: "#e91e63" },
-            { name: "Emanuel Lasker", years: "1894-1921", initials: "EL", color: "#9c27b0" },
-            { name: "José Raúl Capablanca", years: "1921-1927", initials: "JC", color: "#673ab7" },
-            { name: "Alexander Alekhine", years: "1927-1935, 1937-1946", initials: "AA", color: "#3f51b5" },
-            { name: "Mikhail Botvinnik", years: "1948-1957, 1958-1960, 1961-1963", initials: "MB", color: "#2196f3" },
-            { name: "Bobby Fischer", years: "1972-1975", initials: "BF", color: "#00bcd4" },
-            { name: "Garry Kasparov", years: "1985-2000", initials: "GK", color: "#009688" },
-            { name: "Anatoly Karpov", years: "1975-1985", initials: "AK", color: "#4caf50" },
-            { name: "Vladimir Kramnik", years: "2000-2007", initials: "VK", color: "#ff9800" },
-            { name: "Magnus Carlsen", years: "2013-2023", initials: "MC", color: "#ff5722" }
-        ];
-
-        // Chess quotes
-        const quotes = {
-            it: [
-                { text: "Gli scacchi sono la vita in miniatura.", author: "Garry Kasparov" },
-                { text: "Negli scacchi, come nella vita, la mossa migliore è sempre quella che viene fatta.", author: "Savielly Tartakower" },
-                { text: "Gli scacchi sono l'arte che esprime la scienza della logica.", author: "Mikhail Botvinnik" },
-                { text: "Quando vedi una buona mossa, cercane una migliore.", author: "Emanuel Lasker" },
-                { text: "La bellezza di una mossa non sta nell'apparenza ma nel pensiero dietro di essa.", author: "Aaron Nimzowitsch" },
-                { text: "Gli scacchi sono una guerra su una scacchiera.", author: "Bobby Fischer" },
-                { text: "Ogni mossa di scacchi che fai crea o distrugge una possibilità.", author: "Anatoly Karpov" }
-            ],
-            en: [
-                { text: "Chess is life in miniature.", author: "Garry Kasparov" },
-                { text: "In chess, as in life, the best move is always the one that is made.", author: "Savielly Tartakower" },
-                { text: "Chess is the art which expresses the science of logic.", author: "Mikhail Botvinnik" },
-                { text: "When you see a good move, look for a better one.", author: "Emanuel Lasker" },
-                { text: "The beauty of a move lies not in its appearance but in the thought behind it.", author: "Aaron Nimzowitsch" },
-                { text: "Chess is war over the board.", author: "Bobby Fischer" },
-                { text: "Every chess move you make creates or destroys a possibility.", author: "Anatoly Karpov" }
-            ]
-        };
-
-        // Internationalization
-        const i18n = {
-            it: {
-                title: "Blindfold Chess Master",
-                subtitle: "Allena la tua visione scacchistica alla cieca",
-                streakTitle: "🔥 La Tua Serie di Allenamento 🔥",
-                daysStreak: "giorni consecutivi",
-                modeTitle: "Modalità di Allenamento",
-                studyDesc: "Risolvi studi e composizioni",
-                ankiDesc: "Ripetizione spaziata con flashcard",
-                memoryDesc: "Memorizza e risolvi alla cieca",
-                memoryTitle: "Memory Chess Challenge",
-                timeToMemorize: "Tempo per memorizzare:",
-                memoryInstruction: "Ricostruisci la posizione e trova la soluzione!",
-                startMemory: "Inizia Memorizzazione",
-                showPosition: "Mostra Posizione (3s)",
-                resetMemory: "Ricomincia",
-                currentMove: "Mossa attuale:",
-                movesRemaining: "Mosse rimanenti:",
-                memoryScore: "Punteggio:",
-                difficultyLabel: "Difficoltà:",
-                easy: "Facile (15s)",
-                medium: "Medio (10s)",
-                hard: "Difficile (5s)",
-                expert: "Esperto (3s)",
-                memorySuccess: "Eccellente! Hai completato il puzzle!",
-                memoryFail: "Riprova! La posizione non è corretta.",
-                positionMemorized: "Posizione memorizzata! Ora risolvi!",
-                uploadTitle: "Carica File PGN",
-                uploadText: "Trascina qui o clicca per caricare",
-                studiesTitle: "Studi Caricati",
-                settingsTitle: "Impostazioni",
-                soundLabel: "Suoni abilitati",
-                voiceLabel: "Comandi vocali",
-                autoNext: "Prossimo studio automatico",
-                blindfoldText: "MODALITÀ ALLA CIECA",
-                moveInputPlaceholder: "Inserisci la mossa...",
-                toggleBlindfold: "Mostra/Nascondi (B)",
-                listPieces: "Elenca Pezzi (L)",
-                getHint: "Suggerimento (H)",
-                resetPosition: "Ricomincia (R)",
-                progressLabel: "Progresso nello studio",
-                statsTitle: "Le Tue Statistiche",
-                accuracy: "Precisione",
-                avgTime: "Tempo Medio",
-                studiesCompleted: "Studi Completati",
-                rating: "Rating",
-                achievementsTitle: "Obiettivi del Giorno",
-                leaderboardTitle: "Classifica",
-                successTitle: "Fantastico!",
-                successMessage: "Hai completato lo studio con successo!",
-                continue: "Continua",
-                ankiQuestion: "Il Bianco muove e vince",
-                showSolution: "Mostra Soluzione",
-                solution: "Soluzione",
-                again: "Ancora",
-                hard: "Difficile",
-                good: "Buono",
-                easy: "Facile",
-                bookReader: "Lettore Libri PGN",
-                whiteToMove: "Mossa al Bianco",
-                blackToMove: "Mossa al Nero",
-                correct: "Corretto!",
-                incorrect: "Riprova!",
-                timeUp: "Tempo scaduto!",
-                studyCompleted: "Studio completato!",
-                piecesOnBoard: "Pezzi sulla scacchiera:",
-                white: "Bianchi",
-                black: "Neri",
-                king: "re",
-                queen: "donna",
-                rook: "torre",
-                bishop: "alfiere",
-                knight: "cavallo",
-                pawn: "pedone",
-                on: "in",
-                hint: "Suggerimento",
-                moveIs: "La mossa è"
-            },
-            en: {
-                title: "Blindfold Chess Master",
-                subtitle: "Train your blindfold chess vision",
-                streakTitle: "🔥 Your Training Streak 🔥",
-                daysStreak: "consecutive days",
-                modeTitle: "Training Mode",
-                studyDesc: "Solve studies and compositions",
-                ankiDesc: "Spaced repetition with flashcards",
-                memoryDesc: "Memorize and solve blindfolded",
-                memoryTitle: "Memory Chess Challenge",
-                timeToMemorize: "Time to memorize:",
-                memoryInstruction: "Reconstruct the position and find the solution!",
-                startMemory: "Start Memorization",
-                showPosition: "Show Position (3s)",
-                resetMemory: "Reset",
-                currentMove: "Current move:",
-                movesRemaining: "Moves remaining:",
-                memoryScore: "Score:",
-                difficultyLabel: "Difficulty:",
-                easy: "Easy (15s)",
-                medium: "Medium (10s)",
-                hard: "Hard (5s)",
-                expert: "Expert (3s)",
-                memorySuccess: "Excellent! You completed the puzzle!",
-                memoryFail: "Try again! The position is not correct.",
-                positionMemorized: "Position memorized! Now solve!",
-                uploadTitle: "Upload PGN File",
-                uploadText: "Drag here or click to upload",
-                studiesTitle: "Loaded Studies",
-                settingsTitle: "Settings",
-                soundLabel: "Sounds enabled",
-                voiceLabel: "Voice commands",
-                autoNext: "Auto next study",
-                blindfoldText: "BLINDFOLD MODE",
-                moveInputPlaceholder: "Enter move...",
-                toggleBlindfold: "Show/Hide (B)",
-                listPieces: "List Pieces (L)",
-                getHint: "Hint (H)",
-                resetPosition: "Reset (R)",
-                progressLabel: "Study progress",
-                statsTitle: "Your Statistics",
-                accuracy: "Accuracy",
-                avgTime: "Average Time",
-                studiesCompleted: "Studies Completed",
-                rating: "Rating",
-                achievementsTitle: "Daily Goals",
-                leaderboardTitle: "Leaderboard",
-                successTitle: "Fantastic!",
-                successMessage: "You successfully completed the study!",
-                continue: "Continue",
-                ankiQuestion: "White to move and win",
-                showSolution: "Show Solution",
-                solution: "Solution",
-                again: "Again",
-                hard: "Hard",
-                good: "Good",
-                easy: "Easy",
-                bookReader: "PGN Book Reader",
-                whiteToMove: "White to move",
-                blackToMove: "Black to move",
-                correct: "Correct!",
-                incorrect: "Try again!",
-                timeUp: "Time's up!",
-                studyCompleted: "Study completed!",
-                piecesOnBoard: "Pieces on board:",
-                white: "White",
-                black: "Black",
-                king: "king",
-                queen: "queen",
-                rook: "rook",
-                bishop: "bishop",
-                knight: "knight",
-                pawn: "pawn",
-                on: "on",
-                hint: "Hint",
-                moveIs: "The move is"
-            }
-        };
-
         // Global variables
-        let currentLang = 'it';
-        let currentMode = 'study';
-        let game = new Chess();
         let board = null;
-        let ankiBoard = null;
-        let ankiBoardSolution = null;
-        let bookBoard = null;
-        let memoryBoard = null;
-        let memoryGame = new Chess();
+        let game = new Chess();
         let currentStudy = null;
         let moveIndex = 0;
-        let startTime = null;
-        let timerInterval = null;
-        let memoryTimerInterval = null;
-        let memoryPhase = 'waiting'; // waiting, memorizing, solving
-        let memoryMoves = [];
-        let memoryMoveIndex = 0;
-        let memoryScore = 0;
-        let originalPosition = null;
+        let blindfoldMode = false;
+        let currentLang = 'it';
         let stats = {
             correct: 0,
             total: 0,
-            totalTime: 0,
-            studiesCompleted: 0,
-            streak: 0,
-            rating: 1200,
-            lastPlayed: null,
-            memoryHighScore: 0
+            completed: 0,
+            streak: 0
         };
-        let blindfoldMode = true;
-        let soundEnabled = true;
-        let voiceEnabled = false;
-        let recognition = null;
-        let synthesis = window.speechSynthesis;
-        let ankiCards = [];
-        let currentAnkiCard = 0;
 
-        // Storage system with fallback
-        const storage = {
-            isAvailable: function() {
-                try {
-                    const test = '__storage_test__';
-                    window.localStorage.setItem(test, test);
-                    window.localStorage.removeItem(test);
-                    return true;
-                } catch(e) {
-                    return false;
-                }
+        // Translations
+        const translations = {
+            it: {
+                subtitle: "Allena la tua visione scacchistica alla cieca",
+                uploadTitle: "Carica File PGN",
+                uploadText: "Clicca o trascina qui il file PGN",
+                studiesTitle: "Studi Caricati",
+                statsTitle: "Statistiche",
+                btnToggle: "Nascondi/Mostra",
+                btnList: "Elenca Pezzi",
+                btnHint: "Suggerimento",
+                btnReset: "Ricomincia",
+                accuracyLabel: "Precisione",
+                completedLabel: "Completati",
+                streakLabel: "Serie",
+                successTitle: "Complimenti!",
+                successText: "Hai completato lo studio!",
+                correct: "Corretto!",
+                incorrect: "Riprova!",
+                hint: "La mossa inizia con",
+                whiteToMove: "Mossa al Bianco",
+                blackToMove: "Mossa al Nero"
             },
-            
-            setItem: function(key, value) {
-                if (this.isAvailable()) {
-                    window.localStorage.setItem(key, value);
-                } else {
-                    window.__memoryStorage = window.__memoryStorage || {};
-                    window.__memoryStorage[key] = value;
-                }
-            },
-            
-            getItem: function(key) {
-                if (this.isAvailable()) {
-                    return window.localStorage.getItem(key);
-                } else {
-                    window.__memoryStorage = window.__memoryStorage || {};
-                    return window.__memoryStorage[key] || null;
-                }
+            en: {
+                subtitle: "Train your blindfold chess vision",
+                uploadTitle: "Upload PGN File",
+                uploadText: "Click or drag PGN file here",
+                studiesTitle: "Loaded Studies",
+                statsTitle: "Statistics",
+                btnToggle: "Hide/Show",
+                btnList: "List Pieces",
+                btnHint: "Hint",
+                btnReset: "Reset",
+                accuracyLabel: "Accuracy",
+                completedLabel: "Completed",
+                streakLabel: "Streak",
+                successTitle: "Congratulations!",
+                successText: "You completed the study!",
+                correct: "Correct!",
+                incorrect: "Try again!",
+                hint: "The move starts with",
+                whiteToMove: "White to move",
+                blackToMove: "Black to move"
             }
         };
 
-        // Initialize
-        document.addEventListener('DOMContentLoaded', function() {
-            console.log('Initializing Blindfold Chess Master...');
-            initializeBoards();
-            initializeEventListeners();
-            loadStats();
-            updateDailyContent();
-            updateCalendar();
-            updateUI();
-            
-            // Set initial blindfold mode
-            document.getElementById('boardContainer').classList.add('board-hidden');
-            
-            // Debug: Check if elements exist
-            console.log('Upload area:', document.getElementById('uploadArea'));
-            console.log('File input:', document.getElementById('fileInput'));
-        });
-
-        function initializeBoards() {
-            // Main board for study mode
+        // Initialize board
+        function initBoard() {
             board = Chessboard('board', {
                 draggable: true,
                 position: 'start',
-                onDrop: handleMove,
-                pieceTheme: 'https://chessboardjs.com/img/chesspieces/wikipedia/{piece}.png'
-            });
-
-            // Anki boards
-            ankiBoard = Chessboard('ankiBoard', {
-                draggable: false,
-                position: 'start',
-                pieceTheme: 'https://chessboardjs.com/img/chesspieces/wikipedia/{piece}.png'
-            });
-
-            ankiBoardSolution = Chessboard('ankiBoardSolution', {
-                draggable: false,
-                position: 'start',
-                pieceTheme: 'https://chessboardjs.com/img/chesspieces/wikipedia/{piece}.png'
-            });
-
-            // Memory board
-            memoryBoard = Chessboard('memoryBoard', {
-                draggable: true,
-                position: 'start',
-                onDrop: handleMemoryMove,
-                pieceTheme: 'https://chessboardjs.com/img/chesspieces/wikipedia/{piece}.png'
-            });
-
-            // Book reader board
-            bookBoard = Chessboard('bookBoard', {
-                draggable: false,
-                position: 'start',
-                pieceTheme: 'https://chessboardjs.com/img/chesspieces/wikipedia/{piece}.png'
-            });
-        }
-
-        function updateDailyContent() {
-            // Update champion of the day
-            const today = new Date();
-            const championIndex = today.getDate() % champions.length;
-            const champion = champions[championIndex];
-            
-            // Update champion info immediately
-            document.getElementById('championName').textContent = champion.name;
-            document.getElementById('championYears').textContent = champion.years;
-            document.getElementById('championInitials').textContent = champion.initials;
-            
-            // Update avatar color
-            const avatar = document.getElementById('championAvatar');
-            avatar.style.background = champion.color;
-            
-            // Update daily quote immediately
-            const quoteIndex = today.getDate() % quotes[currentLang].length;
-            const quote = quotes[currentLang][quoteIndex];
-            document.getElementById('dailyQuote').textContent = quote.text;
-            document.getElementById('quoteAuthor').textContent = `- ${quote.author}`;
-        }
-
-        function updateCalendar() {
-            const calendar = document.getElementById('calendar');
-            const today = new Date();
-            const currentMonth = today.getMonth();
-            const currentYear = today.getFullYear();
-            const currentDay = today.getDate();
-            
-            // Update month header with current date
-            const monthNames = currentLang === 'it' ? 
-                ['Gennaio', 'Febbraio', 'Marzo', 'Aprile', 'Maggio', 'Giugno', 'Luglio', 'Agosto', 'Settembre', 'Ottobre', 'Novembre', 'Dicembre'] :
-                ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
-            
-            document.getElementById('calendarMonth').textContent = `${monthNames[currentMonth]} ${currentYear}`;
-            
-            // Clear calendar
-            calendar.innerHTML = '';
-            
-            // Add day labels
-            const dayLabels = currentLang === 'it' ? ['L', 'M', 'M', 'G', 'V', 'S', 'D'] : ['M', 'T', 'W', 'T', 'F', 'S', 'S'];
-            dayLabels.forEach(label => {
-                const dayLabel = document.createElement('div');
-                dayLabel.className = 'day-label';
-                dayLabel.textContent = label;
-                calendar.appendChild(dayLabel);
+                onDrop: onDrop
             });
             
-            // Get first day of month
-            const firstDay = new Date(currentYear, currentMonth, 1).getDay();
-            const daysInMonth = new Date(currentYear, currentMonth + 1, 0).getDate();
-            
-            // Add empty cells for days before month starts
-            const startDay = firstDay === 0 ? 6 : firstDay - 1; // Adjust for Monday start
-            for (let i = 0; i < startDay; i++) {
-                const emptyDay = document.createElement('div');
-                calendar.appendChild(emptyDay);
-            }
-            
-            // Add days of month
-            const activityData = getActivityData();
-            for (let day = 1; day <= daysInMonth; day++) {
-                const dayElement = document.createElement('div');
-                dayElement.className = 'calendar-day';
-                dayElement.textContent = day;
-                
-                if (day === currentDay) {
-                    dayElement.classList.add('today');
-                }
-                
-                if (day > currentDay) {
-                    dayElement.classList.add('future');
-                } else if (activityData[day]) {
-                    dayElement.classList.add('active');
-                }
-                
-                calendar.appendChild(dayElement);
-            }
-        }
-
-        function getActivityData() {
-            // Get activity data from storage or generate demo data
-            const savedActivity = storage.getItem('activityData');
-            if (savedActivity) {
-                return JSON.parse(savedActivity);
-            }
-            
-            // Demo data - random activity for past days
-            const data = {};
-            const today = new Date().getDate();
-            for (let i = 1; i < today; i++) {
-                if (Math.random() > 0.3) { // 70% chance of activity
-                    data[i] = true;
-                }
-            }
-            return data;
-        }
-
-        function updateStreak() {
-            const today = new Date().toDateString();
-            const lastPlayed = storage.getItem('lastPlayed');
-            
-            if (lastPlayed !== today) {
-                const yesterday = new Date();
-                yesterday.setDate(yesterday.getDate() - 1);
-                
-                if (lastPlayed === yesterday.toDateString()) {
-                    stats.streak++;
-                } else if (!lastPlayed || new Date(lastPlayed) < yesterday) {
-                    stats.streak = 1;
-                }
-                
-                storage.setItem('lastPlayed', today);
-                
-                // Update activity data
-                const activityData = getActivityData();
-                activityData[new Date().getDate()] = true;
-                storage.setItem('activityData', JSON.stringify(activityData));
-                
-                updateCalendar();
-            }
-            
-            document.getElementById('streakNumber').textContent = stats.streak;
-        }
-
-        function initializeEventListeners() {
-            // Language switcher
-            document.querySelectorAll('.lang-btn').forEach(btn => {
-                btn.addEventListener('click', function() {
-                    document.querySelectorAll('.lang-btn').forEach(b => b.classList.remove('active'));
-                    this.classList.add('active');
-                    currentLang = this.dataset.lang;
-                    updateLanguage();
-                    updateDailyContent();
-                });
-            });
-
-            // Mode selector
-            document.querySelectorAll('.mode-btn').forEach(btn => {
-                btn.addEventListener('click', function() {
-                    document.querySelectorAll('.mode-btn').forEach(b => b.classList.remove('active'));
-                    this.classList.add('active');
-                    currentMode = this.dataset.mode;
-                    switchMode(currentMode);
-                });
-            });
-
-            // File upload
-            const uploadArea = document.getElementById('uploadArea');
-            const fileInput = document.getElementById('fileInput');
-
-            uploadArea.addEventListener('click', () => fileInput.click());
-            uploadArea.addEventListener('dragover', (e) => {
-                e.preventDefault();
-                uploadArea.classList.add('dragover');
-            });
-            uploadArea.addEventListener('dragleave', () => {
-                uploadArea.classList.remove('dragover');
-            });
-            uploadArea.addEventListener('drop', (e) => {
-                e.preventDefault();
-                uploadArea.classList.remove('dragover');
-                handleFileUpload(e.dataTransfer.files[0]);
-            });
-            fileInput.addEventListener('change', (e) => {
-                handleFileUpload(e.target.files[0]);
-            });
-
-            // Controls
-            document.getElementById('toggleBlindfold').addEventListener('click', toggleBlindfold);
-            document.getElementById('listPieces').addEventListener('click', listPieces);
-            document.getElementById('getHint').addEventListener('click', getHint);
-            document.getElementById('resetPosition').addEventListener('click', resetPosition);
-            document.getElementById('closeModal').addEventListener('click', () => {
-                document.getElementById('successModal').classList.remove('show');
-                if (document.getElementById('autoNext').checked && currentStudy) {
-                    // Load next study automatically
-                    const studyItems = document.querySelectorAll('.study-item');
-                    const currentIndex = Array.from(studyItems).findIndex(item => item.classList.contains('active'));
-                    if (currentIndex < studyItems.length - 1) {
-                        studyItems[currentIndex + 1].click();
-                    }
-                }
-            });
-
-            // Move input
-            const moveInput = document.getElementById('moveInput');
-            moveInput.addEventListener('keypress', (e) => {
-                if (e.key === 'Enter') {
-                    const move = moveInput.value.trim();
-                    if (move) {
-                        handleMove(null, null, move);
-                        moveInput.value = '';
-                    }
-                }
-            });
-
-            // Move input autocomplete
-            moveInput.addEventListener('input', (e) => {
-                const value = e.target.value;
-                if (value.length >= 2) {
-                    // Show legal moves that start with the input
-                    const legalMoves = game.moves();
-                    const matches = legalMoves.filter(move => move.toLowerCase().startsWith(value.toLowerCase()));
-                    if (matches.length === 1) {
-                        // Auto-complete if only one match
-                        moveInput.value = matches[0];
-                    }
-                }
-            });
-
-            // Settings
-            document.getElementById('soundEnabled').addEventListener('change', (e) => {
-                soundEnabled = e.target.checked;
-            });
-            document.getElementById('voiceEnabled').addEventListener('change', (e) => {
-                voiceEnabled = e.target.checked;
-                if (voiceEnabled) {
-                    initializeVoiceRecognition();
-                } else if (recognition) {
-                    recognition.stop();
-                }
-            });
-
-            // Voice indicator
-            document.getElementById('voiceIndicator').addEventListener('click', toggleVoiceRecognition);
-
-            // Anki rating buttons
-            document.querySelectorAll('.anki-rating-btn').forEach(btn => {
-                btn.addEventListener('click', function() {
-                    const rating = parseInt(this.dataset.rating);
-                    processAnkiRating(rating);
-                });
-            });
-
-            // Memory mode controls
-            document.getElementById('startMemory').addEventListener('click', startMemoryChallenge);
-            document.getElementById('showPosition').addEventListener('click', showPositionBriefly);
-            document.getElementById('resetMemory').addEventListener('click', resetMemoryChallenge);
-            document.getElementById('memoryDifficulty').addEventListener('change', resetMemoryChallenge);
-
-            // Book reader controls
-            document.getElementById('prevMove').addEventListener('click', previousBookMove);
-            document.getElementById('nextMove').addEventListener('click', nextBookMove);
-            document.getElementById('playPause').addEventListener('click', toggleBookPlayback);
-
-            // Keyboard shortcuts
-            document.addEventListener('keydown', (e) => {
-                if (currentMode === 'study') {
-                    switch(e.key.toLowerCase()) {
-                        case 'b':
-                            toggleBlindfold();
-                            break;
-                        case 'l':
-                            listPieces();
-                            break;
-                        case 'h':
-                            getHint();
-                            break;
-                        case 'r':
-                            resetPosition();
-                            break;
-                        case 'escape':
-                            document.getElementById('successModal').classList.remove('show');
-                            break;
-                    }
-                } else if (currentMode === 'book') {
-                    switch(e.key) {
-                        case 'ArrowLeft':
-                            previousBookMove();
-                            break;
-                        case 'ArrowRight':
-                            nextBookMove();
-                            break;
-                        case ' ':
-                            e.preventDefault();
-                            toggleBookPlayback();
-                            break;
-                    }
-                }
-            });
-
-            // Window resize
-            window.addEventListener('resize', () => {
-                board.resize();
-                if (ankiBoard) ankiBoard.resize();
-                if (ankiBoardSolution) ankiBoardSolution.resize();
-                if (bookBoard) bookBoard.resize();
-                if (memoryBoard) memoryBoard.resize();
-            });
-        }
-
-        function switchMode(mode) {
-            console.log('Switching to mode:', mode);
-            
-            // Hide all mode contents
-            document.querySelectorAll('.mode-content').forEach(content => {
-                content.style.display = 'none';
-            });
-            
-            // Show selected mode
-            const modeElement = document.getElementById(mode + 'Mode');
-            if (modeElement) {
-                modeElement.style.display = 'block';
-            } else {
-                console.error('Mode element not found:', mode + 'Mode');
-                return;
-            }
-            
-            currentMode = mode;
-            
-            // Initialize mode-specific features
-            setTimeout(() => {
-                if (mode === 'study' && board) {
-                    board.resize();
-                }
-                if (mode === 'anki') {
-                    if (ankiBoard) ankiBoard.resize();
-                    if (ankiBoardSolution) ankiBoardSolution.resize();
-                    initializeAnkiSession();
-                }
-                if (mode === 'memory' && memoryBoard) {
-                    memoryBoard.resize();
-                    resetMemoryChallenge();
-                }
-                if (mode === 'book' && bookBoard) {
-                    bookBoard.resize();
-                }
-            }, 100);
-        }
-
-        function handleFileUpload(file) {
-            console.log('File upload started:', file);
-            
-            if (!file) {
-                showNotification('Nessun file selezionato', 'error');
-                return;
-            }
-            
-            if (!file.name.toLowerCase().endsWith('.pgn')) {
-                showNotification('Per favore carica un file PGN', 'error');
-                return;
-            }
-
-            const reader = new FileReader();
-            reader.onload = function(e) {
-                console.log('File read successfully');
-                const pgn = e.target.result;
-                parsePGN(pgn);
-                showNotification('PGN caricato con successo!', 'success');
-            };
-            reader.onerror = function(e) {
-                console.error('File read error:', e);
-                showNotification('Errore nel caricamento del file', 'error');
-            };
-            reader.readAsText(file);
-        }
-
-        function parsePGN(pgn) {
-            console.log('Parsing PGN...');
-            
-            // Split games by double newline or by Event tag
-            const games = pgn.split(/\n\n(?=\[Event)/);
-            const studyList = document.getElementById('studyList');
-            studyList.innerHTML = '';
-            
-            // Clear previous Anki cards
-            ankiCards = [];
-            
-            let validGames = 0;
-
-            games.forEach((gameText, index) => {
-                if (!gameText.trim()) return;
-                
-                try {
-                    // Parse headers and moves
-                    const headers = {};
-                    const lines = gameText.split('\n');
-                    let movesText = '';
-                    let inMoves = false;
-                    
-                    lines.forEach(line => {
-                        line = line.trim();
-                        if (line.startsWith('[') && line.endsWith(']')) {
-                            const match = line.match(/\[(\w+)\s+"([^"]+)"\]/);
-                            if (match) {
-                                headers[match[1]] = match[2];
-                            }
-                        } else if (line && !line.startsWith('[')) {
-                            movesText += line + ' ';
-                            inMoves = true;
-                        }
-                    });
-                    
-                    // Clean moves text
-                    movesText = movesText.replace(/\{[^}]*\}/g, '') // Remove comments
-                                         .replace(/\([^)]*\)/g, '') // Remove variations
-                                         .replace(/\d+\./g, '') // Remove move numbers
-                                         .replace(/\s+/g, ' ') // Normalize spaces
-                                         .trim();
-                    
-                    if (!movesText) return;
-                    
-                    validGames++;
-                    
-                    // Create study item
-                    const studyItem = document.createElement('div');
-                    studyItem.className = 'study-item';
-                    const title = headers.Event || headers.White || `Studio ${validGames}`;
-                    const subtitle = headers.Site || headers.Date || '';
-                    
-                    studyItem.innerHTML = `
-                        <div class="study-title">${title}</div>
-                        <div class="study-info">${subtitle}</div>
-                    `;
-                    
-                    // Store the parsed data
-                    const studyData = {
-                        headers: headers,
-                        moves: movesText,
-                        movesArray: movesText.split(' ').filter(m => m && m.match(/^[a-h1-8NBRQK]/))
-                    };
-                    
-                    studyItem.onclick = () => loadStudy(studyData, studyItem);
-                    studyList.appendChild(studyItem);
-                    
-                    // Create Anki card
-                    ankiCards.push({
-                        id: `card_${index}`,
-                        fen: headers.FEN || 'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1',
-                        solution: studyData.movesArray,
-                        title: title,
-                        nextReview: new Date(),
-                        interval: 1,
-                        easeFactor: 2.5,
-                        repetitions: 0
-                    });
-                    
-                } catch (error) {
-                    console.error('Error parsing game:', error);
-                }
-            });
-            
-            console.log(`Parsed ${validGames} games, created ${ankiCards.length} Anki cards`);
-            
-            if (validGames === 0) {
-                showNotification('Nessuna partita valida trovata nel file PGN', 'error');
-            } else {
-                showNotification(`Caricate ${validGames} partite/studi`, 'success');
-            }
-        }
-
-        function loadStudy(study, element) {
-            console.log('Loading study:', study);
-            
-            // Remove active class from all study items
-            document.querySelectorAll('.study-item').forEach(item => {
-                item.classList.remove('active');
-            });
-            element.classList.add('active');
-
-            currentStudy = study;
-            moveIndex = 0;
-            
-            // Reset game
-            game = new Chess();
-            if (study.headers.FEN) {
-                try {
-                    game.load(study.headers.FEN);
-                } catch (e) {
-                    console.error('Invalid FEN:', e);
-                    game.reset();
-                }
-            }
-            
-            board.position(game.fen());
-            
-            // Make sure moves array is valid
-            if (!currentStudy.movesArray || currentStudy.movesArray.length === 0) {
-                showNotification('Nessuna mossa valida trovata nello studio', 'error');
-                return;
-            }
-            
-            startTimer();
-            updateStreak();
-            showNotification('Studio caricato. Fai la tua mossa!', 'success');
-            
-            // Update progress
-            updateProgress();
-            
-            if (blindfoldMode && voiceEnabled) {
-                speak(game.turn() === 'w' ? i18n[currentLang].whiteToMove : i18n[currentLang].blackToMove);
-            }
-        }
-
-        function handleMove(source, target, moveString = null) {
-            let move = null;
-            
-            if (moveString) {
-                // Move entered via text
-                move = game.move(moveString);
-            } else if (source && target) {
-                // Move made by dragging
-                move = game.move({
-                    from: source,
-                    to: target,
-                    promotion: 'q' // Always promote to queen for simplicity
-                });
-            }
-
-            if (move === null) {
-                showNotification(i18n[currentLang].incorrect, 'error');
-                if (soundEnabled) playSound('error');
-                animateMoveInput('incorrect');
-                return 'snapback';
-            }
-
-            // Check if move matches study
-            if (currentStudy && currentStudy.movesArray[moveIndex] === move.san) {
-                stats.correct++;
-                stats.total++;
-                moveIndex++;
-                
-                showNotification(i18n[currentLang].correct, 'success');
-                if (soundEnabled) playSound('success');
-                animateMoveInput('correct');
-                updateProgress();
-                
-                if (moveIndex >= currentStudy.movesArray.length) {
-                    studyCompleted();
-                } else {
-                    // Computer makes next move if it's their turn
-                    if (moveIndex < currentStudy.movesArray.length) {
-                        setTimeout(() => {
-                            const computerMove = game.move(currentStudy.movesArray[moveIndex]);
-                            if (computerMove) {
-                                board.position(game.fen());
-                                moveIndex++;
-                                if (blindfoldMode && voiceEnabled) {
-                                    speak(`${getPieceName(computerMove.piece)} ${computerMove.san}`);
-                                }
-                            }
-                        }, 500);
-                    }
-                }
-            } else {
-                // Wrong move
-                game.undo();
-                stats.total++;
-                showNotification(i18n[currentLang].incorrect, 'error');
-                if (soundEnabled) playSound('error');
-                animateMoveInput('incorrect');
-                return 'snapback';
-            }
-
-            board.position(game.fen());
-            updateStats();
-        }
-
-        function toggleBlindfold() {
-            blindfoldMode = !blindfoldMode;
-            const container = document.getElementById('boardContainer');
-            if (blindfoldMode) {
-                container.classList.add('board-hidden');
-            } else {
-                container.classList.remove('board-hidden');
-            }
-        }
-
-        function listPieces() {
-            const pieces = [];
-            const position = game.board();
-            
-            // White pieces
-            const whitePieces = [];
-            const blackPieces = [];
-            
-            for (let row = 0; row < 8; row++) {
-                for (let col = 0; col < 8; col++) {
-                    const piece = position[row][col];
-                    if (piece) {
-                        const square = String.fromCharCode(97 + col) + (8 - row);
-                        const pieceName = getPieceName(piece.type);
-                        const text = `${pieceName} ${i18n[currentLang].on} ${square}`;
-                        
-                        if (piece.color === 'w') {
-                            whitePieces.push(text);
-                        } else {
-                            blackPieces.push(text);
-                        }
-                    }
-                }
-            }
-            
-            const message = `${i18n[currentLang].piecesOnBoard}\n${i18n[currentLang].white}: ${whitePieces.join(', ')}\n${i18n[currentLang].black}: ${blackPieces.join(', ')}`;
-            
-            if (voiceEnabled) {
-                speak(message);
-            } else {
-                showNotification(message.replace(/\n/g, ' - '), 'success');
-            }
-        }
-
-        function getPieceName(type) {
-            const names = {
-                'k': i18n[currentLang].king,
-                'q': i18n[currentLang].queen,
-                'r': i18n[currentLang].rook,
-                'b': i18n[currentLang].bishop,
-                'n': i18n[currentLang].knight,
-                'p': i18n[currentLang].pawn
-            };
-            return names[type] || type;
-        }
-
-        function getHint() {
-            if (currentStudy && moveIndex < currentStudy.movesArray.length) {
-                const nextMove = currentStudy.movesArray[moveIndex];
-                const hint = `${i18n[currentLang].hint}: ${i18n[currentLang].moveIs} ${nextMove.substring(0, 2)}...`;
-                showNotification(hint, 'success');
-                if (voiceEnabled) speak(hint);
-            }
-        }
-
-        function resetPosition() {
-            if (currentStudy) {
-                moveIndex = 0;
-                game.reset();
-                if (currentStudy.headers.FEN) {
-                    game.load(currentStudy.headers.FEN);
-                }
-                board.position(game.fen());
-                startTimer();
-                showNotification('Position reset', 'success');
-            }
-        }
-
-        function studyCompleted() {
-            stopTimer();
-            stats.studiesCompleted++;
-            stats.rating += 10; // Simple rating system
-            updateStats();
-            saveStats();
-            
-            const timeTaken = document.getElementById('timer').textContent;
-            const accuracy = Math.round((stats.correct / stats.total) * 100);
-            
-            document.getElementById('statsSummary').innerHTML = `
-                <p style="font-size: 1.3em; margin: 10px 0;">⏱️ Tempo: <strong>${timeTaken}</strong></p>
-                <p style="font-size: 1.3em; margin: 10px 0;">🎯 Precisione: <strong>${accuracy}%</strong></p>
-                <p style="font-size: 1.3em; margin: 10px 0;">♟️ Mosse: <strong>${moveIndex}</strong></p>
-                <p style="font-size: 1.2em; margin: 15px 0; color: var(--gold);">+10 Rating Points!</p>
-            `;
-            
-            document.getElementById('successModal').classList.add('show');
-            
-            if (soundEnabled) playSound('victory');
-            if (voiceEnabled) speak(i18n[currentLang].studyCompleted);
-        }
-
-        function startTimer() {
-            stopTimer();
-            startTime = Date.now();
-            timerInterval = setInterval(updateTimer, 1000);
-        }
-
-        function stopTimer() {
-            if (timerInterval) {
-                clearInterval(timerInterval);
-                timerInterval = null;
-            }
-        }
-
-        function updateTimer() {
-            const elapsed = Math.floor((Date.now() - startTime) / 1000);
-            const minutes = Math.floor(elapsed / 60);
-            const seconds = elapsed % 60;
-            const display = `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
-            
-            const timerElement = document.getElementById('timer');
-            timerElement.textContent = display;
-            
-            // Warning at 10 seconds left (if time limit is set)
-            if (elapsed === 110) { // Example: 120 second time limit
-                timerElement.classList.add('warning');
-                if (voiceEnabled) speak('10 seconds remaining');
-            }
-        }
-
-        function updateProgress() {
-            if (currentStudy) {
-                const progress = (moveIndex / currentStudy.movesArray.length) * 100;
-                document.getElementById('progressFill').style.width = progress + '%';
-            }
-        }
-
-        function updateStats() {
-            const accuracy = stats.total > 0 ? Math.round((stats.correct / stats.total) * 100) : 0;
-            document.getElementById('accuracy').textContent = accuracy + '%';
-            document.getElementById('studiesCompleted').textContent = stats.studiesCompleted;
-            document.getElementById('rating').textContent = stats.rating;
-            
-            // Update average time
-            if (stats.studiesCompleted > 0) {
-                const avgTime = Math.round(stats.totalTime / stats.studiesCompleted);
-                document.getElementById('avgTime').textContent = avgTime + 's';
-            }
-        }
-
-        function saveStats() {
-            storage.setItem('blindfoldChessStats', JSON.stringify(stats));
-            updateStreak();
-        }
-
-        function loadStats() {
-            const saved = storage.getItem('blindfoldChessStats');
-            if (saved) {
-                stats = JSON.parse(saved);
+            // Load saved stats
+            const savedStats = localStorage.getItem('blindfoldStats');
+            if (savedStats) {
+                stats = JSON.parse(savedStats);
                 updateStats();
             }
-            updateStreak();
         }
 
-        function updateLanguage() {
-            document.querySelectorAll('[data-i18n]').forEach(element => {
-                const key = element.getAttribute('data-i18n');
-                if (i18n[currentLang][key]) {
-                    element.textContent = i18n[currentLang][key];
-                }
-            });
-            
-            document.querySelectorAll('[data-i18n-placeholder]').forEach(element => {
-                const key = element.getAttribute('data-i18n-placeholder');
-                if (i18n[currentLang][key]) {
-                    element.placeholder = i18n[currentLang][key];
-                }
-            });
-            
-            updateCalendar();
-        }
-
-        function updateUI() {
-            updateLanguage();
-            updateStats();
-            document.getElementById('streakNumber').textContent = stats.streak;
-        }
-
-        function showNotification(message, type = 'success') {
-            console.log(`Notification [${type}]:`, message);
-            
-            const notification = document.getElementById('notification');
-            notification.textContent = message;
-            notification.className = `notification ${type} show`;
-            
-            // Clear previous timeout
-            if (notification.timeout) {
-                clearTimeout(notification.timeout);
-            }
-            
-            notification.timeout = setTimeout(() => {
-                notification.classList.remove('show');
-            }, 3000);
-        }
-
-        function animateMoveInput(result) {
-            const input = document.getElementById('moveInput');
-            input.className = `move-input ${result}`;
-            setTimeout(() => {
-                input.className = 'move-input';
-            }, 500);
-        }
-
-        function playSound(type) {
-            // In production, you would play actual sound files
-            const audioContext = new (window.AudioContext || window.webkitAudioContext)();
-            const oscillator = audioContext.createOscillator();
-            const gainNode = audioContext.createGain();
-            
-            oscillator.connect(gainNode);
-            gainNode.connect(audioContext.destination);
-            
-            switch(type) {
-                case 'success':
-                    oscillator.frequency.value = 523.25; // C5
-                    gainNode.gain.value = 0.3;
-                    break;
-                case 'error':
-                    oscillator.frequency.value = 220; // A3
-                    gainNode.gain.value = 0.3;
-                    break;
-                case 'victory':
-                    oscillator.frequency.value = 659.25; // E5
-                    gainNode.gain.value = 0.4;
-                    break;
-            }
-            
-            oscillator.start();
-            oscillator.stop(audioContext.currentTime + 0.1);
-        }
-
-        function speak(text) {
-            if (synthesis && voiceEnabled) {
-                const utterance = new SpeechSynthesisUtterance(text);
-                utterance.lang = currentLang === 'it' ? 'it-IT' : 'en-US';
-                utterance.rate = 1.1;
-                synthesis.speak(utterance);
-            }
-        }
-
-        function initializeVoiceRecognition() {
-            if ('webkitSpeechRecognition' in window || 'SpeechRecognition' in window) {
-                const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
-                recognition = new SpeechRecognition();
-                recognition.continuous = true;
-                recognition.interimResults = true;
-                recognition.lang = currentLang === 'it' ? 'it-IT' : 'en-US';
-                
-                recognition.onresult = (event) => {
-                    const last = event.results.length - 1;
-                    const transcript = event.results[last][0].transcript.trim();
-                    
-                    // Process voice commands
-                    processVoiceCommand(transcript);
-                };
-                
-                recognition.onerror = (event) => {
-                    console.error('Speech recognition error:', event.error);
-                };
-            }
-        }
-
-        function toggleVoiceRecognition() {
-            const indicator = document.getElementById('voiceIndicator');
-            
-            if (!recognition) {
-                initializeVoiceRecognition();
-            }
-            
-            if (indicator.classList.contains('active')) {
-                recognition.stop();
-                indicator.classList.remove('active');
-            } else {
-                recognition.start();
-                indicator.classList.add('active');
-            }
-        }
-
-        function processVoiceCommand(command) {
-            const cmd = command.toLowerCase();
-            
-            // Italian commands
-            if (currentLang === 'it') {
-                if (cmd.includes('elenca pezzi')) {
-                    listPieces();
-                } else if (cmd.includes('mostra') || cmd.includes('nascondi')) {
-                    toggleBlindfold();
-                } else if (cmd.includes('suggerimento')) {
-                    getHint();
-                } else if (cmd.includes('ricomincia')) {
-                    resetPosition();
-                } else {
-                    // Try to parse as move
-                    const moveMatch = cmd.match(/([a-h][1-8]|[rnbqk])[a-h]?[1-8]?/i);
-                    if (moveMatch) {
-                        document.getElementById('moveInput').value = moveMatch[0];
-                        handleMove(null, null, moveMatch[0]);
-                    }
-                }
-            } else {
-                // English commands
-                if (cmd.includes('list pieces')) {
-                    listPieces();
-                } else if (cmd.includes('show') || cmd.includes('hide')) {
-                    toggleBlindfold();
-                } else if (cmd.includes('hint')) {
-                    getHint();
-                } else if (cmd.includes('reset')) {
-                    resetPosition();
-                } else {
-                    // Try to parse as move
-                    const moveMatch = cmd.match(/([a-h][1-8]|[rnbqk])[a-h]?[1-8]?/i);
-                    if (moveMatch) {
-                        document.getElementById('moveInput').value = moveMatch[0];
-                        handleMove(null, null, moveMatch[0]);
-                    }
-                }
-            }
-        }
-
-        // Anki mode with spaced repetition
-        let currentAnkiCardIndex = 0;
-        let ankiSession = {
-            cardsToReview: [],
-            currentCard: null,
-            startTime: null
-        };
-
-        function initializeAnkiSession() {
-            console.log('Initializing Anki session with', ankiCards.length, 'cards');
-            
-            if (ankiCards.length === 0) {
-                showNotification('Carica prima un database PGN!', 'error');
-                return;
-            }
-            
-            // Get cards due for review
-            const now = new Date();
-            ankiSession.cardsToReview = ankiCards.filter(card => {
-                return new Date(card.nextReview) <= now;
-            });
-            
-            // If no cards due, take the first 10 cards
-            if (ankiSession.cardsToReview.length === 0) {
-                ankiSession.cardsToReview = ankiCards.slice(0, Math.min(10, ankiCards.length));
-            }
-            
-            console.log('Cards to review:', ankiSession.cardsToReview.length);
-            
-            // Shuffle cards
-            ankiSession.cardsToReview.sort(() => Math.random() - 0.5);
-            
-            // Load first card
-            loadNextAnkiCard();
-        }
-
-        function loadNextAnkiCard() {
-            if (ankiSession.cardsToReview.length === 0) {
-                showNotification('Sessione Anki completata! 🎉', 'success');
-                // Reset session
-                document.getElementById('ankiCard').classList.remove('flipped');
-                return;
-            }
-            
-            // Get next card
-            ankiSession.currentCard = ankiSession.cardsToReview.shift();
-            ankiSession.startTime = Date.now();
-            
-            console.log('Loading Anki card:', ankiSession.currentCard);
-            
-            // Reset flip state
-            document.getElementById('ankiCard').classList.remove('flipped');
-            
-            // Load position
-            const ankiGame = new Chess();
-            if (ankiSession.currentCard.fen) {
-                try {
-                    ankiGame.load(ankiSession.currentCard.fen);
-                } catch (e) {
-                    console.error('Invalid FEN in Anki card:', e);
-                    ankiGame.reset();
-                }
-            }
-            
-            // Set both boards to the same position
-            ankiBoard.position(ankiGame.fen());
-            ankiBoardSolution.position(ankiGame.fen());
-            
-            // Update question based on whose turn
-            const questionElement = document.querySelector('.anki-question');
-            if (ankiGame.turn() === 'w') {
-                questionElement.textContent = 'Il Bianco muove e vince';
-            } else {
-                questionElement.textContent = 'Il Nero muove e vince';
-            }
-            
-            // Show remaining cards
-            const remaining = ankiSession.cardsToReview.length;
-            showNotification(`Carta ${ankiCards.indexOf(ankiSession.currentCard) + 1} - Ancora ${remaining} carte`, 'success');
-        }
-
-        function flipAnkiCard() {
-            console.log('Flipping Anki card');
-            document.getElementById('ankiCard').classList.add('flipped');
-            
-            // Show solution moves on the back
-            if (ankiSession.currentCard && ankiSession.currentCard.solution) {
-                const solutionGame = new Chess();
-                if (ankiSession.currentCard.fen) {
-                    solutionGame.load(ankiSession.currentCard.fen);
-                }
-                
-                // Play through solution moves
-                let moveIndex = 0;
-                const playMoves = setInterval(() => {
-                    if (moveIndex < ankiSession.currentCard.solution.length && moveIndex < 6) {
-                        const move = solutionGame.move(ankiSession.currentCard.solution[moveIndex]);
-                        if (move) {
-                            ankiBoardSolution.position(solutionGame.fen());
-                        }
-                        moveIndex++;
-                    } else {
-                        clearInterval(playMoves);
-                    }
-                }, 1000);
-            }
-        }
-
-        function processAnkiRating(rating) {
-            if (!ankiSession.currentCard) return;
-            
-            console.log('Processing Anki rating:', rating);
-            
-            const timeSpent = (Date.now() - ankiSession.startTime) / 1000; // in seconds
-            
-            // Update card based on SM-2 algorithm
-            const card = ankiSession.currentCard;
-            
-            // Performance rating: 1 = Again, 2 = Hard, 3 = Good, 4 = Easy
-            const quality = rating;
-            
-            // Update repetitions and ease factor
-            if (quality >= 3) {
-                // Correct response
-                if (card.repetitions === 0) {
-                    card.interval = 1;
-                } else if (card.repetitions === 1) {
-                    card.interval = 6;
-                } else {
-                    card.interval = Math.round(card.interval * card.easeFactor);
-                }
-                card.repetitions++;
-                
-                // Update ease factor
-                card.easeFactor = card.easeFactor + (0.1 - (5 - quality) * (0.08 + (5 - quality) * 0.02));
-            } else {
-                // Incorrect response
-                card.repetitions = 0;
-                card.interval = 1;
-            }
-            
-            // Ensure ease factor doesn't go below 1.3
-            card.easeFactor = Math.max(1.3, card.easeFactor);
-            
-            // Calculate next review date
-            const nextReview = new Date();
-            nextReview.setDate(nextReview.getDate() + card.interval);
-            card.nextReview = nextReview;
-            
-            console.log(`Card updated: interval=${card.interval}, easeFactor=${card.easeFactor}`);
-            
-            // Save stats
-            saveStats();
-            
-            // Load next card
-            setTimeout(() => loadNextAnkiCard(), 500);
-        }
-
-        // Update flipAnkiCard to be globally accessible
-        window.flipAnkiCard = flipAnkiCard;
-
-        // Memory Chess Functions
-        function startMemoryChallenge() {
-            if (!currentStudy) {
-                showNotification('Carica prima uno studio PGN!', 'error');
-                return;
-            }
-
-            memoryPhase = 'memorizing';
-            memoryScore = 0;
-            memoryMoveIndex = 0;
-            
-            // Set up the position
-            memoryGame.reset();
-            if (currentStudy.headers.FEN) {
-                memoryGame.load(currentStudy.headers.FEN);
-            }
-            
-            // Store original position and moves
-            originalPosition = memoryGame.fen();
-            memoryMoves = currentStudy.movesArray.slice(0, 6); // Limit to first 6 moves for memory challenge
-            
-            // Show the target position (after the first move)
-            if (memoryMoves.length > 0) {
-                memoryGame.move(memoryMoves[0]);
-                memoryBoard.position(memoryGame.fen());
-                memoryMoveIndex = 1;
-            }
-            
-            // Update UI
-            document.getElementById('startMemory').style.display = 'none';
-            document.getElementById('showPosition').style.display = 'inline-block';
-            document.getElementById('memoryMovesLeft').textContent = memoryMoves.length - 1;
-            document.getElementById('memoryScore').textContent = memoryScore;
-            
-            // Start countdown
-            const difficulty = parseInt(document.getElementById('memoryDifficulty').value);
-            startMemoryCountdown(difficulty);
-        }
-
-        function startMemoryCountdown(seconds) {
-            let timeLeft = seconds;
-            document.getElementById('memoryTimerValue').textContent = timeLeft;
-            
-            memoryTimerInterval = setInterval(() => {
-                timeLeft--;
-                document.getElementById('memoryTimerValue').textContent = timeLeft;
-                
-                if (timeLeft <= 3) {
-                    document.getElementById('memoryTimerValue').style.color = '#f44336';
-                    document.getElementById('memoryTimerValue').classList.add('warning');
-                }
-                
-                if (timeLeft <= 0) {
-                    clearInterval(memoryTimerInterval);
-                    hidePosition();
-                }
-            }, 1000);
-        }
-
-        function hidePosition() {
-            memoryPhase = 'solving';
-            
-            // Hide the board and show overlay
-            document.getElementById('memoryOverlay').style.display = 'flex';
-            
-            // Reset to starting position
-            memoryGame.load(originalPosition);
-            memoryBoard.position(memoryGame.fen());
-            
-            // Clear the board visually
-            setTimeout(() => {
-                memoryBoard.clear();
-                showNotification(i18n[currentLang].positionMemorized, 'success');
-            }, 500);
-            
-            // Update timer
-            document.getElementById('memoryTimerValue').textContent = '∞';
-            document.getElementById('memoryTimerValue').style.color = 'var(--gold)';
-            document.getElementById('memoryTimerValue').classList.remove('warning');
-        }
-
-        function showPositionBriefly() {
-            if (memoryPhase !== 'solving') return;
-            
-            // Show position for 3 seconds
-            document.getElementById('memoryOverlay').style.display = 'none';
-            memoryBoard.position(memoryGame.fen());
-            
-            // Penalty for peeking
-            memoryScore = Math.max(0, memoryScore - 50);
-            document.getElementById('memoryScore').textContent = memoryScore;
-            
-            let countdown = 3;
-            const peekInterval = setInterval(() => {
-                countdown--;
-                if (countdown <= 0) {
-                    clearInterval(peekInterval);
-                    document.getElementById('memoryOverlay').style.display = 'flex';
-                    memoryBoard.clear();
-                }
-            }, 1000);
-        }
-
-        function handleMemoryMove(source, target) {
-            if (memoryPhase !== 'solving') return 'snapback';
-            
-            const move = memoryGame.move({
+        // Handle piece drop
+        function onDrop(source, target) {
+            const move = game.move({
                 from: source,
                 to: target,
                 promotion: 'q'
@@ -3178,162 +395,245 @@
             
             if (move === null) return 'snapback';
             
-            // Check if this is the correct move
-            if (memoryMoveIndex < memoryMoves.length && move.san === memoryMoves[memoryMoveIndex]) {
-                // Correct move!
-                memoryScore += 100;
-                memoryMoveIndex++;
+            checkMove(move.san);
+        }
+
+        // Handle text input
+        document.getElementById('moveInput').addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                const moveText = this.value.trim();
+                if (moveText) {
+                    const move = game.move(moveText);
+                    if (move) {
+                        board.position(game.fen());
+                        checkMove(move.san);
+                    } else {
+                        showNotification(translations[currentLang].incorrect);
+                    }
+                    this.value = '';
+                }
+            }
+        });
+
+        // Check if move is correct
+        function checkMove(moveSan) {
+            if (!currentStudy) return;
+            
+            stats.total++;
+            
+            if (currentStudy.moves[moveIndex] === moveSan) {
+                stats.correct++;
+                moveIndex++;
+                showNotification(translations[currentLang].correct);
                 
-                document.getElementById('memoryScore').textContent = memoryScore;
-                document.getElementById('memoryMoveNumber').textContent = memoryMoveIndex + 1;
-                document.getElementById('memoryMovesLeft').textContent = memoryMoves.length - memoryMoveIndex;
-                
-                // Visual feedback
-                const boardElement = document.querySelector('#memoryBoard');
-                boardElement.classList.add('memory-correct-move');
-                setTimeout(() => boardElement.classList.remove('memory-correct-move'), 600);
-                
-                if (soundEnabled) playSound('success');
-                
-                // Check if puzzle completed
-                if (memoryMoveIndex >= memoryMoves.length) {
-                    memorySuccess();
-                } else {
-                    // Computer plays response
+                if (moveIndex >= currentStudy.moves.length) {
+                    studyCompleted();
+                } else if (moveIndex < currentStudy.moves.length) {
+                    // Computer move
                     setTimeout(() => {
-                        if (memoryMoveIndex < memoryMoves.length) {
-                            const computerMove = memoryGame.move(memoryMoves[memoryMoveIndex]);
-                            if (computerMove) {
-                                memoryBoard.position(memoryGame.fen());
-                                memoryMoveIndex++;
-                                document.getElementById('memoryMovesLeft').textContent = memoryMoves.length - memoryMoveIndex;
-                            }
+                        const computerMove = game.move(currentStudy.moves[moveIndex]);
+                        if (computerMove) {
+                            board.position(game.fen());
+                            moveIndex++;
                         }
                     }, 500);
                 }
             } else {
-                // Wrong move
-                memoryGame.undo();
-                memoryScore = Math.max(0, memoryScore - 25);
-                document.getElementById('memoryScore').textContent = memoryScore;
+                game.undo();
+                board.position(game.fen());
+                showNotification(translations[currentLang].incorrect);
+            }
+            
+            updateStats();
+        }
+
+        // Study completed
+        function studyCompleted() {
+            stats.completed++;
+            stats.streak++;
+            updateStats();
+            saveStats();
+            
+            document.getElementById('successModal').style.display = 'block';
+        }
+
+        // Toggle blindfold mode
+        function toggleBlindfold() {
+            blindfoldMode = !blindfoldMode;
+            document.body.classList.toggle('blindfold-mode');
+        }
+
+        // List pieces
+        function listPieces() {
+            const position = game.board();
+            let pieces = translations[currentLang].whiteToMove + '\n';
+            
+            for (let row = 0; row < 8; row++) {
+                for (let col = 0; col < 8; col++) {
+                    const piece = position[row][col];
+                    if (piece) {
+                        const square = String.fromCharCode(97 + col) + (8 - row);
+                        pieces += `${piece.type} ${square}\n`;
+                    }
+                }
+            }
+            
+            alert(pieces);
+        }
+
+        // Get hint
+        function getHint() {
+            if (!currentStudy || moveIndex >= currentStudy.moves.length) return;
+            
+            const nextMove = currentStudy.moves[moveIndex];
+            showNotification(translations[currentLang].hint + ': ' + nextMove.substring(0, 2));
+        }
+
+        // Reset position
+        function resetPosition() {
+            if (!currentStudy) return;
+            
+            game.reset();
+            board.position('start');
+            moveIndex = 0;
+        }
+
+        // File upload
+        document.getElementById('uploadArea').addEventListener('click', () => {
+            document.getElementById('fileInput').click();
+        });
+
+        document.getElementById('fileInput').addEventListener('change', function(e) {
+            const file = e.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    parsePGN(e.target.result);
+                };
+                reader.readAsText(file);
+            }
+        });
+
+        // Parse PGN
+        function parsePGN(pgn) {
+            const games = pgn.split('\n\n\n');
+            const studyList = document.getElementById('studyList');
+            studyList.innerHTML = '';
+            
+            games.forEach((gameText, index) => {
+                if (gameText.trim()) {
+                    const study = parseGame(gameText);
+                    if (study) {
+                        const item = document.createElement('div');
+                        item.className = 'study-item';
+                        item.textContent = study.title;
+                        item.onclick = () => loadStudy(study, item);
+                        studyList.appendChild(item);
+                    }
+                }
+            });
+        }
+
+        // Parse single game
+        function parseGame(gameText) {
+            try {
+                game.load_pgn(gameText);
+                const moves = game.history();
+                game.reset();
                 
-                // Visual feedback
-                const boardElement = document.querySelector('#memoryBoard');
-                boardElement.classList.add('memory-wrong-move');
-                setTimeout(() => boardElement.classList.remove('memory-wrong-move'), 500);
-                
-                if (soundEnabled) playSound('error');
-                showNotification(i18n[currentLang].incorrect, 'error');
-                
-                return 'snapback';
+                return {
+                    title: `Study ${Date.now()}`,
+                    pgn: gameText,
+                    moves: moves
+                };
+            } catch (e) {
+                console.error('Error parsing game:', e);
+                return null;
             }
         }
 
-        function memorySuccess() {
-            memoryPhase = 'completed';
+        // Load study
+        function loadStudy(study, element) {
+            document.querySelectorAll('.study-item').forEach(item => {
+                item.classList.remove('active');
+            });
+            element.classList.add('active');
             
-            // Update high score
-            if (memoryScore > stats.memoryHighScore) {
-                stats.memoryHighScore = memoryScore;
-                saveStats();
+            currentStudy = study;
+            moveIndex = 0;
+            game.reset();
+            board.position('start');
+        }
+
+        // Update stats display
+        function updateStats() {
+            const accuracy = stats.total > 0 ? Math.round((stats.correct / stats.total) * 100) : 0;
+            document.getElementById('accuracy').textContent = accuracy + '%';
+            document.getElementById('completed').textContent = stats.completed;
+            document.getElementById('streak').textContent = stats.streak;
+        }
+
+        // Save stats
+        function saveStats() {
+            localStorage.setItem('blindfoldStats', JSON.stringify(stats));
+        }
+
+        // Show notification
+        function showNotification(message) {
+            // Simple notification - in production use a proper notification library
+            const notification = document.createElement('div');
+            notification.style.cssText = `
+                position: fixed;
+                top: 20px;
+                left: 50%;
+                transform: translateX(-50%);
+                background: ${message.includes('Corr') ? 'var(--success)' : 'var(--error)'};
+                color: white;
+                padding: 15px 30px;
+                border-radius: 25px;
+                z-index: 1000;
+            `;
+            notification.textContent = message;
+            document.body.appendChild(notification);
+            
+            setTimeout(() => notification.remove(), 2000);
+        }
+
+        // Close modal
+        function closeModal() {
+            document.getElementById('successModal').style.display = 'none';
+        }
+
+        // Set language
+        function setLanguage(lang) {
+            currentLang = lang;
+            document.querySelectorAll('.lang-btn').forEach(btn => {
+                btn.classList.toggle('active', btn.textContent.toLowerCase() === lang);
+            });
+            
+            // Update all texts
+            Object.keys(translations[lang]).forEach(key => {
+                const element = document.getElementById(key);
+                if (element) {
+                    element.textContent = translations[lang][key];
+                }
+            });
+        }
+
+        // Keyboard shortcuts
+        document.addEventListener('keydown', (e) => {
+            switch(e.key.toLowerCase()) {
+                case 'b': toggleBlindfold(); break;
+                case 'l': listPieces(); break;
+                case 'h': getHint(); break;
+                case 'r': resetPosition(); break;
             }
-            
-            // Show success message
-            document.getElementById('memoryOverlay').style.display = 'none';
-            showNotification(i18n[currentLang].memorySuccess, 'success');
-            
-            // Confetti effect
-            createConfetti();
-            
-            // Reset button
-            document.getElementById('startMemory').style.display = 'inline-block';
-            document.getElementById('startMemory').textContent = i18n[currentLang].continue;
-            document.getElementById('showPosition').style.display = 'none';
-        }
+        });
 
-        function resetMemoryChallenge() {
-            memoryPhase = 'waiting';
-            memoryScore = 0;
-            memoryMoveIndex = 0;
-            
-            clearInterval(memoryTimerInterval);
-            
-            // Reset UI
-            document.getElementById('memoryOverlay').style.display = 'none';
-            document.getElementById('startMemory').style.display = 'inline-block';
-            document.getElementById('startMemory').textContent = i18n[currentLang].startMemory;
-            document.getElementById('showPosition').style.display = 'none';
-            document.getElementById('memoryTimerValue').textContent = document.getElementById('memoryDifficulty').value;
-            document.getElementById('memoryTimerValue').style.color = 'var(--gold)';
-            document.getElementById('memoryTimerValue').classList.remove('warning');
-            document.getElementById('memoryScore').textContent = '0';
-            document.getElementById('memoryMoveNumber').textContent = '1';
-            document.getElementById('memoryMovesLeft').textContent = '-';
-            
-            // Reset board
-            memoryGame.reset();
-            memoryBoard.position('start');
-        }
-
-        function createConfetti() {
-            // Simple confetti effect
-            const colors = ['#e94560', '#ffd700', '#4caf50', '#2196f3', '#9c27b0'];
-            const confettiCount = 50;
-            
-            for (let i = 0; i < confettiCount; i++) {
-                const confetti = document.createElement('div');
-                confetti.style.position = 'fixed';
-                confetti.style.width = '10px';
-                confetti.style.height = '10px';
-                confetti.style.backgroundColor = colors[Math.floor(Math.random() * colors.length)];
-                confetti.style.left = Math.random() * window.innerWidth + 'px';
-                confetti.style.top = '-20px';
-                confetti.style.opacity = '0.8';
-                confetti.style.transform = `rotate(${Math.random() * 360}deg)`;
-                confetti.style.transition = 'all 3s ease-out';
-                confetti.style.zIndex = '9999';
-                
-                document.body.appendChild(confetti);
-                
-                setTimeout(() => {
-                    confetti.style.top = window.innerHeight + 20 + 'px';
-                    confetti.style.transform = `rotate(${Math.random() * 720}deg)`;
-                    confetti.style.opacity = '0';
-                }, 100);
-                
-                setTimeout(() => confetti.remove(), 3100);
-            }
-        }
-
-        // Book reader functions
-        let bookMoves = [];
-        let bookMoveIndex = 0;
-        let bookPlayInterval = null;
-
-        function previousBookMove() {
-            if (bookMoveIndex > 0) {
-                bookMoveIndex--;
-                // TODO: Update book board position
-            }
-        }
-
-        function nextBookMove() {
-            if (bookMoveIndex < bookMoves.length - 1) {
-                bookMoveIndex++;
-                // TODO: Update book board position
-            }
-        }
-
-        function toggleBookPlayback() {
-            if (bookPlayInterval) {
-                clearInterval(bookPlayInterval);
-                bookPlayInterval = null;
-                document.getElementById('playPause').textContent = '▶ Play';
-            } else {
-                bookPlayInterval = setInterval(nextBookMove, 2000);
-                document.getElementById('playPause').textContent = '⏸ Pause';
-            }
-        }
+        // Initialize on load
+        window.addEventListener('load', () => {
+            initBoard();
+        });
     </script>
 </body>
 </html>
