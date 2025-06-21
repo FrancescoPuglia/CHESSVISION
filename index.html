@@ -1960,6 +1960,7 @@
 
         // Initialize
         document.addEventListener('DOMContentLoaded', function() {
+            console.log('Initializing Blindfold Chess Master...');
             initializeBoards();
             initializeEventListeners();
             loadStats();
@@ -1969,6 +1970,10 @@
             
             // Set initial blindfold mode
             document.getElementById('boardContainer').classList.add('board-hidden');
+            
+            // Debug: Check if elements exist
+            console.log('Upload area:', document.getElementById('uploadArea'));
+            console.log('File input:', document.getElementById('fileInput'));
         });
 
         function initializeBoards() {
@@ -2302,91 +2307,168 @@
         }
 
         function switchMode(mode) {
+            console.log('Switching to mode:', mode);
+            
             // Hide all mode contents
             document.querySelectorAll('.mode-content').forEach(content => {
                 content.style.display = 'none';
             });
             
             // Show selected mode
-            document.getElementById(mode + 'Mode').style.display = 'block';
+            const modeElement = document.getElementById(mode + 'Mode');
+            if (modeElement) {
+                modeElement.style.display = 'block';
+            } else {
+                console.error('Mode element not found:', mode + 'Mode');
+                return;
+            }
             
-            // Resize boards
+            currentMode = mode;
+            
+            // Initialize mode-specific features
             setTimeout(() => {
-                if (mode === 'study' && board) board.resize();
-                if (mode === 'anki' && ankiBoard) {
-                    ankiBoard.resize();
-                    ankiBoardSolution.resize();
-                    if (ankiCards.length > 0) {
-                        loadAnkiCard(currentAnkiCard);
-                    }
+                if (mode === 'study' && board) {
+                    board.resize();
+                }
+                if (mode === 'anki') {
+                    if (ankiBoard) ankiBoard.resize();
+                    if (ankiBoardSolution) ankiBoardSolution.resize();
+                    initializeAnkiSession();
                 }
                 if (mode === 'memory' && memoryBoard) {
                     memoryBoard.resize();
                     resetMemoryChallenge();
                 }
-                if (mode === 'book' && bookBoard) bookBoard.resize();
+                if (mode === 'book' && bookBoard) {
+                    bookBoard.resize();
+                }
             }, 100);
         }
 
         function handleFileUpload(file) {
-            if (!file || !file.name.endsWith('.pgn')) {
-                showNotification('Please upload a PGN file', 'error');
+            console.log('File upload started:', file);
+            
+            if (!file) {
+                showNotification('Nessun file selezionato', 'error');
+                return;
+            }
+            
+            if (!file.name.toLowerCase().endsWith('.pgn')) {
+                showNotification('Per favore carica un file PGN', 'error');
                 return;
             }
 
             const reader = new FileReader();
             reader.onload = function(e) {
+                console.log('File read successfully');
                 const pgn = e.target.result;
                 parsePGN(pgn);
-                showNotification('PGN loaded successfully!', 'success');
+                showNotification('PGN caricato con successo!', 'success');
+            };
+            reader.onerror = function(e) {
+                console.error('File read error:', e);
+                showNotification('Errore nel caricamento del file', 'error');
             };
             reader.readAsText(file);
         }
 
         function parsePGN(pgn) {
-            const studies = pgn.split(/\n\n(?=\[)/);
+            console.log('Parsing PGN...');
+            
+            // Split games by double newline or by Event tag
+            const games = pgn.split(/\n\n(?=\[Event)/);
             const studyList = document.getElementById('studyList');
             studyList.innerHTML = '';
+            
+            // Clear previous Anki cards
+            ankiCards = [];
+            
+            let validGames = 0;
 
-            studies.forEach((study, index) => {
-                if (study.trim()) {
-                    const lines = study.split('\n');
+            games.forEach((gameText, index) => {
+                if (!gameText.trim()) return;
+                
+                try {
+                    // Parse headers and moves
                     const headers = {};
-                    let moves = '';
-
+                    const lines = gameText.split('\n');
+                    let movesText = '';
+                    let inMoves = false;
+                    
                     lines.forEach(line => {
-                        if (line.startsWith('[')) {
-                            const match = line.match(/\[(\w+)\s+"(.+)"\]/);
+                        line = line.trim();
+                        if (line.startsWith('[') && line.endsWith(']')) {
+                            const match = line.match(/\[(\w+)\s+"([^"]+)"\]/);
                             if (match) {
                                 headers[match[1]] = match[2];
                             }
-                        } else if (line.trim() && !line.startsWith('[')) {
-                            moves += line + ' ';
+                        } else if (line && !line.startsWith('[')) {
+                            movesText += line + ' ';
+                            inMoves = true;
                         }
                     });
-
+                    
+                    // Clean moves text
+                    movesText = movesText.replace(/\{[^}]*\}/g, '') // Remove comments
+                                         .replace(/\([^)]*\)/g, '') // Remove variations
+                                         .replace(/\d+\./g, '') // Remove move numbers
+                                         .replace(/\s+/g, ' ') // Normalize spaces
+                                         .trim();
+                    
+                    if (!movesText) return;
+                    
+                    validGames++;
+                    
+                    // Create study item
                     const studyItem = document.createElement('div');
                     studyItem.className = 'study-item';
+                    const title = headers.Event || headers.White || `Studio ${validGames}`;
+                    const subtitle = headers.Site || headers.Date || '';
+                    
                     studyItem.innerHTML = `
-                        <div class="study-title">${headers.Event || 'Studio ' + (index + 1)}</div>
-                        <div class="study-info">${headers.White || 'Bianco'} vs ${headers.Black || 'Nero'}</div>
+                        <div class="study-title">${title}</div>
+                        <div class="study-info">${subtitle}</div>
                     `;
-                    studyItem.onclick = () => loadStudy({ headers, moves: moves.trim() }, studyItem);
+                    
+                    // Store the parsed data
+                    const studyData = {
+                        headers: headers,
+                        moves: movesText,
+                        movesArray: movesText.split(' ').filter(m => m && m.match(/^[a-h1-8NBRQK]/))
+                    };
+                    
+                    studyItem.onclick = () => loadStudy(studyData, studyItem);
                     studyList.appendChild(studyItem);
-
-                    // Create Anki card from study
-                    if (moves.trim()) {
-                        ankiCards.push({
-                            fen: headers.FEN || 'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1',
-                            solution: moves.trim(),
-                            title: headers.Event || 'Studio ' + (index + 1)
-                        });
-                    }
+                    
+                    // Create Anki card
+                    ankiCards.push({
+                        id: `card_${index}`,
+                        fen: headers.FEN || 'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1',
+                        solution: studyData.movesArray,
+                        title: title,
+                        nextReview: new Date(),
+                        interval: 1,
+                        easeFactor: 2.5,
+                        repetitions: 0
+                    });
+                    
+                } catch (error) {
+                    console.error('Error parsing game:', error);
                 }
             });
+            
+            console.log(`Parsed ${validGames} games, created ${ankiCards.length} Anki cards`);
+            
+            if (validGames === 0) {
+                showNotification('Nessuna partita valida trovata nel file PGN', 'error');
+            } else {
+                showNotification(`Caricate ${validGames} partite/studi`, 'success');
+            }
         }
 
         function loadStudy(study, element) {
+            console.log('Loading study:', study);
+            
             // Remove active class from all study items
             document.querySelectorAll('.study-item').forEach(item => {
                 item.classList.remove('active');
@@ -2395,21 +2477,34 @@
 
             currentStudy = study;
             moveIndex = 0;
-            game.reset();
+            
+            // Reset game
+            game = new Chess();
             if (study.headers.FEN) {
-                game.load(study.headers.FEN);
+                try {
+                    game.load(study.headers.FEN);
+                } catch (e) {
+                    console.error('Invalid FEN:', e);
+                    game.reset();
+                }
             }
+            
             board.position(game.fen());
             
-            // Parse moves
-            const movesArray = study.moves.replace(/\d+\./g, '').trim().split(/\s+/);
-            currentStudy.movesArray = movesArray.filter(m => m && !m.match(/^[\{\}]/));
+            // Make sure moves array is valid
+            if (!currentStudy.movesArray || currentStudy.movesArray.length === 0) {
+                showNotification('Nessuna mossa valida trovata nello studio', 'error');
+                return;
+            }
             
             startTimer();
             updateStreak();
-            showNotification('Study loaded. Make your move!', 'success');
+            showNotification('Studio caricato. Fai la tua mossa!', 'success');
             
-            if (blindfoldMode) {
+            // Update progress
+            updateProgress();
+            
+            if (blindfoldMode && voiceEnabled) {
                 speak(game.turn() === 'w' ? i18n[currentLang].whiteToMove : i18n[currentLang].blackToMove);
             }
         }
@@ -2667,11 +2762,18 @@
         }
 
         function showNotification(message, type = 'success') {
+            console.log(`Notification [${type}]:`, message);
+            
             const notification = document.getElementById('notification');
             notification.textContent = message;
             notification.className = `notification ${type} show`;
             
-            setTimeout(() => {
+            // Clear previous timeout
+            if (notification.timeout) {
+                clearTimeout(notification.timeout);
+            }
+            
+            notification.timeout = setTimeout(() => {
                 notification.classList.remove('show');
             }, 3000);
         }
@@ -2801,54 +2903,166 @@
             }
         }
 
-        // Anki mode functions
-        function flipAnkiCard() {
-            document.getElementById('ankiCard').classList.add('flipped');
+        // Anki mode with spaced repetition
+        let currentAnkiCardIndex = 0;
+        let ankiSession = {
+            cardsToReview: [],
+            currentCard: null,
+            startTime: null
+        };
+
+        function initializeAnkiSession() {
+            console.log('Initializing Anki session with', ankiCards.length, 'cards');
+            
+            if (ankiCards.length === 0) {
+                showNotification('Carica prima un database PGN!', 'error');
+                return;
+            }
+            
+            // Get cards due for review
+            const now = new Date();
+            ankiSession.cardsToReview = ankiCards.filter(card => {
+                return new Date(card.nextReview) <= now;
+            });
+            
+            // If no cards due, take the first 10 cards
+            if (ankiSession.cardsToReview.length === 0) {
+                ankiSession.cardsToReview = ankiCards.slice(0, Math.min(10, ankiCards.length));
+            }
+            
+            console.log('Cards to review:', ankiSession.cardsToReview.length);
+            
+            // Shuffle cards
+            ankiSession.cardsToReview.sort(() => Math.random() - 0.5);
+            
+            // Load first card
+            loadNextAnkiCard();
         }
 
-        function loadAnkiCard(index) {
-            if (ankiCards.length === 0) return;
+        function loadNextAnkiCard() {
+            if (ankiSession.cardsToReview.length === 0) {
+                showNotification('Sessione Anki completata! 🎉', 'success');
+                // Reset session
+                document.getElementById('ankiCard').classList.remove('flipped');
+                return;
+            }
             
-            currentAnkiCard = index % ankiCards.length;
-            const card = ankiCards[currentAnkiCard];
+            // Get next card
+            ankiSession.currentCard = ankiSession.cardsToReview.shift();
+            ankiSession.startTime = Date.now();
             
-            // Reset card flip
+            console.log('Loading Anki card:', ankiSession.currentCard);
+            
+            // Reset flip state
             document.getElementById('ankiCard').classList.remove('flipped');
             
             // Load position
             const ankiGame = new Chess();
-            if (card.fen) {
-                ankiGame.load(card.fen);
+            if (ankiSession.currentCard.fen) {
+                try {
+                    ankiGame.load(ankiSession.currentCard.fen);
+                } catch (e) {
+                    console.error('Invalid FEN in Anki card:', e);
+                    ankiGame.reset();
+                }
             }
             
+            // Set both boards to the same position
             ankiBoard.position(ankiGame.fen());
             ankiBoardSolution.position(ankiGame.fen());
             
-            // TODO: Show solution moves on back
+            // Update question based on whose turn
+            const questionElement = document.querySelector('.anki-question');
+            if (ankiGame.turn() === 'w') {
+                questionElement.textContent = 'Il Bianco muove e vince';
+            } else {
+                questionElement.textContent = 'Il Nero muove e vince';
+            }
+            
+            // Show remaining cards
+            const remaining = ankiSession.cardsToReview.length;
+            showNotification(`Carta ${ankiCards.indexOf(ankiSession.currentCard) + 1} - Ancora ${remaining} carte`, 'success');
+        }
+
+        function flipAnkiCard() {
+            console.log('Flipping Anki card');
+            document.getElementById('ankiCard').classList.add('flipped');
+            
+            // Show solution moves on the back
+            if (ankiSession.currentCard && ankiSession.currentCard.solution) {
+                const solutionGame = new Chess();
+                if (ankiSession.currentCard.fen) {
+                    solutionGame.load(ankiSession.currentCard.fen);
+                }
+                
+                // Play through solution moves
+                let moveIndex = 0;
+                const playMoves = setInterval(() => {
+                    if (moveIndex < ankiSession.currentCard.solution.length && moveIndex < 6) {
+                        const move = solutionGame.move(ankiSession.currentCard.solution[moveIndex]);
+                        if (move) {
+                            ankiBoardSolution.position(solutionGame.fen());
+                        }
+                        moveIndex++;
+                    } else {
+                        clearInterval(playMoves);
+                    }
+                }, 1000);
+            }
         }
 
         function processAnkiRating(rating) {
-            // Simple spaced repetition algorithm
-            const intervals = {
-                1: 1,     // Again - 1 day
-                2: 3,     // Hard - 3 days
-                3: 7,     // Good - 7 days
-                4: 21     // Easy - 21 days
-            };
+            if (!ankiSession.currentCard) return;
             
-            // Update card with next review date
-            if (ankiCards[currentAnkiCard]) {
-                ankiCards[currentAnkiCard].nextReview = new Date();
-                ankiCards[currentAnkiCard].nextReview.setDate(
-                    ankiCards[currentAnkiCard].nextReview.getDate() + intervals[rating]
-                );
+            console.log('Processing Anki rating:', rating);
+            
+            const timeSpent = (Date.now() - ankiSession.startTime) / 1000; // in seconds
+            
+            // Update card based on SM-2 algorithm
+            const card = ankiSession.currentCard;
+            
+            // Performance rating: 1 = Again, 2 = Hard, 3 = Good, 4 = Easy
+            const quality = rating;
+            
+            // Update repetitions and ease factor
+            if (quality >= 3) {
+                // Correct response
+                if (card.repetitions === 0) {
+                    card.interval = 1;
+                } else if (card.repetitions === 1) {
+                    card.interval = 6;
+                } else {
+                    card.interval = Math.round(card.interval * card.easeFactor);
+                }
+                card.repetitions++;
+                
+                // Update ease factor
+                card.easeFactor = card.easeFactor + (0.1 - (5 - quality) * (0.08 + (5 - quality) * 0.02));
+            } else {
+                // Incorrect response
+                card.repetitions = 0;
+                card.interval = 1;
             }
             
-            showNotification(`Next review in ${intervals[rating]} days`, 'success');
+            // Ensure ease factor doesn't go below 1.3
+            card.easeFactor = Math.max(1.3, card.easeFactor);
+            
+            // Calculate next review date
+            const nextReview = new Date();
+            nextReview.setDate(nextReview.getDate() + card.interval);
+            card.nextReview = nextReview;
+            
+            console.log(`Card updated: interval=${card.interval}, easeFactor=${card.easeFactor}`);
+            
+            // Save stats
+            saveStats();
             
             // Load next card
-            loadAnkiCard(currentAnkiCard + 1);
+            setTimeout(() => loadNextAnkiCard(), 500);
         }
+
+        // Update flipAnkiCard to be globally accessible
+        window.flipAnkiCard = flipAnkiCard;
 
         // Memory Chess Functions
         function startMemoryChallenge() {
