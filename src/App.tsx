@@ -9,6 +9,12 @@ function App() {
     series: 0
   });
 
+  // TODO: Implement stats update functionality
+  // For now, this prevents the TypeScript error
+  const updateStats = (newStats: Partial<typeof stats>) => {
+    setStats(prev => ({ ...prev, ...newStats }));
+  };
+
   const handleFileUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
     if (file && file.name.endsWith('.pgn')) {
@@ -26,6 +32,9 @@ function App() {
     // TODO: Validate move
     console.log('Move submitted:', currentMove);
     setCurrentMove('');
+    
+    // Example of how stats will be updated
+    // updateStats({ completed: stats.completed + 1 });
   };
 
   return (
@@ -58,10 +67,14 @@ function App() {
         maxWidth: '1200px',
         margin: '0 auto',
         gap: '2rem',
-        padding: '2rem'
+        padding: '2rem',
+        flexWrap: 'wrap'
       }}>
         {/* Left Sidebar */}
-        <div style={{ flex: '0 0 250px' }}>
+        <div style={{ 
+          flex: '0 0 250px',
+          minWidth: '250px'
+        }}>
           <div style={{ marginBottom: '2rem' }}>
             <h2 style={{ color: '#ffd700', marginBottom: '1rem' }}>
               Carica File PGN
@@ -102,7 +115,10 @@ function App() {
         </div>
 
         {/* Center - Chess Board Area */}
-        <div style={{ flex: '1' }}>
+        <div style={{ 
+          flex: '1',
+          minWidth: '300px'
+        }}>
           <div style={{
             backgroundColor: '#2d3142',
             padding: '2rem',
@@ -141,48 +157,63 @@ function App() {
               flexWrap: 'wrap',
               justifyContent: 'center'
             }}>
-              <button style={{
-                padding: '0.75rem 1.5rem',
-                backgroundColor: '#8b5cf6',
-                color: 'white',
-                border: 'none',
-                borderRadius: '6px',
-                cursor: 'pointer',
-                fontSize: '1rem'
-              }}>
+              <button 
+                onClick={() => console.log('Toggle board visibility')}
+                style={{
+                  padding: '0.75rem 1.5rem',
+                  backgroundColor: '#8b5cf6',
+                  color: 'white',
+                  border: 'none',
+                  borderRadius: '6px',
+                  cursor: 'pointer',
+                  fontSize: '1rem'
+                }}
+              >
                 Nascondi/Mostra (D)
               </button>
-              <button style={{
-                padding: '0.75rem 1.5rem',
-                backgroundColor: '#ef4444',
-                color: 'white',
-                border: 'none',
-                borderRadius: '6px',
-                cursor: 'pointer',
-                fontSize: '1rem'
-              }}>
+              <button 
+                onClick={() => console.log('List pieces')}
+                style={{
+                  padding: '0.75rem 1.5rem',
+                  backgroundColor: '#ef4444',
+                  color: 'white',
+                  border: 'none',
+                  borderRadius: '6px',
+                  cursor: 'pointer',
+                  fontSize: '1rem'
+                }}
+              >
                 Elenca Pezzi (L)
               </button>
-              <button style={{
-                padding: '0.75rem 1.5rem',
-                backgroundColor: '#3b82f6',
-                color: 'white',
-                border: 'none',
-                borderRadius: '6px',
-                cursor: 'pointer',
-                fontSize: '1rem'
-              }}>
+              <button 
+                onClick={() => console.log('Show hint')}
+                style={{
+                  padding: '0.75rem 1.5rem',
+                  backgroundColor: '#3b82f6',
+                  color: 'white',
+                  border: 'none',
+                  borderRadius: '6px',
+                  cursor: 'pointer',
+                  fontSize: '1rem'
+                }}
+              >
                 Suggerimento (H)
               </button>
-              <button style={{
-                padding: '0.75rem 1.5rem',
-                backgroundColor: '#10b981',
-                color: 'white',
-                border: 'none',
-                borderRadius: '6px',
-                cursor: 'pointer',
-                fontSize: '1rem'
-              }}>
+              <button 
+                onClick={() => {
+                  console.log('Reset game');
+                  updateStats({ completed: 0, precision: 0, series: 0 });
+                }}
+                style={{
+                  padding: '0.75rem 1.5rem',
+                  backgroundColor: '#10b981',
+                  color: 'white',
+                  border: 'none',
+                  borderRadius: '6px',
+                  cursor: 'pointer',
+                  fontSize: '1rem'
+                }}
+              >
                 Ricomincia (R)
               </button>
             </div>
@@ -190,7 +221,10 @@ function App() {
         </div>
 
         {/* Right Sidebar - Statistics */}
-        <div style={{ flex: '0 0 250px' }}>
+        <div style={{ 
+          flex: '0 0 250px',
+          minWidth: '250px'
+        }}>
           <h2 style={{ color: '#ffd700', marginBottom: '1rem' }}>
             Statistiche
           </h2>

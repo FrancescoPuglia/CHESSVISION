@@ -1,5 +1,4 @@
-// src/core/chess/ChessGame.ts
-import { Chess, ChessInstance, Move, Square } from 'chess.js';
+import { Chess, Move, Square } from 'chess.js';
 import { ChessMove, ChessPosition, ChessTurn, ValidationResult } from './types';
 
 /**
@@ -7,7 +6,7 @@ import { ChessMove, ChessPosition, ChessTurn, ValidationResult } from './types';
  * Provides a clean API for chess game logic
  */
 export class ChessGame {
-  private game: ChessInstance;
+  private game: Chess;  // ← CAMBIATO: Chess invece di ChessInstance
   
   constructor(fen?: string) {
     this.game = new Chess(fen);
@@ -38,10 +37,14 @@ export class ChessGame {
    * Check if a move is legal
    */
   isLegalMove(from: Square, to: Square): boolean {
-    const move = this.game.move({ from, to, promotion: 'q' });
-    if (move) {
-      this.game.undo();
-      return true;
+    try {
+      const move = this.game.move({ from, to, promotion: 'q' });
+      if (move) {
+        this.game.undo();
+        return true;
+      }
+    } catch {
+      // Move is illegal
     }
     return false;
   }
@@ -50,17 +53,21 @@ export class ChessGame {
    * Make a move
    */
   makeMove(from: Square, to: Square, promotion: 'q' | 'r' | 'b' | 'n' = 'q'): ChessMove | null {
-    const move = this.game.move({ from, to, promotion });
-    if (move) {
-      return {
-        from: move.from,
-        to: move.to,
-        san: move.san,
-        piece: move.piece,
-        captured: move.captured,
-        promotion: move.promotion,
-        fen: this.game.fen()
-      };
+    try {
+      const move = this.game.move({ from, to, promotion });
+      if (move) {
+        return {
+          from: move.from,
+          to: move.to,
+          san: move.san,
+          piece: move.piece,
+          captured: move.captured,
+          promotion: move.promotion,
+          fen: this.game.fen()
+        };
+      }
+    } catch {
+      // Invalid move
     }
     return null;
   }
@@ -69,17 +76,21 @@ export class ChessGame {
    * Make a move from SAN notation
    */
   makeMoveFromSan(san: string): ChessMove | null {
-    const move = this.game.move(san);
-    if (move) {
-      return {
-        from: move.from,
-        to: move.to,
-        san: move.san,
-        piece: move.piece,
-        captured: move.captured,
-        promotion: move.promotion,
-        fen: this.game.fen()
-      };
+    try {
+      const move = this.game.move(san);
+      if (move) {
+        return {
+          from: move.from,
+          to: move.to,
+          san: move.san,
+          piece: move.piece,
+          captured: move.captured,
+          promotion: move.promotion,
+          fen: this.game.fen()
+        };
+      }
+    } catch {
+      // Invalid move
     }
     return null;
   }
@@ -102,15 +113,15 @@ export class ChessGame {
    * Load position from FEN
    */
   loadFen(fen: string): ValidationResult {
-    const result = this.game.validate_fen(fen);
-    if (result.valid) {
+    try {
       this.game.load(fen);
       return { valid: true };
+    } catch (error) {
+      return { 
+        valid: false, 
+        error: error instanceof Error ? error.message : 'Invalid FEN'
+      };
     }
-    return { 
-      valid: false, 
-      error: result.error 
-    };
   }
 
   /**
@@ -124,35 +135,35 @@ export class ChessGame {
    * Check if game is over
    */
   isGameOver(): boolean {
-    return this.game.game_over();
+    return this.game.isGameOver();
   }
 
   /**
    * Check if current position is checkmate
    */
   isCheckmate(): boolean {
-    return this.game.in_checkmate();
+    return this.game.isCheckmate();
   }
 
   /**
    * Check if current position is draw
    */
   isDraw(): boolean {
-    return this.game.in_draw();
+    return this.game.isDraw();
   }
 
   /**
    * Check if current position is stalemate
    */
   isStalemate(): boolean {
-    return this.game.in_stalemate();
+    return this.game.isStalemate();
   }
 
   /**
    * Check if current position is check
    */
   isCheck(): boolean {
-    return this.game.in_check();
+    return this.game.isCheck();
   }
 
   /**
@@ -173,7 +184,12 @@ export class ChessGame {
    * Load from PGN
    */
   loadPgn(pgn: string): boolean {
-    return this.game.load_pgn(pgn);
+    try {
+      this.game.loadPgn(pgn);
+      return true;
+    } catch {
+      return false;
+    }
   }
 
   /**

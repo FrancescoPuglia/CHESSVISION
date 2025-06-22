@@ -1,5 +1,5 @@
 // src/services/storage/StorageService.ts
-import { get, set, del, clear } from 'idb-keyval';
+import { get, set, clear } from 'idb-keyval';  // ← RIMOSSO 'del'
 import { UserStats } from '@core/chess/types';
 import { StatsStore } from '@core/stats/StatsStore';
 
