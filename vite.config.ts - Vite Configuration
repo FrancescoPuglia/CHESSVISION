@@ -8,6 +8,7 @@ import { visualizer } from 'rollup-plugin-visualizer';
 export default defineConfig({
   plugins: [
     react(),
+    base: '/CHESSVISION/', 
     visualizer({
       template: 'treemap',
       open: false,
