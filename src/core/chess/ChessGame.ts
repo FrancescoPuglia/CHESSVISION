@@ -176,9 +176,9 @@ export class ChessGame {
   /**
    * Get piece at square
    */
-  getPieceAt(square: Square): { type: string; color: 'w' | 'b' } | null {
-    return this.game.get(square);
-  }
+ getPieceAt(square: Square): { type: string; color: 'w' | 'b' } | null {
+  return this.game.get(square) || null;
+}
 
   /**
    * Load from PGN
