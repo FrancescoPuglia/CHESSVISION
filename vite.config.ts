@@ -6,7 +6,7 @@ import { visualizer } from 'rollup-plugin-visualizer';
 
 // https://vitejs.dev/config/
 export default defineConfig({
-   base: '/CHESSVISION/',  // ← QUI! Fuori da plugins
+  base: '/CHESSVISION/',  // ← QUI! Fuori da plugins
   plugins: [
     react(),
     visualizer({
