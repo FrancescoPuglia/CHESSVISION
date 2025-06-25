@@ -1,9 +1,83 @@
 // src/core/pgn/PgnParser.ts
 import { PgnGame, PgnMove, PgnHeader } from '../chess/types';
 
+// Multi-study collection type
+export interface PgnCollection {
+  studies: PgnGame[];
+  totalStudies: number;
+}
+
 export class PgnParser {
   /**
-   * Parse a PGN string into a structured game object
+   * Parse a PGN string that may contain multiple games/studies
+   */
+  static parseMultiple(pgnText: string): PgnCollection {
+    const studies: PgnGame[] = [];
+    
+    // Split PGN text into individual games
+    // Look for header sections starting with [Event or similar
+    const gameTexts = this.splitMultiplePgn(pgnText);
+    
+    for (const gameText of gameTexts) {
+      if (gameText.trim()) {
+        try {
+          const study = this.parse(gameText);
+          studies.push(study);
+        } catch (error) {
+          console.warn('Failed to parse PGN study:', error);
+          // Continue parsing other studies even if one fails
+        }
+      }
+    }
+    
+    return {
+      studies,
+      totalStudies: studies.length
+    };
+  }
+  
+  /**
+   * Split PGN text containing multiple games
+   */
+  private static splitMultiplePgn(pgnText: string): string[] {
+    const games: string[] = [];
+    const lines = pgnText.split('\n');
+    
+    let currentGame = '';
+    let inGame = false;
+    
+    for (const line of lines) {
+      const trimmedLine = line.trim();
+      
+      // Start of new game (header line)
+      if (trimmedLine.startsWith('[') && trimmedLine.includes('"')) {
+        // If we were already building a game, save it
+        if (inGame && currentGame.trim()) {
+          games.push(currentGame.trim());
+        }
+        // Start new game
+        currentGame = line + '\n';
+        inGame = true;
+      } else if (inGame) {
+        currentGame += line + '\n';
+      }
+    }
+    
+    // Don't forget the last game
+    if (inGame && currentGame.trim()) {
+      games.push(currentGame.trim());
+    }
+    
+    // If no explicit games found, treat entire text as single game
+    if (games.length === 0 && pgnText.trim()) {
+      games.push(pgnText.trim());
+    }
+    
+    return games;
+  }
+
+  /**
+   * Parse a single PGN string into a structured game object
    */
   static parse(pgnText: string): PgnGame {
     const lines = pgnText.trim().split('\n');
@@ -54,16 +128,30 @@ export class PgnParser {
   private static parseMoves(movesText: string): PgnMove[] {
     const moves: PgnMove[] = [];
     
-    // Remove game result and comments for basic parsing
+    // Extract comments first and preserve them
+    const commentPattern = /\{([^}]*)\}/g;
+    const comments: { index: number; text: string }[] = [];
+    let commentMatch;
+    
+    while ((commentMatch = commentPattern.exec(movesText)) !== null) {
+      comments.push({
+        index: commentMatch.index,
+        text: commentMatch[1].trim()
+      });
+    }
+    
+    // Remove comments and variations for move parsing
     let cleanText = movesText
-      .replace(/\{[^}]*\}/g, '') // Remove comments
-      .replace(/\([^)]*\)/g, '') // Remove variations (basic)
+      .replace(/\{[^}]*\}/g, ' ') // Replace comments with spaces
+      .replace(/\([^)]*\)/g, ' ') // Remove variations
       .replace(/[012\/\-½\*]+\s*$/, '') // Remove result
+      .replace(/\s+/g, ' ') // Normalize spaces
       .trim();
 
     // Split by move numbers and extract moves
     const movePattern = /(\d+)\.\s*([^\s]+)(?:\s+([^\s]+))?/g;
     let match;
+    let moveIndex = 0;
 
     while ((match = movePattern.exec(cleanText)) !== null) {
       const moveNumber = parseInt(match[1]);
@@ -71,25 +159,47 @@ export class PgnParser {
       const blackMove = match[3];
 
       if (whiteMove && whiteMove !== '...' && !whiteMove.match(/[012\/\-½\*]/)) {
+        // Find comment for this move
+        const comment = this.findCommentForMove(movesText, moveIndex, comments);
         moves.push({
           moveNumber,
           san: whiteMove,
           color: 'white',
-          comment: undefined
+          comment
         });
+        moveIndex++;
       }
 
       if (blackMove && !blackMove.match(/[012\/\-½\*]/)) {
+        // Find comment for this move
+        const comment = this.findCommentForMove(movesText, moveIndex, comments);
         moves.push({
           moveNumber,
           san: blackMove,
           color: 'black',
-          comment: undefined
+          comment
         });
+        moveIndex++;
       }
     }
 
     return moves;
+  }
+
+  /**
+   * Find comment associated with a move
+   */
+  private static findCommentForMove(
+    _originalText: string, 
+    moveIndex: number, 
+    comments: { index: number; text: string }[]
+  ): string | undefined {
+    // This is a simplified approach - in real PGN parsing this would be more complex
+    // For now, we'll associate comments with moves based on their position in the text
+    if (comments.length > moveIndex) {
+      return comments[moveIndex]?.text;
+    }
+    return undefined;
   }
 
   /**
@@ -131,27 +241,26 @@ export class PgnParser {
   }
 
   /**
-   * Validate PGN format
+   * Validate PGN format (single or multiple games)
    */
-  static validate(pgnText: string): { valid: boolean; errors: string[] } {
+  static validate(pgnText: string): { valid: boolean; errors: string[]; studyCount: number } {
     const errors: string[] = [];
+    let studyCount = 0;
     
     try {
-      const game = this.parse(pgnText);
+      const collection = this.parseMultiple(pgnText);
+      studyCount = collection.totalStudies;
       
-      // Basic validation
-      if (!game.moves || game.moves.length === 0) {
-        errors.push('No moves found in PGN');
+      if (studyCount === 0) {
+        errors.push('No valid studies found in PGN file');
       }
-
-      // Check for required headers (optional for basic parsing)
-      const requiredHeaders = ['Event', 'Site', 'Date', 'Round', 'White', 'Black', 'Result'];
-      for (const header of requiredHeaders) {
-        if (!game.headers[header]) {
-          // Don't treat missing headers as errors for now
-          // errors.push(`Missing required header: ${header}`);
+      
+      // Validate each study
+      collection.studies.forEach((study, index) => {
+        if (!study.moves || study.moves.length === 0) {
+          errors.push(`Study ${index + 1}: No moves found`);
         }
-      }
+      });
 
     } catch (error) {
       errors.push(`Parse error: ${error instanceof Error ? error.message : 'Unknown error'}`);
@@ -159,15 +268,16 @@ export class PgnParser {
 
     return {
       valid: errors.length === 0,
-      errors
+      errors,
+      studyCount
     };
   }
 
   /**
-   * Create a sample PGN for demo purposes
+   * Create a sample multi-study PGN for demo purposes
    */
   static createSample(): string {
-    return `[Event "Italian Game Study"]
+    return `[Event "Italian Game Study 1"]
 [Site "Chess Vision"]
 [Date "2024.12.25"]
 [Round "1"]
@@ -175,6 +285,68 @@ export class PgnParser {
 [Black "Engine"]
 [Result "*"]
 
-1.e4 e5 2.Nf3 Nc6 3.Bc4 Bc5 4.c3 Nf6 5.d3 d6 6.O-O O-O 7.Re1 a6 8.Bb3 Ba7 9.h3 h6 10.Nbd2 Re8 *`;
+1.e4 {Apertura del re, controllo del centro} e5 2.Nf3 {Sviluppo naturale} Nc6 3.Bc4 {Punta al punto debole f7} Bc5 4.c3 {Prepara d4} Nf6 5.d3 {Supporta il centro} d6 6.O-O {Mette al sicuro il re} O-O 7.Re1 {Pressione su e5} a6 8.Bb3 {Mantiene l'alfiere attivo} Ba7 *
+
+[Event "Sicilian Defense Study"]
+[Site "Chess Vision"]
+[Date "2024.12.25"]
+[Round "2"]
+[White "Student"]
+[Black "Engine"]
+[Result "*"]
+
+1.e4 {Controllo del centro} c5 {Difesa Siciliana} 2.Nf3 {Sviluppo normale} d6 3.d4 {Attacco al centro} cxd4 4.Nxd4 {Riprende con sviluppo} Nf6 5.Nc3 {Protezione di e4} a6 6.Be3 {Sviluppo dell'alfiere} e6 7.f3 {Supporta il centro} Be7 *
+
+[Event "French Defense Study"]
+[Site "Chess Vision"]
+[Date "2024.12.25"]
+[Round "3"]
+[White "Student"]
+[Black "Engine"]
+[Result "*"]
+
+1.e4 {Apertura del re} e6 {Difesa Francese} 2.d4 {Controllo del centro} d5 3.Nc3 {Variante Winawer} Bb4 {Inchioda il cavallo} 4.e5 {Conquista spazio} c5 5.a3 {Attacca l'alfiere} Bxc3+ 6.bxc3 {Mantiene il centro} Ne7 *`;
+  }
+  
+  /**
+   * Get study title from headers
+   */
+  static getStudyTitle(study: PgnGame, index?: number): string {
+    const event = study.headers.Event || 'Unnamed Study';
+    const round = study.headers.Round;
+    const prefix = index !== undefined ? `${index + 1}. ` : '';
+    
+    if (round && round !== '1') {
+      return `${prefix}${event} (Round ${round})`;
+    }
+    return `${prefix}${event}`;
+  }
+  
+  /**
+   * Get study description from headers
+   */
+  static getStudyDescription(study: PgnGame): string {
+    const parts: string[] = [];
+    
+    if (study.headers.White && study.headers.Black) {
+      parts.push(`${study.headers.White} vs ${study.headers.Black}`);
+    }
+    
+    if (study.headers.Date && study.headers.Date !== '????.??.??') {
+      parts.push(study.headers.Date);
+    }
+    
+    if (study.headers.Site && study.headers.Site !== '?') {
+      parts.push(study.headers.Site);
+    }
+    
+    return parts.join(' • ');
+  }
+  
+  /**
+   * Convert multiple games back to PGN string
+   */
+  static stringifyCollection(collection: PgnCollection): string {
+    return collection.studies.map(study => this.stringify(study)).join('\n\n');
   }
 }

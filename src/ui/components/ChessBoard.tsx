@@ -1,67 +1,152 @@
 // src/ui/components/ChessBoard.tsx
-import React from 'react';
+import React, { useState } from 'react';
 import { ChessPosition } from '@core/chess/types';
 
 interface ChessBoardProps {
   position: ChessPosition;
   isVisible: boolean;
   className?: string;
+  onSquareClick?: (square: string) => void;
+  highlightedSquares?: string[];
+  lastMove?: { from: string; to: string };
 }
 
+// Beautiful chess piece symbols with professional styling
 const PIECE_SYMBOLS: { [key: string]: string } = {
   'wK': '♔', 'wQ': '♕', 'wR': '♖', 'wB': '♗', 'wN': '♘', 'wP': '♙',
   'bK': '♚', 'bQ': '♛', 'bR': '♜', 'bB': '♝', 'bN': '♞', 'bP': '♟'
 };
 
-export const ChessBoard: React.FC<ChessBoardProps> = ({ position, isVisible, className = '' }) => {
+// Modern Chess.com/Lichess inspired color palette
+const BOARD_COLORS = {
+  light: '#f0d9b5',
+  dark: '#b58863',
+  border: '#8b7355',
+  coordinates: '#6b5b47',
+  highlight: '#cdd26a',
+  lastMoveLight: '#cdd26a',
+  lastMoveDark: '#aaa23a',
+  check: '#ff6b6b',
+  validMove: '#20bf6b'
+};
+
+export const ChessBoard: React.FC<ChessBoardProps> = ({ 
+  position, 
+  isVisible, 
+  className = '',
+  onSquareClick,
+  highlightedSquares = [],
+  lastMove
+}) => {
+  const [hoveredSquare, setHoveredSquare] = useState<string | null>(null);
+
   if (!isVisible) {
     return (
-      <div className={`chess-board-hidden ${className}`}>
-        <div className="hidden-message">
-          <h3 style={{ color: '#ffd700', fontSize: '1.5rem', marginBottom: '1rem' }}>
+      <div className={`chess-board-hidden ${className}`} style={{
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        minHeight: '500px',
+        backgroundColor: '#1a1a1a',
+        borderRadius: '12px',
+        border: '2px solid #444',
+        boxShadow: '0 8px 32px rgba(0,0,0,0.3)'
+      }}>
+        <div className="hidden-message" style={{
+          textAlign: 'center',
+          padding: '2rem'
+        }}>
+          <div style={{
+            fontSize: '4rem',
+            marginBottom: '1rem'
+          }}>🙈</div>
+          <h3 style={{ 
+            color: '#ffd700', 
+            fontSize: '1.8rem', 
+            marginBottom: '1rem',
+            fontWeight: '600'
+          }}>
             Modalità Blindfold Attiva
           </h3>
-          <p style={{ color: '#a0a0a0' }}>
-            La scacchiera è nascosta. Usa i comandi per giocare.
+          <p style={{ 
+            color: '#a0a0a0',
+            fontSize: '1.1rem',
+            lineHeight: '1.5'
+          }}>
+            La scacchiera è nascosta. Usa i comandi vocali per giocare.
           </p>
+          <div style={{
+            marginTop: '1.5rem',
+            padding: '1rem',
+            backgroundColor: 'rgba(255,255,255,0.05)',
+            borderRadius: '8px',
+            fontSize: '0.9rem',
+            color: '#888'
+          }}>
+            <p><kbd>B</kbd> per mostrare/nascondere • <kbd>V</kbd> per comandi vocali</p>
+          </div>
         </div>
       </div>
     );
   }
 
+  const getSquareColor = (rowIndex: number, colIndex: number, square: string) => {
+    const isLight = (rowIndex + colIndex) % 2 === 0;
+    
+    // Last move highlight
+    if (lastMove && (square === lastMove.from || square === lastMove.to)) {
+      return isLight ? BOARD_COLORS.lastMoveLight : BOARD_COLORS.lastMoveDark;
+    }
+    
+    // Custom highlights
+    if (highlightedSquares.includes(square)) {
+      return BOARD_COLORS.highlight;
+    }
+    
+    // Default colors
+    return isLight ? BOARD_COLORS.light : BOARD_COLORS.dark;
+  };
+
   return (
-    <div className={`chess-board ${className}`} style={{
+    <div className={`chess-board-container ${className}`} style={{
       display: 'flex',
       flexDirection: 'column',
       alignItems: 'center',
-      padding: '1rem'
+      padding: '1.5rem',
+      background: 'linear-gradient(135deg, #2c3e50 0%, #34495e 100%)',
+      borderRadius: '16px',
+      boxShadow: '0 20px 60px rgba(0,0,0,0.3)',
+      position: 'relative'
     }}>
-      {/* Rank Labels (8-1) */}
-      <div style={{
-        display: 'grid',
-        gridTemplateColumns: '30px repeat(8, 60px) 30px',
-        gridTemplateRows: 'repeat(8, 60px)',
-        gap: '0',
-        border: '3px solid #8B4513',
-        borderRadius: '8px',
-        overflow: 'hidden',
-        backgroundColor: '#8B4513'
-      }}>
-        {/* File labels top (a-h) */}
-        {['', 'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', ''].map((file, index) => (
+      {/* Professional board with coordinates */}
+      <div 
+        className="chess-board"
+        style={{
+          display: 'grid',
+          gridTemplateColumns: '24px repeat(8, 70px) 24px',
+          gridTemplateRows: '24px repeat(8, 70px) 24px',
+          gap: '0',
+          background: BOARD_COLORS.border,
+          padding: '12px',
+          borderRadius: '12px',
+          boxShadow: 'inset 0 2px 8px rgba(0,0,0,0.2), 0 8px 24px rgba(0,0,0,0.15)',
+          position: 'relative'
+        }}
+      >
+        {/* Top file labels (a-h) */}
+        {[null, 'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', null].map((file, index) => (
           <div
             key={`top-${index}`}
             style={{
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center',
-              backgroundColor: '#8B4513',
-              color: '#F5DEB3',
-              fontSize: '0.8rem',
-              fontWeight: 'bold',
+              color: BOARD_COLORS.coordinates,
+              fontSize: '12px',
+              fontWeight: '600',
               gridColumn: index + 1,
-              gridRow: 0,
-              height: '20px'
+              gridRow: 1,
+              fontFamily: 'Inter, system-ui, sans-serif'
             }}
           >
             {file}
@@ -79,80 +164,97 @@ export const ChessBoard: React.FC<ChessBoardProps> = ({ position, isVisible, cla
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center',
-                backgroundColor: '#8B4513',
-                color: '#F5DEB3',
-                fontSize: '0.8rem',
-                fontWeight: 'bold',
+                color: BOARD_COLORS.coordinates,
+                fontSize: '12px',
+                fontWeight: '600',
                 gridColumn: 1,
-                gridRow: rowIndex + 1,
-                width: '30px',
-                height: '60px'
+                gridRow: rowIndex + 2,
+                fontFamily: 'Inter, system-ui, sans-serif'
               }}
             >
               {rank}
             </div>,
             // Board squares for this row
             ...row.map((piece, colIndex) => {
-              const isLight = (rowIndex + colIndex) % 2 === 0;
               const file = String.fromCharCode(97 + colIndex); // a-h
               const square = `${file}${rank}`;
+              const squareColor = getSquareColor(rowIndex, colIndex, square);
+              const isHovered = hoveredSquare === square;
               
               return (
                 <div
                   key={square}
+                  className="chess-square"
                   style={{
-                    backgroundColor: isLight ? '#f0d9b5' : '#b58863',
+                    backgroundColor: squareColor,
                     display: 'flex',
                     alignItems: 'center',
                     justifyContent: 'center',
-                    fontSize: '2.5rem',
-                    fontWeight: 'bold',
+                    fontSize: '42px',
                     position: 'relative',
                     gridColumn: colIndex + 2,
-                    gridRow: rowIndex + 1,
-                    width: '60px',
-                    height: '60px',
-                    cursor: 'pointer',
-                    transition: 'all 0.2s ease',
-                    border: '1px solid rgba(0,0,0,0.1)'
+                    gridRow: rowIndex + 2,
+                    width: '70px',
+                    height: '70px',
+                    cursor: onSquareClick ? 'pointer' : 'default',
+                    transition: 'all 0.15s cubic-bezier(0.4, 0, 0.2, 1)',
+                    transform: isHovered ? 'scale(1.02)' : 'scale(1)',
+                    boxShadow: isHovered 
+                      ? '0 4px 12px rgba(0,0,0,0.15), inset 0 0 20px rgba(255,255,255,0.1)' 
+                      : 'inset 0 0 0 1px rgba(0,0,0,0.1)',
+                    overflow: 'hidden'
                   }}
-                  onMouseEnter={(e) => {
-                    e.currentTarget.style.boxShadow = '0 0 10px rgba(255, 215, 0, 0.6)';
-                    e.currentTarget.style.transform = 'scale(1.05)';
-                  }}
-                  onMouseLeave={(e) => {
-                    e.currentTarget.style.boxShadow = 'none';
-                    e.currentTarget.style.transform = 'scale(1)';
-                  }}
+                  onClick={() => onSquareClick?.(square)}
+                  onMouseEnter={() => setHoveredSquare(square)}
+                  onMouseLeave={() => setHoveredSquare(null)}
                 >
+                  {/* Piece rendering with shadows and effects */}
                   {piece && (
                     <span style={{
-                      textShadow: piece.color === 'w' ? '1px 1px 2px rgba(0,0,0,0.3)' : '1px 1px 2px rgba(255,255,255,0.3)',
-                      filter: piece.color === 'w' ? 'brightness(1.1)' : 'brightness(0.9)'
+                      textShadow: piece.color === 'w' 
+                        ? '0 2px 4px rgba(0,0,0,0.3), 0 1px 2px rgba(0,0,0,0.4)' 
+                        : '0 2px 4px rgba(255,255,255,0.2), 0 1px 2px rgba(255,255,255,0.3)',
+                      filter: piece.color === 'w' ? 'brightness(1.1)' : 'brightness(0.95)',
+                      transform: isHovered ? 'scale(1.05)' : 'scale(1)',
+                      transition: 'all 0.15s ease',
+                      display: 'block',
+                      lineHeight: '1'
                     }}>
                       {PIECE_SYMBOLS[`${piece.color}${piece.type.toUpperCase()}`]}
                     </span>
                   )}
                   
-                  {/* Square coordinate - only show on hover */}
+                  {/* Square coordinates on hover */}
                   <span 
+                    className="square-coordinate"
                     style={{
                       position: 'absolute',
-                      bottom: '2px',
+                      bottom: '3px',
                       right: '4px',
-                      fontSize: '0.6rem',
-                      color: isLight ? '#8B4513' : '#F5DEB3',
-                      opacity: 0,
-                      transition: 'opacity 0.2s',
-                      fontWeight: 'bold',
+                      fontSize: '10px',
+                      color: (rowIndex + colIndex) % 2 === 0 ? '#8b7355' : '#f0d9b5',
+                      opacity: isHovered ? 0.8 : 0,
+                      transition: 'opacity 0.2s ease',
+                      fontWeight: '600',
+                      fontFamily: 'monospace',
                       backgroundColor: 'rgba(0,0,0,0.1)',
                       borderRadius: '2px',
-                      padding: '1px 2px'
+                      padding: '1px 3px',
+                      backdropFilter: 'blur(2px)'
                     }}
-                    className="square-coordinate"
                   >
                     {square}
                   </span>
+
+                  {/* Subtle square pattern overlay */}
+                  <div style={{
+                    position: 'absolute',
+                    inset: '0',
+                    background: isHovered 
+                      ? 'radial-gradient(circle at center, rgba(255,255,255,0.1) 0%, transparent 70%)'
+                      : 'none',
+                    pointerEvents: 'none'
+                  }} />
                 </div>
               );
             }),
@@ -163,14 +265,12 @@ export const ChessBoard: React.FC<ChessBoardProps> = ({ position, isVisible, cla
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center',
-                backgroundColor: '#8B4513',
-                color: '#F5DEB3',
-                fontSize: '0.8rem',
-                fontWeight: 'bold',
+                color: BOARD_COLORS.coordinates,
+                fontSize: '12px',
+                fontWeight: '600',
                 gridColumn: 10,
-                gridRow: rowIndex + 1,
-                width: '30px',
-                height: '60px'
+                gridRow: rowIndex + 2,
+                fontFamily: 'Inter, system-ui, sans-serif'
               }}
             >
               {rank}
@@ -178,21 +278,20 @@ export const ChessBoard: React.FC<ChessBoardProps> = ({ position, isVisible, cla
           ];
         }).flat()}
 
-        {/* File labels bottom (a-h) */}
-        {['', 'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', ''].map((file, index) => (
+        {/* Bottom file labels (a-h) */}
+        {[null, 'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', null].map((file, index) => (
           <div
             key={`bottom-${index}`}
             style={{
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center',
-              backgroundColor: '#8B4513',
-              color: '#F5DEB3',
-              fontSize: '0.8rem',
-              fontWeight: 'bold',
+              color: BOARD_COLORS.coordinates,
+              fontSize: '12px',
+              fontWeight: '600',
               gridColumn: index + 1,
-              gridRow: 9,
-              height: '20px'
+              gridRow: 10,
+              fontFamily: 'Inter, system-ui, sans-serif'
             }}
           >
             {file}
@@ -200,24 +299,58 @@ export const ChessBoard: React.FC<ChessBoardProps> = ({ position, isVisible, cla
         ))}
       </div>
 
-      {/* Board info */}
+      {/* Professional board info */}
       <div style={{
-        marginTop: '1rem',
-        textAlign: 'center',
+        marginTop: '1.5rem',
+        display: 'flex',
+        alignItems: 'center',
+        gap: '1rem',
         color: '#a0a0a0',
-        fontSize: '0.9rem'
+        fontSize: '0.85rem',
+        fontFamily: 'Inter, system-ui, sans-serif'
       }}>
-        <p>🎯 Standard 8×8 Chess Board | Files: a-h, Ranks: 1-8</p>
+        <div style={{
+          display: 'flex',
+          alignItems: 'center',
+          gap: '0.5rem'
+        }}>
+          <div style={{
+            width: '8px',
+            height: '8px',
+            backgroundColor: BOARD_COLORS.light,
+            borderRadius: '2px'
+          }} />
+          <span>Light Squares</span>
+        </div>
+        <div style={{
+          display: 'flex',
+          alignItems: 'center',
+          gap: '0.5rem'
+        }}>
+          <div style={{
+            width: '8px',
+            height: '8px',
+            backgroundColor: BOARD_COLORS.dark,
+            borderRadius: '2px'
+          }} />
+          <span>Dark Squares</span>
+        </div>
+        {lastMove && (
+          <div style={{
+            display: 'flex',
+            alignItems: 'center',
+            gap: '0.5rem'
+          }}>
+            <div style={{
+              width: '8px',
+              height: '8px',
+              backgroundColor: BOARD_COLORS.lastMoveLight,
+              borderRadius: '2px'
+            }} />
+            <span>Last Move: {lastMove.from}-{lastMove.to}</span>
+          </div>
+        )}
       </div>
-
-      <style>{`
-        .chess-board .square-coordinate {
-          opacity: 0 !important;
-        }
-        .chess-board div:hover .square-coordinate {
-          opacity: 0.8 !important;
-        }
-      `}</style>
     </div>
   );
 };

@@ -7,20 +7,31 @@ import { useChessGame } from './ui/hooks/useChessGame';
 import { useTranslation } from './core/i18n/useTranslation';
 import { translations } from './core/i18n/translations';
 import { SpeechService } from './services/speech/SpeechService';
-import { PgnParser } from './core/pgn/PgnParser';
+import { PgnParser, PgnCollection } from './core/pgn/PgnParser';
+import { EngineGame } from './ui/components/EngineGame';
+import { StudyMode } from './ui/components/StudyMode';
+import { ReadMode } from './ui/components/ReadMode';
+import { FlashcardMode } from './ui/components/FlashcardMode';
+import { StreakCalendar } from './ui/components/StreakCalendar';
 
 function App() {
   const { t, language, changeLanguage } = useTranslation();
   const [gameState, gameActions] = useChessGame();
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [isBoardVisible, setIsBoardVisible] = useState(true);
-  const [loadedStudies, setLoadedStudies] = useState<string[]>([]);
   const [isVoiceEnabled, setIsVoiceEnabled] = useState(false);
   const [isListening, setIsListening] = useState(false);
-  const [currentStudy, setCurrentStudy] = useState<any>(null);
+  const [currentCollection, setCurrentCollection] = useState<PgnCollection | null>(null);
+  const [currentStudyIndex, setCurrentStudyIndex] = useState(0);
   const [studyMoveIndex, setStudyMoveIndex] = useState(0);
   const [timeRemaining, setTimeRemaining] = useState(0);
   const [isTimerActive, setIsTimerActive] = useState(false);
+  const [showEngineGame, setShowEngineGame] = useState(false);
+  const [showStudyMode, setShowStudyMode] = useState(false);
+  const [showReadMode, setShowReadMode] = useState(false);
+  const [showFlashcardMode, setShowFlashcardMode] = useState(false);
+  const [studyTimeLimit, setStudyTimeLimit] = useState(300); // 5 minutes default
+  const [, setForceRerender] = useState(0);
   const speechService = useRef<SpeechService | null>(null);
 
   // Initialize speech service
@@ -68,24 +79,36 @@ function App() {
           break;
         case ' ':
           event.preventDefault();
-          if (currentStudy) {
-            navigateStudy(event.shiftKey ? -1 : 1);
+          if (currentCollection) {
+            navigateStudyMoves(event.shiftKey ? -1 : 1);
           }
           break;
         case 'arrowleft':
           event.preventDefault();
-          navigateStudy(-1);
+          navigateStudyMoves(-1);
           break;
         case 'arrowright':
           event.preventDefault();
-          navigateStudy(1);
+          navigateStudyMoves(1);
+          break;
+        case 'pageup':
+          event.preventDefault();
+          navigateStudies(-1);
+          break;
+        case 'pagedown':
+          event.preventDefault();
+          navigateStudies(1);
+          break;
+        case 'e':
+          event.preventDefault();
+          setShowEngineGame(true);
           break;
       }
     };
 
     document.addEventListener('keydown', handleKeyDown);
     return () => document.removeEventListener('keydown', handleKeyDown);
-  }, [isBoardVisible, isVoiceEnabled, currentStudy, studyMoveIndex]);
+  }, [isBoardVisible, isVoiceEnabled, currentCollection, currentStudyIndex, studyMoveIndex]);
 
   // Voice functions - CORE blindfold functionality
   const toggleVoice = () => {
@@ -99,10 +122,13 @@ function App() {
   const speakPieceList = async () => {
     if (!isVoiceEnabled || !speechService.current) return;
     
-    const board = gameState.game.getBoard();
+    // Always use the main game state - studies are loaded into gameState.game
+    const activeBoard = gameState.game.getBoard();
+    
+    
     const pieces: Array<{ piece: string; color: string; square: string }> = [];
     
-    board.forEach((row, rankIndex) => {
+    activeBoard.forEach((row, rankIndex) => {
       row.forEach((piece, fileIndex) => {
         if (piece) {
           const file = String.fromCharCode(97 + fileIndex);
@@ -140,8 +166,10 @@ function App() {
   const speakPosition = async () => {
     if (!isVoiceEnabled || !speechService.current) return;
     
+    const activeGame = gameState.game;
+    
     try {
-      await speechService.current.speakPosition(gameState.game.getFen(), {
+      await speechService.current.speakPosition(activeGame.getFen(), {
         white: t('white'),
         black: t('black'),
         king: t('king'),
@@ -257,33 +285,6 @@ function App() {
     return movePattern.test(text.replace(/\s/g, ''));
   };
 
-  // Study navigation - KEY feature for PGN books
-  const navigateStudy = async (direction: number) => {
-    if (!currentStudy || !currentStudy.moves) return;
-
-    const newIndex = Math.max(0, Math.min(currentStudy.moves.length - 1, studyMoveIndex + direction));
-    
-    if (newIndex !== studyMoveIndex) {
-      setStudyMoveIndex(newIndex);
-      
-      // Speak the move if voice is enabled
-      if (isVoiceEnabled && speechService.current) {
-        const move = currentStudy.moves[newIndex];
-        try {
-          await speechService.current.speakMove(move.san, {
-            castles: t('castles')
-          });
-          
-          // Read comments if any
-          if (move.comment) {
-            await speechService.current.speak(move.comment);
-          }
-        } catch (error) {
-          console.error('Speech error:', error);
-        }
-      }
-    }
-  };
 
   // Timer functionality - ESSENTIAL for study mode
   const handleTimeUp = () => {
@@ -295,6 +296,60 @@ function App() {
     alert(t('timeUp'));
   };
 
+  // Load study position using ONLY the unified game state system
+  const loadStudyPosition = (study: any, moveIndex: number) => {
+    try {
+      const moves = study.moves.map((m: any) => m.san);
+      
+      // Use ONLY the hook's loadStudyPosition method - no parallel state
+      const success = gameActions.loadStudyPosition(moves, moveIndex);
+      
+      if (success) {
+        // Force re-render to ensure UI updates
+        setForceRerender(prev => prev + 1);
+        
+        if (isVoiceEnabled && speechService.current) {
+          const position = moveIndex === 0 ? 'posizione iniziale' : `dopo ${moveIndex} moss${moveIndex === 1 ? 'a' : 'e'}`;
+          speechService.current.speak(`Caricata ${position} di ${PgnParser.getStudyTitle(study)}`);
+        }
+      }
+      
+      return success;
+    } catch (error) {
+      console.error('Error loading study position:', error);
+      return false;
+    }
+  };
+
+  // Navigate between different studies
+  const navigateStudies = (direction: number) => {
+    if (!currentCollection || currentCollection.studies.length <= 1) return;
+    
+    const newIndex = Math.max(0, Math.min(currentCollection.studies.length - 1, currentStudyIndex + direction));
+    
+    if (newIndex !== currentStudyIndex) {
+      setCurrentStudyIndex(newIndex);
+      setStudyMoveIndex(0);
+      
+      const newStudy = currentCollection.studies[newIndex];
+      loadStudyPosition(newStudy, 0);
+    }
+  };
+
+  // Navigate through moves within a study
+  const navigateStudyMoves = (direction: number) => {
+    if (!currentCollection || currentCollection.studies.length === 0) return;
+    
+    const currentStudy = currentCollection.studies[currentStudyIndex];
+    const maxMoves = currentStudy.moves.length;
+    const newMoveIndex = Math.max(0, Math.min(maxMoves, studyMoveIndex + direction));
+    
+    if (newMoveIndex !== studyMoveIndex) {
+      setStudyMoveIndex(newMoveIndex);
+      loadStudyPosition(currentStudy, newMoveIndex);
+    }
+  };
+
   const handleFileUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
     if (file && file.name.endsWith('.pgn')) {
@@ -302,22 +357,26 @@ function App() {
       
       try {
         const text = await file.text();
-        const study = PgnParser.parse(text);
-        setCurrentStudy(study);
-        setStudyMoveIndex(0);
-        gameActions.loadPgnStudy(text);
+        const collection = PgnParser.parseMultiple(text);
         
-        const fileName = file.name.replace('.pgn', '');
-        setLoadedStudies(prev => {
-          if (!prev.includes(fileName)) {
-            return [...prev, fileName];
-          }
-          return prev;
-        });
+        if (collection.studies.length === 0) {
+          throw new Error('No valid studies found in PGN file');
+        }
+        
+        setCurrentCollection(collection);
+        setCurrentStudyIndex(0);
+        setStudyMoveIndex(0);
+        
+        // Load the first study position
+        const firstStudy = collection.studies[0];
+        loadStudyPosition(firstStudy, 0);
+        
 
         if (isVoiceEnabled && speechService.current) {
-          const studyName = study.headers.Event || fileName;
-          speechService.current.speak(`${t('uploadSuccess')} ${studyName}`);
+          const message = collection.studies.length === 1 
+            ? `${t('uploadSuccess')} ${PgnParser.getStudyTitle(firstStudy)}`
+            : `${collection.studies.length} studi caricati. Studio corrente: ${PgnParser.getStudyTitle(firstStudy)}`;
+          speechService.current.speak(message);
         }
       } catch (error) {
         console.error('Error reading file:', error);
@@ -326,20 +385,23 @@ function App() {
     }
   };
 
-  const loadSampleStudy = () => {
+  const loadSampleStudy = async () => {
     const samplePgn = PgnParser.createSample();
-    const study = PgnParser.parse(samplePgn);
-    setCurrentStudy(study);
-    setStudyMoveIndex(0);
-    gameActions.loadPgnStudy(samplePgn);
+    const collection = PgnParser.parseMultiple(samplePgn);
     
-    setLoadedStudies(prev => {
-      const sampleName = "Italian Game Study";
-      if (!prev.includes(sampleName)) {
-        return [...prev, sampleName];
-      }
-      return prev;
-    });
+    setCurrentCollection(collection);
+    setCurrentStudyIndex(0);
+    setStudyMoveIndex(0);
+    
+    // Load the first study position
+    const firstStudy = collection.studies[0];
+    loadStudyPosition(firstStudy, 0);
+    
+
+    if (isVoiceEnabled && speechService.current) {
+      const message = `${collection.studies.length} studi di esempio caricati. Studio corrente: ${PgnParser.getStudyTitle(firstStudy)}`;
+      speechService.current.speak(message);
+    }
   };
 
   const getMessageColor = () => {
@@ -587,37 +649,275 @@ function App() {
             >
               Load Sample Study
             </button>
+            
+            <button
+              onClick={() => setShowEngineGame(true)}
+              style={{
+                width: '100%',
+                marginTop: '1rem',
+                padding: '0.75rem',
+                backgroundColor: '#8b5cf6',
+                color: 'white',
+                border: 'none',
+                borderRadius: '6px',
+                cursor: 'pointer',
+                fontSize: '0.9rem',
+                fontWeight: 'bold'
+              }}
+            >
+              🤖 Gioca vs Motore
+            </button>
+            
+            {currentCollection && currentCollection.studies.length > 0 && (
+              <>
+                <div style={{ marginTop: '1rem', marginBottom: '0.5rem' }}>
+                  <label style={{ color: '#a0a0a0', display: 'block', marginBottom: '0.5rem', fontSize: '0.9rem' }}>
+                    ⏱️ Tempo Studio (minuti):
+                  </label>
+                  <select
+                    value={studyTimeLimit / 60}
+                    onChange={(e) => setStudyTimeLimit(parseInt(e.target.value) * 60)}
+                    style={{
+                      width: '100%',
+                      padding: '0.5rem',
+                      backgroundColor: '#2d3142',
+                      color: 'white',
+                      border: '1px solid #666',
+                      borderRadius: '6px',
+                      fontSize: '0.9rem'
+                    }}
+                  >
+                    <option value={2}>2 minuti</option>
+                    <option value={3}>3 minuti</option>
+                    <option value={5}>5 minuti</option>
+                    <option value={10}>10 minuti</option>
+                    <option value={15}>15 minuti</option>
+                  </select>
+                </div>
+                
+                <button
+                  onClick={() => setShowStudyMode(true)}
+                  style={{
+                    width: '100%',
+                    marginTop: '0.5rem',
+                    padding: '1rem',
+                    backgroundColor: '#ef4444',
+                    color: 'white',
+                    border: 'none',
+                    borderRadius: '6px',
+                    cursor: 'pointer',
+                    fontSize: '1rem',
+                    fontWeight: 'bold'
+                  }}
+                >
+                  🧩 INIZIA STUDIO (Timer)
+                </button>
+                
+                <button
+                  onClick={() => setShowReadMode(true)}
+                  style={{
+                    width: '100%',
+                    marginTop: '0.5rem',
+                    padding: '1rem',
+                    backgroundColor: '#10b981',
+                    color: 'white',
+                    border: 'none',
+                    borderRadius: '6px',
+                    cursor: 'pointer',
+                    fontSize: '1rem',
+                    fontWeight: 'bold'
+                  }}
+                >
+                  📚 LEGGI LIBRO (Vocale)
+                </button>
+                
+                <button
+                  onClick={() => setShowFlashcardMode(true)}
+                  style={{
+                    width: '100%',
+                    marginTop: '0.5rem',
+                    padding: '1rem',
+                    backgroundColor: '#8b5cf6',
+                    color: 'white',
+                    border: 'none',
+                    borderRadius: '6px',
+                    cursor: 'pointer',
+                    fontSize: '1rem',
+                    fontWeight: 'bold'
+                  }}
+                >
+                  🎴 FLASHCARD ANKI
+                </button>
+                
+                <button
+                  onClick={() => {
+                    // Test: Load position after 3 moves
+                    const currentStudy = currentCollection.studies[currentStudyIndex];
+                    const testMoveIndex = Math.min(3, currentStudy.moves.length);
+                    loadStudyPosition(currentStudy, testMoveIndex);
+                    setStudyMoveIndex(testMoveIndex);
+                  }}
+                  style={{
+                    width: '100%',
+                    marginTop: '0.5rem',
+                    padding: '0.75rem',
+                    backgroundColor: '#059669',
+                    color: 'white',
+                    border: 'none',
+                    borderRadius: '6px',
+                    cursor: 'pointer',
+                    fontSize: '0.9rem',
+                    fontWeight: 'bold'
+                  }}
+                >
+                  🧪 Test: Carica 3ª Mossa
+                </button>
+              </>
+            )}
           </div>
 
           {/* Studies List */}
           <div>
-            <h2 style={{ color: '#ffd700', marginBottom: '1rem', fontSize: '1.4rem' }}>
-              📚 {t('studyLibrary')}
-            </h2>
-            <div style={{
-              padding: '1rem',
-              backgroundColor: '#2d3142',
-              borderRadius: '8px',
-              minHeight: '150px'
-            }}>
-              {loadedStudies.length > 0 ? (
-                <ul style={{ listStyle: 'none', padding: 0 }}>
-                  {loadedStudies.map((study, index) => (
-                    <li key={index} style={{
-                      padding: '0.5rem',
-                      marginBottom: '0.5rem',
-                      backgroundColor: '#3d4251',
-                      borderRadius: '4px',
-                      fontSize: '0.9rem'
-                    }}>
-                      📖 {study}
-                    </li>
+            {currentCollection && currentCollection.studies.length > 0 && (
+              <div style={{
+                backgroundColor: '#2d3142',
+                padding: '1.5rem',
+                borderRadius: '8px',
+                marginTop: '1rem',
+                border: '1px solid #3d4251'
+              }}>
+                <h3 style={{ 
+                  color: '#ffd700', 
+                  marginBottom: '1rem', 
+                  fontSize: '1.3rem',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '0.5rem'
+                }}>
+                  📚 Studi Caricati ({currentCollection.studies.length})
+                </h3>
+                
+                {/* Study List */}
+                <div style={{ 
+                  display: 'grid', 
+                  gap: '0.75rem',
+                  maxHeight: '300px',
+                  overflowY: 'auto',
+                  padding: '0.5rem'
+                }}>
+                  {currentCollection.studies.map((study, index) => (
+                    <div
+                      key={index}
+                      onClick={() => {
+                        setCurrentStudyIndex(index);
+                        setStudyMoveIndex(0);
+                        loadStudyPosition(study, 0);
+                        
+                        if (isVoiceEnabled && speechService.current) {
+                          speechService.current.speak(`Selezionato studio ${index + 1}: ${PgnParser.getStudyTitle(study)}`);
+                        }
+                      }}
+                      style={{
+                        backgroundColor: index === currentStudyIndex ? '#8b5cf6' : '#3d4251',
+                        padding: '1rem',
+                        borderRadius: '6px',
+                        cursor: 'pointer',
+                        border: index === currentStudyIndex ? '2px solid #ffd700' : '2px solid transparent',
+                        transition: 'all 0.2s ease'
+                      }}
+                      onMouseEnter={(e) => {
+                        if (index !== currentStudyIndex) {
+                          e.currentTarget.style.backgroundColor = '#4b5563';
+                        }
+                      }}
+                      onMouseLeave={(e) => {
+                        if (index !== currentStudyIndex) {
+                          e.currentTarget.style.backgroundColor = '#3d4251';
+                        }
+                      }}
+                    >
+                      <div style={{
+                        display: 'flex',
+                        justifyContent: 'space-between',
+                        alignItems: 'center',
+                        marginBottom: '0.5rem'
+                      }}>
+                        <h4 style={{ 
+                          color: index === currentStudyIndex ? '#fff' : '#ffd700',
+                          margin: 0,
+                          fontSize: '1rem',
+                          fontWeight: 'bold'
+                        }}>
+                          {index + 1}. {study.headers.Event || 'Studio Senza Nome'}
+                        </h4>
+                        
+                        {index === currentStudyIndex && (
+                          <span style={{
+                            backgroundColor: '#ffd700',
+                            color: '#000',
+                            padding: '0.2rem 0.5rem',
+                            borderRadius: '12px',
+                            fontSize: '0.7rem',
+                            fontWeight: 'bold'
+                          }}>
+                            ATTIVO
+                          </span>
+                        )}
+                      </div>
+                      
+                      <div style={{
+                        fontSize: '0.8rem',
+                        color: index === currentStudyIndex ? '#e0e0e0' : '#a0a0a0',
+                        marginBottom: '0.5rem'
+                      }}>
+                        {PgnParser.getStudyDescription(study)}
+                      </div>
+                      
+                      <div style={{
+                        display: 'flex',
+                        gap: '1rem',
+                        fontSize: '0.8rem',
+                        color: index === currentStudyIndex ? '#d0d0d0' : '#888'
+                      }}>
+                        <span>📝 {study.moves.length} mosse</span>
+                        {study.headers.Date && study.headers.Date !== '????.??.??' && (
+                          <span>📅 {study.headers.Date}</span>
+                        )}
+                        {study.headers.Result && study.headers.Result !== '*' && (
+                          <span>🏁 {study.headers.Result}</span>
+                        )}
+                      </div>
+                    </div>
                   ))}
-                </ul>
-              ) : (
-                <p style={{ color: '#666', fontSize: '0.9rem' }}>{t('noStudyLoaded')}</p>
-              )}
-            </div>
+                </div>
+                
+                {/* Quick Study Navigation */}
+                <div style={{
+                  marginTop: '1rem',
+                  padding: '1rem',
+                  backgroundColor: '#3d4251',
+                  borderRadius: '6px'
+                }}>
+                  <div style={{
+                    display: 'flex',
+                    justifyContent: 'space-between',
+                    alignItems: 'center',
+                    marginBottom: '0.5rem'
+                  }}>
+                    <span style={{ color: '#a0a0a0', fontSize: '0.9rem' }}>
+                      Studio Corrente: <strong style={{ color: '#ffd700' }}>{currentStudyIndex + 1} di {currentCollection.studies.length}</strong>
+                    </span>
+                    <span style={{ color: '#a0a0a0', fontSize: '0.9rem' }}>
+                      Mossa: <strong style={{ color: '#8b5cf6' }}>{studyMoveIndex} di {currentCollection.studies[currentStudyIndex].moves.length}</strong>
+                    </span>
+                  </div>
+                  
+                  <div style={{ fontSize: '0.8rem', color: '#666' }}>
+                    💡 Clicca su uno studio per caricarlo • Usa PageUp/PageDown per navigare • ← → per le mosse
+                  </div>
+                </div>
+              </div>
+            )}
           </div>
         </div>
 
@@ -664,7 +964,7 @@ function App() {
           </div>
 
           {/* Current Study Info & Navigation */}
-          {currentStudy && (
+          {currentCollection && currentCollection.studies.length > 0 && (
             <div style={{
               backgroundColor: '#2d3142',
               padding: '1.5rem',
@@ -674,17 +974,67 @@ function App() {
             }}>
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem' }}>
                 <h3 style={{ color: '#ffd700', margin: 0 }}>
-                  📖 {currentStudy.headers.Event || 'Current Study'}
+                  📖 {PgnParser.getStudyTitle(currentCollection.studies[currentStudyIndex], currentStudyIndex)}
                 </h3>
                 <div style={{ color: '#a0a0a0', fontSize: '0.9rem' }}>
-                  {studyMoveIndex + 1} / {currentStudy.moves.length}
+                  {studyMoveIndex + 1} / {currentCollection.studies[currentStudyIndex].moves.length}
                 </div>
               </div>
+              
+              {/* Multi-Study Navigation */}
+              {currentCollection.studies.length > 1 && (
+                <div style={{ 
+                  marginBottom: '1rem', 
+                  padding: '1rem', 
+                  backgroundColor: '#3d4251', 
+                  borderRadius: '8px',
+                  textAlign: 'center'
+                }}>
+                  <div style={{ color: '#a0a0a0', fontSize: '0.9rem', marginBottom: '0.5rem' }}>
+                    Studio {currentStudyIndex + 1} di {currentCollection.studies.length}
+                  </div>
+                  <div style={{ display: 'flex', gap: '0.5rem', justifyContent: 'center' }}>
+                    <button
+                      onClick={() => navigateStudies(-1)}
+                      disabled={currentStudyIndex <= 0}
+                      style={{
+                        padding: '0.5rem 1rem',
+                        backgroundColor: currentStudyIndex <= 0 ? '#666' : '#8b5cf6',
+                        color: 'white',
+                        border: 'none',
+                        borderRadius: '6px',
+                        cursor: currentStudyIndex <= 0 ? 'not-allowed' : 'pointer',
+                        fontSize: '0.8rem'
+                      }}
+                    >
+                      ⬆️ Studio Precedente
+                    </button>
+                    <button
+                      onClick={() => navigateStudies(1)}
+                      disabled={currentStudyIndex >= currentCollection.studies.length - 1}
+                      style={{
+                        padding: '0.5rem 1rem',
+                        backgroundColor: currentStudyIndex >= currentCollection.studies.length - 1 ? '#666' : '#8b5cf6',
+                        color: 'white',
+                        border: 'none',
+                        borderRadius: '6px',
+                        cursor: currentStudyIndex >= currentCollection.studies.length - 1 ? 'not-allowed' : 'pointer',
+                        fontSize: '0.8rem'
+                      }}
+                    >
+                      Studio Successivo ⬇️
+                    </button>
+                  </div>
+                  <div style={{ fontSize: '0.8rem', color: '#8b5cf6', marginTop: '0.5rem' }}>
+                    📖 {PgnParser.getStudyDescription(currentCollection.studies[currentStudyIndex])}
+                  </div>
+                </div>
+              )}
               
               {/* Study Navigation */}
               <div style={{ display: 'flex', gap: '0.5rem', justifyContent: 'center', marginBottom: '1rem' }}>
                 <button
-                  onClick={() => navigateStudy(-1)}
+                  onClick={() => navigateStudyMoves(-1)}
                   disabled={studyMoveIndex <= 0}
                   style={{
                     padding: '0.75rem 1rem',
@@ -700,7 +1050,7 @@ function App() {
                 <button
                   onClick={() => {
                     setStudyMoveIndex(0);
-                    gameActions.resetGame();
+                    loadStudyPosition(currentCollection.studies[currentStudyIndex], 0);
                   }}
                   style={{
                     padding: '0.75rem 1rem',
@@ -714,15 +1064,15 @@ function App() {
                   🔄 {t('firstMove')}
                 </button>
                 <button
-                  onClick={() => navigateStudy(1)}
-                  disabled={studyMoveIndex >= currentStudy.moves.length - 1}
+                  onClick={() => navigateStudyMoves(1)}
+                  disabled={studyMoveIndex >= currentCollection.studies[currentStudyIndex].moves.length - 1}
                   style={{
                     padding: '0.75rem 1rem',
-                    backgroundColor: studyMoveIndex >= currentStudy.moves.length - 1 ? '#666' : '#6b7280',
+                    backgroundColor: studyMoveIndex >= currentCollection.studies[currentStudyIndex].moves.length - 1 ? '#666' : '#6b7280',
                     color: 'white',
                     border: 'none',
                     borderRadius: '6px',
-                    cursor: studyMoveIndex >= currentStudy.moves.length - 1 ? 'not-allowed' : 'pointer'
+                    cursor: studyMoveIndex >= currentCollection.studies[currentStudyIndex].moves.length - 1 ? 'not-allowed' : 'pointer'
                   }}
                 >
                   {t('nextMove')} ➡️
@@ -730,7 +1080,7 @@ function App() {
               </div>
 
               {/* Current Move Display */}
-              {currentStudy.moves[studyMoveIndex] && (
+              {currentCollection.studies[currentStudyIndex].moves[studyMoveIndex] && (
                 <div style={{
                   backgroundColor: '#3d4251',
                   padding: '1rem',
@@ -738,11 +1088,11 @@ function App() {
                   textAlign: 'center'
                 }}>
                   <div style={{ fontSize: '1.5rem', fontWeight: 'bold', color: '#ffd700', marginBottom: '0.5rem' }}>
-                    {currentStudy.moves[studyMoveIndex].san}
+                    {currentCollection.studies[currentStudyIndex].moves[studyMoveIndex].san}
                   </div>
-                  {currentStudy.moves[studyMoveIndex].comment && (
+                  {currentCollection.studies[currentStudyIndex].moves[studyMoveIndex].comment && (
                     <div style={{ fontSize: '0.9rem', color: '#a0a0a0', fontStyle: 'italic' }}>
-                      💬 {currentStudy.moves[studyMoveIndex].comment}
+                      💬 {currentCollection.studies[currentStudyIndex].moves[studyMoveIndex].comment}
                     </div>
                   )}
                 </div>
@@ -779,6 +1129,10 @@ function App() {
             <ChessBoard
               position={gameState.game.getBoard()}
               isVisible={isBoardVisible}
+              lastMove={gameState.moves.length > 0 ? {
+                from: gameState.moves[gameState.moves.length - 1]?.from || 'a1',
+                to: gameState.moves[gameState.moves.length - 1]?.to || 'a1'
+              } : undefined}
             />
           </div>
 
@@ -963,6 +1317,10 @@ function App() {
                 <kbd style={{ backgroundColor: '#3d4251', padding: '0.2rem 0.4rem', borderRadius: '3px' }}>SPC</kbd>
                 <span>{t('keySpace')}</span>
               </div>
+              <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+                <kbd style={{ backgroundColor: '#3d4251', padding: '0.2rem 0.4rem', borderRadius: '3px' }}>E</kbd>
+                <span>Gioca vs Motore</span>
+              </div>
             </div>
           </div>
 
@@ -1039,6 +1397,9 @@ function App() {
               </button>
             </div>
           </div>
+
+          {/* Streak Calendar */}
+          <StreakCalendar />
         </div>
       </div>
 
@@ -1054,9 +1415,74 @@ function App() {
           CHESSVISION v2.0 - Blindfold Chess Training Platform
         </p>
         <p>
-          🎯 Focus: Voice Commands • Timer • PGN Studies • Bilingue EN/IT
+          🎯 Focus: Voice Commands • Timer • PGN Studies • Engine Games • Bilingue EN/IT
         </p>
       </div>
+
+      {/* Engine Game Modal */}
+      <EngineGame
+        isVisible={showEngineGame}
+        onClose={() => {
+          setShowEngineGame(false);
+          // Record engine game activity
+          (window as any).recordChessVisionActivity?.('engine', 6);
+        }}
+        speechService={speechService.current}
+        isVoiceEnabled={isVoiceEnabled}
+      />
+
+      {/* Study Mode Modal */}
+      {showStudyMode && currentCollection && currentCollection.studies.length > 0 && (
+        <StudyMode
+          study={currentCollection.studies[currentStudyIndex]}
+          onComplete={() => {
+            setShowStudyMode(false);
+            // Record study activity
+            (window as any).recordChessVisionActivity?.('study', 10);
+            if (isVoiceEnabled && speechService.current) {
+              speechService.current.speak('Studio completato con successo!');
+            }
+          }}
+          onExit={() => {
+            setShowStudyMode(false);
+            // Record partial study activity
+            (window as any).recordChessVisionActivity?.('study', 3);
+          }}
+          speechService={speechService.current}
+          isVoiceEnabled={isVoiceEnabled}
+          timeLimit={studyTimeLimit}
+        />
+      )}
+
+      {/* Read Mode Modal */}
+      {showReadMode && currentCollection && currentCollection.studies.length > 0 && (
+        <ReadMode
+          study={currentCollection.studies[currentStudyIndex]}
+          onClose={() => {
+            setShowReadMode(false);
+            // Record reading activity
+            (window as any).recordChessVisionActivity?.('read', 5);
+          }}
+          speechService={speechService.current}
+          isVoiceEnabled={isVoiceEnabled}
+          autoPlay={false}
+          readingSpeed={3}
+        />
+      )}
+
+      {/* Flashcard Mode Modal */}
+      {showFlashcardMode && currentCollection && currentCollection.studies.length > 0 && (
+        <FlashcardMode
+          studies={currentCollection.studies}
+          onClose={() => {
+            setShowFlashcardMode(false);
+            // Record flashcard activity
+            (window as any).recordChessVisionActivity?.('flashcard', 8);
+          }}
+          speechService={speechService.current}
+          isVoiceEnabled={isVoiceEnabled}
+        />
+      )}
     </div>
   );
 }

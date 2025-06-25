@@ -20,6 +20,7 @@ export interface GameActions {
   makeMove: (moveText: string) => void;
   resetGame: () => void;
   loadPgnStudy: (pgnText: string) => void;
+  loadStudyPosition: (moves: string[], moveIndex: number) => boolean;
   undoMove: () => void;
   getHint: () => string;
   listPieces: () => string;
@@ -155,6 +156,49 @@ export const useChessGame = (): [GameState, GameActions] => {
     }
   }, [stats]);
 
+  const loadStudyPosition = useCallback((moves: string[], moveIndex: number): boolean => {
+    try {
+      // Create fresh game from starting position
+      const newGame = new ChessGame();
+      
+      // Apply moves up to the specified index
+      const appliedMoves: ChessMove[] = [];
+      for (let i = 0; i < Math.min(moveIndex, moves.length); i++) {
+        const move = moves[i];
+        const result = newGame.makeMoveFromSan(move);
+        
+        if (!result) {
+          console.error(`Failed to make move ${i + 1}: ${move}`);
+          setMessage(`Errore nella mossa ${i + 1}: ${move}`, 'error');
+          return false;
+        }
+        
+        appliedMoves.push(result);
+      }
+      
+      // Update game state
+      setGame(newGame);
+      setMoves(appliedMoves);
+      setCurrentMove(appliedMoves.length);
+      
+      // Update study tracking
+      setStudyMoves(moves);
+      setStudyIndex(moveIndex);
+      
+      const positionText = moveIndex === 0 
+        ? 'posizione iniziale' 
+        : `posizione dopo ${moveIndex} moss${moveIndex === 1 ? 'a' : 'e'}`;
+        
+      setMessage(`Caricata ${positionText}`, 'success');
+      return true;
+      
+    } catch (error) {
+      console.error('Error loading study position:', error);
+      setMessage('Errore nel caricamento della posizione', 'error');
+      return false;
+    }
+  }, []);
+
   const undoMove = useCallback(() => {
     if (moves.length > 0) {
       const undoneMove = game.undoMove();
@@ -223,6 +267,7 @@ export const useChessGame = (): [GameState, GameActions] => {
       makeMove,
       resetGame,
       loadPgnStudy,
+      loadStudyPosition,
       undoMove,
       getHint,
       listPieces

@@ -1,3 +1,35 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+/* Chess Engine Thinking Animation */
+@keyframes thinking {
+  0% { opacity: 0.3; }
+  50% { opacity: 1; }
+  100% { opacity: 0.3; }
+}
+
+.thinking-spinner {
+  animation: thinking 1.5s ease-in-out infinite;
+}
+
+/* Chess Board Animations */
+.chess-square {
+  transition: all 0.15s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.chess-square:hover {
+  transform: scale(1.02);
+  box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+}
+
+/* Voice Input Visual Feedback */
+.voice-recording {
+  animation: pulse 1s ease-in-out infinite;
+}
+
+@keyframes pulse {
+  0% { transform: scale(1); opacity: 1; }
+  50% { transform: scale(1.05); opacity: 0.8; }
+  100% { transform: scale(1); opacity: 1; }
+}
