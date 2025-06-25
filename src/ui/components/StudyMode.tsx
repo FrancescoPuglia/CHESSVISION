@@ -4,6 +4,7 @@ import { PgnGame } from '@core/chess/types';
 import { PgnParser } from '@core/pgn/PgnParser';
 import { ChessGame } from '@core/chess/ChessGame';
 import { SpeechService } from '@services/speech/SpeechService';
+import { InteractiveChessBoard } from './InteractiveChessBoard';
 
 interface StudyModeProps {
   study: PgnGame;
@@ -78,6 +79,61 @@ export const StudyMode: React.FC<StudyModeProps> = ({
       speechService.speak(state.message);
     }
   }, [state.message, isVoiceEnabled, speechService]);
+
+  // Automatically announce position when study starts
+  useEffect(() => {
+    if (isVoiceEnabled && speechService) {
+      const timer = setTimeout(() => {
+        speakInitialPosition();
+      }, 2000); // Wait 2 seconds for UI to settle
+      
+      return () => clearTimeout(timer);
+    }
+  }, [isVoiceEnabled, speechService]);
+
+  const speakInitialPosition = async () => {
+    if (!isVoiceEnabled || !speechService) return;
+    
+    const board = state.studyGame.getBoard();
+    const whitePieces: string[] = [];
+    const blackPieces: string[] = [];
+    
+    board.forEach((row, rankIndex) => {
+      row.forEach((piece, fileIndex) => {
+        if (piece) {
+          const file = String.fromCharCode(97 + fileIndex);
+          const rank = 8 - rankIndex;
+          const pieceNames = {
+            'p': 'Pedone', 'r': 'Torre', 'n': 'Cavallo',
+            'b': 'Alfiere', 'q': 'Donna', 'k': 'Re'
+          };
+          const pieceName = pieceNames[piece.type as keyof typeof pieceNames] || piece.type;
+          const pieceDescription = `${pieceName} in ${file}${rank}`;
+          
+          if (piece.color === 'w') {
+            whitePieces.push(pieceDescription);
+          } else {
+            blackPieces.push(pieceDescription);
+          }
+        }
+      });
+    });
+    
+    // Announce white pieces first, then black pieces
+    let announcement = 'Posizione di partenza dello studio. ';
+    
+    if (whitePieces.length > 0) {
+      announcement += `Pezzi bianchi: ${whitePieces.join(', ')}. `;
+    }
+    
+    if (blackPieces.length > 0) {
+      announcement += `Pezzi neri: ${blackPieces.join(', ')}. `;
+    }
+    
+    announcement += `È il turno del ${study.moves[0]?.color === 'white' ? 'Bianco' : 'Nero'}. Trova la mossa migliore!`;
+    
+    await speechService.speak(announcement);
+  };
 
   const handleTimeUp = () => {
     setState(prev => ({
@@ -173,7 +229,8 @@ export const StudyMode: React.FC<StudyModeProps> = ({
     if (!isVoiceEnabled || !speechService) return;
     
     const board = state.studyGame.getBoard();
-    const pieces: string[] = [];
+    const whitePieces: string[] = [];
+    const blackPieces: string[] = [];
     
     board.forEach((row, rankIndex) => {
       row.forEach((piece, fileIndex) => {
@@ -184,18 +241,33 @@ export const StudyMode: React.FC<StudyModeProps> = ({
             'p': 'Pedone', 'r': 'Torre', 'n': 'Cavallo',
             'b': 'Alfiere', 'q': 'Donna', 'k': 'Re'
           };
-          const colorName = piece.color === 'w' ? 'Bianco' : 'Nero';
           const pieceName = pieceNames[piece.type as keyof typeof pieceNames] || piece.type;
-          pieces.push(`${pieceName} ${colorName} in ${file}${rank}`);
+          const pieceDescription = `${pieceName} in ${file}${rank}`;
+          
+          if (piece.color === 'w') {
+            whitePieces.push(pieceDescription);
+          } else {
+            blackPieces.push(pieceDescription);
+          }
         }
       });
     });
     
-    const text = pieces.length > 0 ? 
-      `Posizione corrente: ${pieces.join(', ')}` : 
-      'Scacchiera vuota';
+    let announcement = 'Posizione corrente. ';
     
-    await speechService.speak(text);
+    if (whitePieces.length > 0) {
+      announcement += `Pezzi bianchi: ${whitePieces.join(', ')}. `;
+    }
+    
+    if (blackPieces.length > 0) {
+      announcement += `Pezzi neri: ${blackPieces.join(', ')}.`;
+    }
+    
+    if (whitePieces.length === 0 && blackPieces.length === 0) {
+      announcement = 'Scacchiera vuota';
+    }
+    
+    await speechService.speak(announcement);
   };
 
   const progress = ((state.currentMoveIndex) / study.moves.length) * 100;
@@ -324,6 +396,22 @@ export const StudyMode: React.FC<StudyModeProps> = ({
           </p>
         </div>
 
+        {/* Interactive Chess Board */}
+        <div style={{ marginBottom: '2rem' }}>
+          <InteractiveChessBoard
+            position={state.studyGame.getBoard()}
+            isVisible={true}
+            game={state.studyGame}
+            allowMoves={true}
+            showCoordinates={true}
+            onMove={(move) => {
+              setState(prev => ({ ...prev, userInput: move.san }));
+              // Auto-submit the move when made via board
+              setTimeout(() => handleMoveSubmit(), 100);
+            }}
+          />
+        </div>
+
         {/* Current Position Info */}
         {state.expectedMove && (
           <div style={{
@@ -338,6 +426,9 @@ export const StudyMode: React.FC<StudyModeProps> = ({
             </div>
             <div style={{ color: '#8b5cf6', fontSize: '0.85rem' }}>
               Turno: {study.moves[state.currentMoveIndex]?.color === 'white' ? '⚪ Bianco' : '⚫ Nero'}
+            </div>
+            <div style={{ color: '#ffd700', fontSize: '0.85rem', marginTop: '0.5rem' }}>
+              💡 Clicca sui pezzi per muoverli o digita la mossa
             </div>
           </div>
         )}

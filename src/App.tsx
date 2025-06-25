@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { ChessBoard } from './ui/components/ChessBoard';
+import { InteractiveChessBoard } from './ui/components/InteractiveChessBoard';
 import { MoveInput } from './ui/components/MoveInput';
 import { GameStats } from './ui/components/GameStats';
 import { Timer } from './ui/components/Timer';
@@ -1126,9 +1126,17 @@ function App() {
             borderRadius: '12px',
             marginBottom: '1rem'
           }}>
-            <ChessBoard
+            <InteractiveChessBoard
               position={gameState.game.getBoard()}
               isVisible={isBoardVisible}
+              game={gameState.game}
+              allowMoves={true}
+              showCoordinates={true}
+              onMove={(move) => {
+                gameActions.makeMove(move.san);
+                // Record normal game activity
+                (window as any).recordChessVisionActivity?.('game', 1);
+              }}
               lastMove={gameState.moves.length > 0 ? {
                 from: gameState.moves[gameState.moves.length - 1]?.from || 'a1',
                 to: gameState.moves[gameState.moves.length - 1]?.to || 'a1'

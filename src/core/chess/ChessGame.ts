@@ -205,4 +205,101 @@ export class ChessGame {
   toPgn(): string {
     return this.game.pgn();
   }
+
+  /**
+   * Get valid moves from a specific square
+   */
+  getValidMovesFrom(square: Square): Array<{ from: string; to: string; san: string }> {
+    try {
+      const moves = this.game.moves({ square, verbose: true });
+      return moves.map(move => ({
+        from: move.from,
+        to: move.to,
+        san: move.san
+      }));
+    } catch {
+      return [];
+    }
+  }
+
+  /**
+   * Check if a square has valid moves
+   */
+  hasValidMovesFrom(square: Square): boolean {
+    try {
+      const moves = this.game.moves({ square });
+      return moves.length > 0;
+    } catch {
+      return false;
+    }
+  }
+
+  /**
+   * Validate and return move details if valid
+   */
+  isValidMove(from: Square, to: Square): { san: string; from: string; to: string } | null {
+    try {
+      // Try the move without actually making it
+      const moves = this.game.moves({ verbose: true });
+      const validMove = moves.find(move => move.from === from && move.to === to);
+      
+      if (validMove) {
+        return {
+          san: validMove.san,
+          from: validMove.from,
+          to: validMove.to
+        };
+      }
+      return null;
+    } catch {
+      return null;
+    }
+  }
+
+  /**
+   * Get all valid moves in current position
+   */
+  getValidMoves(): Array<{ from: string; to: string; san: string }> {
+    try {
+      const moves = this.game.moves({ verbose: true });
+      return moves.map(move => ({
+        from: move.from,
+        to: move.to,
+        san: move.san
+      }));
+    } catch {
+      return [];
+    }
+  }
+
+  /**
+   * Make a move by coordinates (for interactive board)
+   */
+  makeMoveByCoords(from: Square, to: Square, promotion?: string): ChessMove | null {
+    try {
+      const move = this.game.move({ from, to, promotion });
+      if (move) {
+        return {
+          from: move.from,
+          to: move.to,
+          san: move.san,
+          piece: move.piece,
+          captured: move.captured,
+          promotion: move.promotion,
+          fen: this.game.fen()
+        };
+      }
+      return null;
+    } catch (error) {
+      console.error('Move error:', error);
+      return null;
+    }
+  }
+
+  /**
+   * Clone the current game state
+   */
+  clone(): ChessGame {
+    return new ChessGame(this.getFen());
+  }
 }
