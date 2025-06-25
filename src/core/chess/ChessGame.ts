@@ -103,6 +103,13 @@ export class ChessGame {
   }
 
   /**
+   * Undo last move (alias for compatibility)
+   */
+  undoMove(): Move | null {
+    return this.undo();
+  }
+
+  /**
    * Reset to starting position
    */
   reset(): void {

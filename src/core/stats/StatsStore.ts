@@ -158,6 +158,13 @@ export class StatsStore {
   }
 
   /**
+   * Get accuracy percentage (alias for compatibility)
+   */
+  getAccuracyPercentage(): number {
+    return this.getAccuracy();
+  }
+
+  /**
    * Get average time per move
    */
   getAverageTime(): number {
@@ -192,5 +199,42 @@ export class StatsStore {
    */
   reset(): void {
     this.stats = this.createEmptyStats();
+  }
+
+  // Simplified methods for hook usage
+  private currentSessionId: string | null = null;
+
+  /**
+   * Start session without studyId (for simplified usage)
+   */
+  startSimpleSession(): void {
+    const session = this.startSession('default-study');
+    this.currentSessionId = session.id;
+  }
+
+  /**
+   * Record move with simplified parameters
+   */
+  recordSimpleMove(correct: boolean, timeMs: number = 0): void {
+    if (!this.currentSessionId) {
+      const session = this.startSession('default-study');
+      this.currentSessionId = session.id;
+    }
+    
+    this.recordMove(this.currentSessionId, {
+      san: 'move',
+      correct,
+      timeMs,
+      hintsUsed: 0
+    });
+  }
+
+  /**
+   * Complete current session
+   */
+  completeCurrentSession(): void {
+    if (this.currentSessionId) {
+      this.completeSession(this.currentSessionId);
+    }
   }
 }

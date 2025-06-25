@@ -28,17 +28,19 @@ export type ChessPosition = ({
 } | null)[][];
 
 // PGN Parser Types
+export type PgnHeader = Record<string, string>;
+
 export interface PgnGame {
-  headers: Record<string, string>;
+  headers: PgnHeader;
   moves: PgnMove[];
   result: string;
 }
 
 export interface PgnMove {
-  move: string;
-  comments: string[];
-  nag: number[];
-  variations: PgnMove[][];
+  moveNumber: number;
+  san: string;
+  color: ChessTurn;
+  comment?: string;
 }
 
 export interface PgnNode {
