@@ -45,20 +45,31 @@ export class PgnParser {
     
     let currentGame = '';
     let inGame = false;
+    let foundFirstHeader = false;
     
     for (const line of lines) {
       const trimmedLine = line.trim();
       
-      // Start of new game (header line)
+      // Check if this is a header line
       if (trimmedLine.startsWith('[') && trimmedLine.includes('"')) {
-        // If we were already building a game, save it
-        if (inGame && currentGame.trim()) {
+        // This is a header line
+        
+        // If this is an Event header and we already have a game, save the previous one
+        if (trimmedLine.startsWith('[Event') && foundFirstHeader && inGame && currentGame.trim()) {
           games.push(currentGame.trim());
+          currentGame = '';
         }
-        // Start new game
-        currentGame = line + '\n';
+        
+        // Add this header to current game
+        currentGame += line + '\n';
         inGame = true;
+        
+        // Mark that we found at least one header
+        if (trimmedLine.startsWith('[Event')) {
+          foundFirstHeader = true;
+        }
       } else if (inGame) {
+        // This is either moves, comments, or empty lines - add to current game
         currentGame += line + '\n';
       }
     }
