@@ -1443,6 +1443,8 @@ function App() {
       {showStudyMode && currentCollection && currentCollection.studies.length > 0 && (
         <StudyMode
           study={currentCollection.studies[currentStudyIndex]}
+          startFromMoveIndex={studyMoveIndex}
+          gameState={gameState.game}
           onComplete={() => {
             setShowStudyMode(false);
             // Record study activity

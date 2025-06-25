@@ -8,11 +8,13 @@ import { InteractiveChessBoard } from './InteractiveChessBoard';
 
 interface StudyModeProps {
   study: PgnGame;
+  startFromMoveIndex?: number; // Which move to start from
   onComplete: () => void;
   onExit: () => void;
   speechService: SpeechService | null;
   isVoiceEnabled: boolean;
   timeLimit: number; // seconds
+  gameState: ChessGame; // Use the already-loaded game state from main app
 }
 
 interface StudyState {
@@ -31,18 +33,21 @@ interface StudyState {
 
 export const StudyMode: React.FC<StudyModeProps> = ({
   study,
+  startFromMoveIndex = 0,
   onComplete,
   onExit,
   speechService,
   isVoiceEnabled,
-  timeLimit
+  timeLimit,
+  gameState
 }) => {
+  // Use the already-loaded game state from main app - no need to recreate!
   const [state, setState] = useState<StudyState>({
-    currentMoveIndex: 0,
-    studyGame: new ChessGame(),
-    expectedMove: study.moves[0]?.san || null,
+    currentMoveIndex: startFromMoveIndex,
+    studyGame: gameState, // Use the correctly loaded game state
+    expectedMove: study.moves[startFromMoveIndex]?.san || null,
     userInput: '',
-    message: `Studio: ${PgnParser.getStudyTitle(study)}. Trova la prima mossa!`,
+    message: `Studio: ${PgnParser.getStudyTitle(study)}. ${startFromMoveIndex === 0 ? 'Trova la prima mossa!' : `Posizione alla mossa ${startFromMoveIndex + 1}. Trova la prossima mossa!`}`,
     messageType: 'info',
     isWaitingForMove: true,
     timeRemaining: timeLimit,
