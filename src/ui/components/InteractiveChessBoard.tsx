@@ -355,14 +355,14 @@ export const InteractiveChessBoard: React.FC<InteractiveChessBoardProps> = ({
                     {piece && (
                       <span
                         style={{
-                          // Beautiful piece colors matching the reference
-                          color: piece.color === "w" ? "#FFFFFF" : "#1a1a1a",
+                          // LICHESS-STYLE MAXIMUM CONTRAST PIECES
+                          color: piece.color === "w" ? "#f8f8f8" : "#2c2c2c",
                           textShadow: piece.color === "w" 
-                            ? "0 0 2px #000000, 0 1px 3px #000000, 1px 1px 1px #000000" 
-                            : "0 0 2px #FFFFFF, 0 1px 3px #FFFFFF, 1px 1px 1px #FFFFFF",
+                            ? "0 0 3px #000000, 0 2px 4px #000000, 2px 2px 2px #000000, -1px -1px 1px #000000" 
+                            : "0 0 3px #ffffff, 0 2px 4px #ffffff, 2px 2px 2px #ffffff, -1px -1px 1px #ffffff",
                           filter: piece.color === "w" 
-                            ? "brightness(1.0) contrast(1.1) drop-shadow(1px 1px 2px rgba(0,0,0,0.7))"
-                            : "brightness(0.9) contrast(1.2) drop-shadow(1px 1px 2px rgba(255,255,255,0.6))",
+                            ? "brightness(1.2) contrast(1.3) drop-shadow(2px 2px 4px rgba(0,0,0,0.8))"
+                            : "brightness(0.8) contrast(1.5) drop-shadow(2px 2px 4px rgba(255,255,255,0.8))",
                           transform:
                             isHovered || isSelected
                               ? "scale(1.08)"
@@ -373,7 +373,7 @@ export const InteractiveChessBoard: React.FC<InteractiveChessBoardProps> = ({
                           fontWeight: "900",
                           fontSize: "42px",
                           zIndex: 2,
-                          WebkitTextStroke: piece.color === "w" ? "0.5px #000000" : "0.5px #FFFFFF",
+                          WebkitTextStroke: piece.color === "w" ? "1px #000000" : "1px #ffffff",
                         }}
                       >
                         {

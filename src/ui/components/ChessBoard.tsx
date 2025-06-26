@@ -12,22 +12,22 @@ interface ChessBoardProps {
   lastMove?: { from: string; to: string };
 }
 
-// Chess piece symbols - Using distinct symbols for maximum visibility
+// Professional chess piece symbols - FIXED VISIBILITY
 const PIECE_SYMBOLS: { [key: string]: string } = {
-  // White pieces - Hollow/outlined symbols
-  wK: "♔",
-  wQ: "♕",
-  wR: "♖",
-  wB: "♗",
-  wN: "♘",
-  wP: "♙",
-  // Black pieces - Solid/filled symbols
-  bK: "♚",
-  bQ: "♛",
-  bR: "♜",
-  bB: "♝",
-  bN: "♞",
-  bP: "♟",
+  // White pieces - Outline symbols for contrast
+  wK: "♔", // King outline
+  wQ: "♕", // Queen outline  
+  wR: "♖", // Rook outline
+  wB: "♗", // Bishop outline
+  wN: "♘", // Knight outline
+  wP: "♙", // Pawn outline
+  // Black pieces - Solid symbols for contrast  
+  bK: "♚", // King solid
+  bQ: "♛", // Queen solid
+  bR: "♜", // Rook solid
+  bB: "♝", // Bishop solid
+  bN: "♞", // Knight solid
+  bP: "♟", // Pawn solid
 };
 
 // Professional color palette like the reference image
@@ -266,15 +266,15 @@ export const ChessBoard: React.FC<ChessBoardProps> = ({
                           lineHeight: "1",
                           fontWeight: "900",
                           fontSize: "52px",
-                          // Beautiful piece colors matching the reference
-                          color: piece.color === "w" ? "#FFFFFF" : "#1a1a1a",
+                          // LICHESS-STYLE PIECE COLORS - MAXIMUM CONTRAST
+                          color: piece.color === "w" ? "#f8f8f8" : "#2c2c2c",
                           textShadow: piece.color === "w" 
-                            ? "0 0 2px #000000, 0 1px 3px #000000, 1px 1px 1px #000000" 
-                            : "0 0 2px #FFFFFF, 0 1px 3px #FFFFFF, 1px 1px 1px #FFFFFF",
+                            ? "0 0 3px #000000, 0 2px 4px #000000, 2px 2px 2px #000000, -1px -1px 1px #000000" 
+                            : "0 0 3px #ffffff, 0 2px 4px #ffffff, 2px 2px 2px #ffffff, -1px -1px 1px #ffffff",
                           filter: piece.color === "w" 
-                            ? "brightness(1.0) contrast(1.1) drop-shadow(1px 1px 2px rgba(0,0,0,0.7))"
-                            : "brightness(0.9) contrast(1.2) drop-shadow(1px 1px 2px rgba(255,255,255,0.6))",
-                          WebkitTextStroke: piece.color === "w" ? "0.5px #000000" : "0.5px #FFFFFF",
+                            ? "brightness(1.2) contrast(1.3) drop-shadow(2px 2px 4px rgba(0,0,0,0.8))"
+                            : "brightness(0.8) contrast(1.5) drop-shadow(2px 2px 4px rgba(255,255,255,0.8))",
+                          WebkitTextStroke: piece.color === "w" ? "1px #000000" : "1px #ffffff",
                         }}
                       >
                         {
