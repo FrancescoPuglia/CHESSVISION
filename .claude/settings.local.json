@@ -27,7 +27,8 @@
       "Bash(grep:*)",
       "Bash(npm run format:*)",
       "Bash(npm test)",
-      "Bash(npm run lint:*)"
+      "Bash(npm run lint:*)",
+      "WebFetch(domain:lichess.org)"
     ],
     "deny": []
   }

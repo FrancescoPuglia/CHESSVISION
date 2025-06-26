@@ -18,6 +18,8 @@ import { ReadMode } from "./ui/components/ReadMode";
 import { FlashcardMode } from "./ui/components/FlashcardMode";
 import { VoiceSettings } from "./ui/components/VoiceSettings";
 import { StreakCalendar } from "./ui/components/StreakCalendar";
+import { BlindModeService } from "./services/accessibility/BlindModeService";
+import { BlindModePanel } from "./ui/components/BlindModePanel";
 
 function App() {
   const { t, language, changeLanguage } = useTranslation();
@@ -45,13 +47,21 @@ function App() {
   const [showReadMode, setShowReadMode] = useState(false);
   const [showFlashcardMode, setShowFlashcardMode] = useState(false);
   const [showVoiceSettings, setShowVoiceSettings] = useState(false);
+  const [showBlindModePanel, setShowBlindModePanel] = useState(false);
   const [studyTimeLimit, setStudyTimeLimit] = useState(300); // 5 minutes default
   const [, setForceRerender] = useState(0);
   const speechService = useRef<SpeechService | null>(null);
+  const blindModeService = useRef<BlindModeService | null>(null);
 
-  // Initialize speech service
+  // Initialize speech service and blind mode
   useEffect(() => {
     speechService.current = new SpeechService();
+    blindModeService.current = new BlindModeService(speechService.current);
+    
+    // Set game reference for blind mode
+    if (blindModeService.current) {
+      blindModeService.current.setGame(gameState.game);
+    }
     speechService.current.setLanguage(language);
     setIsVoiceEnabled(speechService.current.isSupported());
   }, []);
@@ -523,7 +533,7 @@ function App() {
           </p>
         </div>
 
-        {/* Language Toggle */}
+        {/* Accessibility and Language Toggle */}
         <div
           style={{
             display: "flex",
@@ -531,6 +541,28 @@ function App() {
             alignItems: "center",
           }}
         >
+          {/* Accessibility Button - TOP PRIORITY */}
+          <button
+            onClick={() => setShowBlindModePanel(true)}
+            style={{
+              padding: "0.75rem 1rem",
+              backgroundColor: blindModeService.current?.isBlindModeEnabled() ? "#10b981" : "#6b7280",
+              color: "white",
+              border: "none",
+              borderRadius: "8px",
+              cursor: "pointer",
+              fontWeight: "bold",
+              fontSize: "0.9rem",
+              transition: "all 0.3s",
+              display: "flex",
+              alignItems: "center",
+              gap: "0.5rem",
+            }}
+            title="Accessibilità: Modalità per non vedenti e controlli vocali"
+            aria-label="Apri pannello accessibilità"
+          >
+            ♿ ACCESSIBILITÀ
+          </button>
           <button
             onClick={() => changeLanguage("en")}
             style={{
@@ -2102,6 +2134,16 @@ function App() {
         isVisible={showVoiceSettings}
         onClose={() => setShowVoiceSettings(false)}
       />
+
+      {/* Blind Mode Panel - ACCESSIBILITY SYSTEM */}
+      {blindModeService.current && (
+        <BlindModePanel
+          blindModeService={blindModeService.current}
+          speechService={speechService.current}
+          isVisible={showBlindModePanel}
+          onClose={() => setShowBlindModePanel(false)}
+        />
+      )}
     </div>
   );
 }
