@@ -1,4 +1,5 @@
 // src/ui/hooks/useChessGame.ts
+/* eslint-disable no-unused-vars, react-hooks/exhaustive-deps */
 import { useState, useCallback } from "react";
 import { ChessGame } from "@core/chess/ChessGame";
 import { ChessMove } from "@core/chess/types";

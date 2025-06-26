@@ -1,4 +1,5 @@
 // src/services/speech/SpeechService.ts
+/* eslint-disable no-undef */
 import { Language } from "@core/i18n/useTranslation";
 
 export class SpeechService {

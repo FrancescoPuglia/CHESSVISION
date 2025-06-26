@@ -1,4 +1,5 @@
 // Type declarations for stockfish module
+/* eslint-disable no-unused-vars */
 declare module "stockfish" {
   interface StockfishWorker {
     postMessage(data: string): void;

@@ -901,11 +901,13 @@ function App() {
               }}
               onMouseEnter={(e) => {
                 e.currentTarget.style.transform = "scale(1.05)";
-                e.currentTarget.style.boxShadow = "0 6px 20px rgba(220, 38, 38, 0.5)";
+                e.currentTarget.style.boxShadow =
+                  "0 6px 20px rgba(220, 38, 38, 0.5)";
               }}
               onMouseLeave={(e) => {
                 e.currentTarget.style.transform = "scale(1)";
-                e.currentTarget.style.boxShadow = "0 4px 15px rgba(220, 38, 38, 0.3)";
+                e.currentTarget.style.boxShadow =
+                  "0 4px 15px rgba(220, 38, 38, 0.3)";
               }}
             >
               🏆 MOTORE PROFESSIONALE (ELO 1200-3000)
@@ -1987,7 +1989,10 @@ function App() {
         onClose={() => {
           setShowProfessionalEngine(false);
           // Record professional engine game activity
-          (window as any).recordChessVisionActivity?.("professional_engine", 10);
+          (window as any).recordChessVisionActivity?.(
+            "professional_engine",
+            10,
+          );
         }}
         speechService={speechService.current}
         isVoiceEnabled={isVoiceEnabled}

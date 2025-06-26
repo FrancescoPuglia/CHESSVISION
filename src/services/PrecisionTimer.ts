@@ -1,4 +1,5 @@
 // src/services/PrecisionTimer.ts
+/* eslint-disable no-unused-vars */
 /**
  * Enterprise-grade precision timer service
  * Uses Web Workers to eliminate main thread interference

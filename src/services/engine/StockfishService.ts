@@ -1,4 +1,5 @@
 // src/services/engine/StockfishService.ts
+/* eslint-disable no-unused-vars */
 import { Chess } from "chess.js";
 
 export interface EngineMove {

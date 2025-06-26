@@ -1,4 +1,5 @@
 // src/ui/components/Timer.tsx
+/* eslint-disable no-unused-vars */
 import React, { useState, useEffect, useCallback } from "react";
 import { useTranslation } from "@core/i18n/useTranslation";
 

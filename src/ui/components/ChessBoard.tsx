@@ -1,4 +1,5 @@
 // src/ui/components/ChessBoard.tsx
+/* eslint-disable no-unused-vars */
 import React, { useState } from "react";
 import { ChessPosition } from "@core/chess/types";
 

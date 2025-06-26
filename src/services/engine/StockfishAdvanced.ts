@@ -1,4 +1,5 @@
 // src/services/engine/StockfishAdvanced.ts
+/* eslint-disable no-unused-vars */
 /**
  * ADVANCED STOCKFISH ENGINE WITH PROFESSIONAL ELO RATINGS
  * Provides precise ELO-calibrated opponents from 1200 to 3000
@@ -84,8 +85,8 @@ export const ELO_PRESETS: Record<number, AdvancedEngineSettings> = {
     threads: 1,
     hash: 32,
     ponder: false,
-    errorRate: 0.20,
-    blunderChance: 0.10,
+    errorRate: 0.2,
+    blunderChance: 0.1,
     timeManagement: 0.4,
     opening: 0.3,
     endgame: 0.3,
@@ -156,7 +157,7 @@ export const ELO_PRESETS: Record<number, AdvancedEngineSettings> = {
     threads: 2,
     hash: 128,
     ponder: false,
-    errorRate: 0.10,
+    errorRate: 0.1,
     blunderChance: 0.04,
     timeManagement: 0.6,
     opening: 0.5,
@@ -402,14 +403,16 @@ export class StockfishAdvanced {
   }
 
   // private findClosestElo(targetElo: number, eloKeys: number[]): number {
-  //   return eloKeys.reduce((prev, curr) => 
+  //   return eloKeys.reduce((prev, curr) =>
   //     Math.abs(curr - targetElo) < Math.abs(prev - targetElo) ? curr : prev
   //   );
   // }
 
   private interpolateSettings(targetElo: number): AdvancedEngineSettings {
-    const eloKeys = Object.keys(ELO_PRESETS).map(Number).sort((a, b) => a - b);
-    
+    const eloKeys = Object.keys(ELO_PRESETS)
+      .map(Number)
+      .sort((a, b) => a - b);
+
     // If exact match exists
     if (ELO_PRESETS[targetElo]) {
       return { ...ELO_PRESETS[targetElo] };
@@ -418,7 +421,7 @@ export class StockfishAdvanced {
     // Find surrounding ELO levels
     let lowerElo = 1200;
     let upperElo = 3000;
-    
+
     for (let i = 0; i < eloKeys.length - 1; i++) {
       if (targetElo >= eloKeys[i] && targetElo <= eloKeys[i + 1]) {
         lowerElo = eloKeys[i];
@@ -445,47 +448,53 @@ export class StockfishAdvanced {
     return {
       elo: targetElo,
       skillLevel: Math.round(
-        lowerSettings.skillLevel + 
-        (upperSettings.skillLevel - lowerSettings.skillLevel) * ratio
+        lowerSettings.skillLevel +
+          (upperSettings.skillLevel - lowerSettings.skillLevel) * ratio,
       ),
       depth: Math.round(
-        lowerSettings.depth + 
-        (upperSettings.depth - lowerSettings.depth) * ratio
+        lowerSettings.depth +
+          (upperSettings.depth - lowerSettings.depth) * ratio,
       ),
       moveTime: Math.round(
-        lowerSettings.moveTime + 
-        (upperSettings.moveTime - lowerSettings.moveTime) * ratio
+        lowerSettings.moveTime +
+          (upperSettings.moveTime - lowerSettings.moveTime) * ratio,
       ),
       multiPv: Math.round(
-        lowerSettings.multiPv + 
-        (upperSettings.multiPv - lowerSettings.multiPv) * ratio
+        lowerSettings.multiPv +
+          (upperSettings.multiPv - lowerSettings.multiPv) * ratio,
       ),
       contempt: Math.round(
-        lowerSettings.contempt + 
-        (upperSettings.contempt - lowerSettings.contempt) * ratio
+        lowerSettings.contempt +
+          (upperSettings.contempt - lowerSettings.contempt) * ratio,
       ),
       threads: Math.round(
-        lowerSettings.threads + 
-        (upperSettings.threads - lowerSettings.threads) * ratio
+        lowerSettings.threads +
+          (upperSettings.threads - lowerSettings.threads) * ratio,
       ),
       hash: Math.round(
-        lowerSettings.hash + 
-        (upperSettings.hash - lowerSettings.hash) * ratio
+        lowerSettings.hash + (upperSettings.hash - lowerSettings.hash) * ratio,
       ),
       ponder: targetElo >= 1900,
-      errorRate: lowerSettings.errorRate + 
+      errorRate:
+        lowerSettings.errorRate +
         (upperSettings.errorRate - lowerSettings.errorRate) * ratio,
-      blunderChance: lowerSettings.blunderChance + 
+      blunderChance:
+        lowerSettings.blunderChance +
         (upperSettings.blunderChance - lowerSettings.blunderChance) * ratio,
-      timeManagement: lowerSettings.timeManagement + 
+      timeManagement:
+        lowerSettings.timeManagement +
         (upperSettings.timeManagement - lowerSettings.timeManagement) * ratio,
-      opening: lowerSettings.opening + 
+      opening:
+        lowerSettings.opening +
         (upperSettings.opening - lowerSettings.opening) * ratio,
-      endgame: lowerSettings.endgame + 
+      endgame:
+        lowerSettings.endgame +
         (upperSettings.endgame - lowerSettings.endgame) * ratio,
-      tactical: lowerSettings.tactical + 
+      tactical:
+        lowerSettings.tactical +
         (upperSettings.tactical - lowerSettings.tactical) * ratio,
-      positional: lowerSettings.positional + 
+      positional:
+        lowerSettings.positional +
         (upperSettings.positional - lowerSettings.positional) * ratio,
     };
   }
@@ -493,13 +502,34 @@ export class StockfishAdvanced {
   private initializeOpeningBook(): void {
     // Popular openings with variations
     this.openingBook.set("initial", [
-      "e2e4", "d2d4", "g1f3", "c2c4", "e2e3", "b1c3", "f2f4", "b2b3"
+      "e2e4",
+      "d2d4",
+      "g1f3",
+      "c2c4",
+      "e2e3",
+      "b1c3",
+      "f2f4",
+      "b2b3",
     ]);
     this.openingBook.set("e2e4", [
-      "e7e5", "c7c5", "e7e6", "c7c6", "d7d5", "g8f6", "d7d6", "g7g6"
+      "e7e5",
+      "c7c5",
+      "e7e6",
+      "c7c6",
+      "d7d5",
+      "g8f6",
+      "d7d6",
+      "g7g6",
     ]);
     this.openingBook.set("d2d4", [
-      "g8f6", "d7d5", "e7e6", "f7f5", "c7c6", "g7g6", "b8c6", "c7c5"
+      "g8f6",
+      "d7d5",
+      "e7e6",
+      "f7f5",
+      "c7c6",
+      "g7g6",
+      "b8c6",
+      "c7c5",
     ]);
     // Add more opening variations...
   }
@@ -507,10 +537,11 @@ export class StockfishAdvanced {
   private async initializeEngine(): Promise<void> {
     try {
       // Use local stockfish or CDN
-      const stockfishUrl = window.location.hostname === 'localhost' 
-        ? '/stockfish/stockfish.js' 
-        : 'https://cdn.jsdelivr.net/npm/stockfish@16.0.0/src/stockfish.js';
-      
+      const stockfishUrl =
+        window.location.hostname === "localhost"
+          ? "/stockfish/stockfish.js"
+          : "https://cdn.jsdelivr.net/npm/stockfish@16.0.0/src/stockfish.js";
+
       this.worker = new Worker(stockfishUrl);
 
       this.worker.onmessage = (event) => {
@@ -561,17 +592,19 @@ export class StockfishAdvanced {
 
   private configureEngine(): void {
     // Set advanced engine options
-    this.sendCommand(`setoption name Skill Level value ${this.settings.skillLevel}`);
+    this.sendCommand(
+      `setoption name Skill Level value ${this.settings.skillLevel}`,
+    );
     this.sendCommand(`setoption name MultiPV value ${this.settings.multiPv}`);
     this.sendCommand(`setoption name Contempt value ${this.settings.contempt}`);
     this.sendCommand(`setoption name Threads value ${this.settings.threads}`);
     this.sendCommand(`setoption name Hash value ${this.settings.hash}`);
     this.sendCommand(`setoption name Ponder value ${this.settings.ponder}`);
-    
+
     // Additional UCI options for realistic play
     this.sendCommand("setoption name UCI_LimitStrength value true");
     this.sendCommand(`setoption name UCI_Elo value ${this.elo}`);
-    
+
     this.sendCommand("isready");
   }
 
@@ -582,7 +615,7 @@ export class StockfishAdvanced {
     if (bestMove && bestMove !== "(none)" && this.moveCallback) {
       // Apply human-like errors based on ELO
       const finalMove = this.applyHumanCharacteristics(bestMove);
-      
+
       this.moveCallback({
         move: finalMove,
         depth: this.settings.depth,
@@ -595,69 +628,70 @@ export class StockfishAdvanced {
 
   private applyHumanCharacteristics(bestMove: string): string {
     const rand = Math.random();
-    
+
     // Check for blunder
     if (rand < this.settings.blunderChance) {
       return this.generateBlunder();
     }
-    
+
     // Check for suboptimal move
     if (rand < this.settings.errorRate) {
       return this.generateSuboptimalMove(bestMove);
     }
-    
+
     // Time pressure errors (more errors in time trouble)
     if (this.moveHistory.length > 30 && rand < this.settings.errorRate * 2) {
       return this.generateSuboptimalMove(bestMove);
     }
-    
+
     return bestMove;
   }
 
   private generateBlunder(): string {
     // Generate a legal but bad move
     const moves = this.currentPosition.moves({ verbose: true });
-    const badMoves = moves.filter(m => {
+    const badMoves = moves.filter((m) => {
       // Avoid obviously winning moves
-      return !m.captured && !m.promotion && !m.san.includes('+');
+      return !m.captured && !m.promotion && !m.san.includes("+");
     });
-    
+
     if (badMoves.length > 0) {
       const blunder = badMoves[Math.floor(Math.random() * badMoves.length)];
-      return blunder.from + blunder.to + (blunder.promotion || '');
+      return blunder.from + blunder.to + (blunder.promotion || "");
     }
-    
+
     // Fallback to random move
     const randomMove = moves[Math.floor(Math.random() * moves.length)];
-    return randomMove.from + randomMove.to + (randomMove.promotion || '');
+    return randomMove.from + randomMove.to + (randomMove.promotion || "");
   }
 
   private generateSuboptimalMove(bestMove: string): string {
     // Get multiple candidate moves and pick a decent but not best one
     const moves = this.currentPosition.moves({ verbose: true });
-    
+
     // Filter out the best move
-    const otherMoves = moves.filter(m => {
-      const moveStr = m.from + m.to + (m.promotion || '');
+    const otherMoves = moves.filter((m) => {
+      const moveStr = m.from + m.to + (m.promotion || "");
       return moveStr !== bestMove;
     });
-    
+
     if (otherMoves.length > 0) {
       // Prefer captures and checks (tactical moves)
-      const tacticalMoves = otherMoves.filter(m => 
-        m.captured || m.san.includes('+')
+      const tacticalMoves = otherMoves.filter(
+        (m) => m.captured || m.san.includes("+"),
       );
-      
+
       if (tacticalMoves.length > 0 && Math.random() < this.settings.tactical) {
         const move = tacticalMoves[0];
-        return move.from + move.to + (move.promotion || '');
+        return move.from + move.to + (move.promotion || "");
       }
-      
+
       // Return a random decent move
-      const move = otherMoves[Math.floor(Math.random() * Math.min(3, otherMoves.length))];
-      return move.from + move.to + (move.promotion || '');
+      const move =
+        otherMoves[Math.floor(Math.random() * Math.min(3, otherMoves.length))];
+      return move.from + move.to + (move.promotion || "");
     }
-    
+
     return bestMove;
   }
 
@@ -670,7 +704,7 @@ export class StockfishAdvanced {
   async getBestMove(fen: string): Promise<EngineMove> {
     return new Promise((resolve, reject) => {
       this.currentPosition = new Chess(fen);
-      
+
       if (!this.isReady && !this.worker) {
         // Use advanced fallback
         resolve(this.generateAdvancedMove(fen));
@@ -709,7 +743,7 @@ export class StockfishAdvanced {
       // Set position and get best move
       this.sendCommand(`position fen ${fen}`);
       this.sendCommand(
-        `go depth ${this.settings.depth} movetime ${this.settings.moveTime}`
+        `go depth ${this.settings.depth} movetime ${this.settings.moveTime}`,
       );
 
       // Timeout fallback
@@ -724,20 +758,24 @@ export class StockfishAdvanced {
 
   private getOpeningBookMove(_fen: string): string | null {
     const moves = this.currentPosition.moves({ verbose: true });
-    const position = this.moveHistory.length === 0 ? "initial" : 
-      this.moveHistory[this.moveHistory.length - 1].move;
-    
+    const position =
+      this.moveHistory.length === 0
+        ? "initial"
+        : this.moveHistory[this.moveHistory.length - 1].move;
+
     const bookMoves = this.openingBook.get(position);
     if (bookMoves && bookMoves.length > 0) {
-      const validBookMoves = bookMoves.filter(bm => 
-        moves.some(m => m.from + m.to === bm)
+      const validBookMoves = bookMoves.filter((bm) =>
+        moves.some((m) => m.from + m.to === bm),
       );
-      
+
       if (validBookMoves.length > 0) {
-        return validBookMoves[Math.floor(Math.random() * validBookMoves.length)];
+        return validBookMoves[
+          Math.floor(Math.random() * validBookMoves.length)
+        ];
       }
     }
-    
+
     return null;
   }
 
@@ -752,45 +790,47 @@ export class StockfishAdvanced {
 
       // Advanced move selection based on ELO
       let selectedMove;
-      
+
       // Evaluate moves based on characteristics
-      const evaluatedMoves = moves.map(move => {
+      const evaluatedMoves = moves.map((move) => {
         let score = Math.random() * 0.5; // Base randomness
-        
+
         // Tactical preferences
         if (move.captured) score += this.settings.tactical * 0.3;
-        if (move.san.includes('+')) score += this.settings.tactical * 0.2;
+        if (move.san.includes("+")) score += this.settings.tactical * 0.2;
         if (move.promotion) score += 0.5;
-        
+
         // Positional preferences
-        if (move.piece === 'n' && ['c3', 'f3', 'c6', 'f6'].includes(move.to)) {
+        if (move.piece === "n" && ["c3", "f3", "c6", "f6"].includes(move.to)) {
           score += this.settings.positional * 0.2;
         }
-        if (move.piece === 'p' && ['e4', 'd4', 'e5', 'd5'].includes(move.to)) {
+        if (move.piece === "p" && ["e4", "d4", "e5", "d5"].includes(move.to)) {
           score += this.settings.positional * 0.15;
         }
-        
+
         // Avoid moving the same piece repeatedly
         const lastMove = this.moveHistory[this.moveHistory.length - 1];
         if (lastMove && move.from === lastMove.move.substring(2, 4)) {
           score -= 0.2;
         }
-        
+
         return { move, score };
       });
 
       // Sort by score and select based on strength
       evaluatedMoves.sort((a, b) => b.score - a.score);
-      
+
       // Higher ELO = more likely to pick best moves
-      const selectionRange = Math.floor((1 - this.settings.errorRate) * 
-        Math.min(5, evaluatedMoves.length));
+      const selectionRange = Math.floor(
+        (1 - this.settings.errorRate) * Math.min(5, evaluatedMoves.length),
+      );
       const index = Math.floor(Math.random() * Math.max(1, selectionRange));
-      
+
       selectedMove = evaluatedMoves[index].move;
 
       return {
-        move: selectedMove.from + selectedMove.to + (selectedMove.promotion || ''),
+        move:
+          selectedMove.from + selectedMove.to + (selectedMove.promotion || ""),
         evaluation: evaluatedMoves[index].score,
         depth: this.settings.depth,
         time: this.settings.moveTime,

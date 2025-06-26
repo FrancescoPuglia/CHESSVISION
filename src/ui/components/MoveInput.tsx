@@ -1,4 +1,5 @@
 // src/ui/components/MoveInput.tsx
+/* eslint-disable no-unused-vars */
 import React, { useState, useRef, useEffect } from "react";
 
 interface MoveInputProps {

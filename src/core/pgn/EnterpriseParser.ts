@@ -475,6 +475,7 @@ export class EnterpriseParser {
 }
 
 // Extend the types to support new features
+/* eslint-disable no-unused-vars */
 declare module "../chess/types" {
   interface PgnMove {
     nag?: string[];

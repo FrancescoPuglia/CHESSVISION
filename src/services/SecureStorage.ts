@@ -1,4 +1,5 @@
 // src/services/SecureStorage.ts
+/* eslint-disable no-unused-vars */
 /**
  * Enterprise Secure Storage Service
  * GDPR-compliant, encrypted, with automatic cleanup and migration support

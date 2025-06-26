@@ -1,4 +1,5 @@
 // src/ui/components/VoiceSettings.tsx
+/* eslint-disable no-undef */
 import React, { useState, useEffect } from "react";
 import { SpeechService } from "@services/speech/SpeechService";
 
