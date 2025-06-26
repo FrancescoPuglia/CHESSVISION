@@ -4,32 +4,44 @@ import { MoveInput } from './ui/components/MoveInput';
 import { GameStats } from './ui/components/GameStats';
 import { Timer } from './ui/components/Timer';
 import { useChessGame } from './ui/hooks/useChessGame';
+import { useTacticalTraining } from './ui/hooks/useTacticalTraining';
 import { useTranslation } from './core/i18n/useTranslation';
 import { translations } from './core/i18n/translations';
 import { SpeechService } from './services/speech/SpeechService';
 import { PgnParser, PgnCollection } from './core/pgn/PgnParser';
+import { FnsParser } from './core/fns/FnsParser';
 import { EngineGame } from './ui/components/EngineGame';
 import { StudyMode } from './ui/components/StudyMode';
+import { TacticalMode } from './ui/components/TacticalMode';
 import { ReadMode } from './ui/components/ReadMode';
 import { FlashcardMode } from './ui/components/FlashcardMode';
+import { VoiceSettings } from './ui/components/VoiceSettings';
 import { StreakCalendar } from './ui/components/StreakCalendar';
 
 function App() {
   const { t, language, changeLanguage } = useTranslation();
   const [gameState, gameActions] = useChessGame();
+  const [tacticalState, tacticalActions] = useTacticalTraining();
+  
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [isBoardVisible, setIsBoardVisible] = useState(true);
   const [isVoiceEnabled, setIsVoiceEnabled] = useState(false);
   const [isListening, setIsListening] = useState(false);
+  
+  // PGN Study System (Legacy)
   const [currentCollection, setCurrentCollection] = useState<PgnCollection | null>(null);
   const [currentStudyIndex, setCurrentStudyIndex] = useState(0);
   const [studyMoveIndex, setStudyMoveIndex] = useState(0);
+  
+  // UI State
   const [timeRemaining, setTimeRemaining] = useState(0);
   const [isTimerActive, setIsTimerActive] = useState(false);
   const [showEngineGame, setShowEngineGame] = useState(false);
   const [showStudyMode, setShowStudyMode] = useState(false);
+  const [showTacticalMode, setShowTacticalMode] = useState(false);
   const [showReadMode, setShowReadMode] = useState(false);
   const [showFlashcardMode, setShowFlashcardMode] = useState(false);
+  const [showVoiceSettings, setShowVoiceSettings] = useState(false);
   const [studyTimeLimit, setStudyTimeLimit] = useState(300); // 5 minutes default
   const [, setForceRerender] = useState(0);
   const speechService = useRef<SpeechService | null>(null);
@@ -301,15 +313,20 @@ function App() {
     try {
       const moves = study.moves.map((m: any) => m.san);
       
+      // Get the FEN from the study headers if available
+      const startingFen = study.headers?.FEN;
+      
       // Use ONLY the hook's loadStudyPosition method - no parallel state
-      const success = gameActions.loadStudyPosition(moves, moveIndex);
+      const success = gameActions.loadStudyPosition(moves, moveIndex, startingFen);
       
       if (success) {
         // Force re-render to ensure UI updates
         setForceRerender(prev => prev + 1);
         
         if (isVoiceEnabled && speechService.current) {
-          const position = moveIndex === 0 ? 'posizione iniziale' : `dopo ${moveIndex} moss${moveIndex === 1 ? 'a' : 'e'}`;
+          const position = moveIndex === 0 
+            ? (startingFen ? 'posizione studio' : 'posizione iniziale') 
+            : `dopo ${moveIndex} moss${moveIndex === 1 ? 'a' : 'e'}`;
           speechService.current.speak(`Caricata ${position} di ${PgnParser.getStudyTitle(study)}`);
         }
       }
@@ -352,11 +369,31 @@ function App() {
 
   const handleFileUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
-    if (file && file.name.endsWith('.pgn')) {
-      setSelectedFile(file);
+    
+    if (!file) return;
+    
+    setSelectedFile(file);
+    
+    try {
+      const text = await file.text();
       
-      try {
-        const text = await file.text();
+      if (file.name.endsWith('.fns')) {
+        // Handle FNS files (Lucas Chess format) for tactical training
+        const collection = FnsParser.parseFnsFile(text, file.name);
+        
+        if (collection.problems.length === 0) {
+          throw new Error('No valid tactical problems found in FNS file');
+        }
+        
+        tacticalActions.loadCollection(collection);
+        
+        if (isVoiceEnabled && speechService.current) {
+          const message = `${collection.problems.length} problemi tattici caricati da ${file.name}`;
+          speechService.current.speak(message);
+        }
+        
+      } else if (file.name.endsWith('.pgn')) {
+        // Handle PGN files (legacy study system)
         const collection = PgnParser.parseMultiple(text);
         
         if (collection.studies.length === 0) {
@@ -371,17 +408,19 @@ function App() {
         const firstStudy = collection.studies[0];
         loadStudyPosition(firstStudy, 0);
         
-
         if (isVoiceEnabled && speechService.current) {
           const message = collection.studies.length === 1 
             ? `${t('uploadSuccess')} ${PgnParser.getStudyTitle(firstStudy)}`
             : `${collection.studies.length} studi caricati. Studio corrente: ${PgnParser.getStudyTitle(firstStudy)}`;
           speechService.current.speak(message);
         }
-      } catch (error) {
-        console.error('Error reading file:', error);
-        alert(t('uploadError'));
+      } else {
+        throw new Error('Unsupported file format. Please use .pgn or .fns files.');
       }
+      
+    } catch (error) {
+      console.error('Error reading file:', error);
+      alert(error instanceof Error ? error.message : t('uploadError'));
     }
   };
 
@@ -587,6 +626,22 @@ function App() {
                     >
                       📍 {t('readPosition')}
                     </button>
+                    
+                    <button
+                      onClick={() => setShowVoiceSettings(true)}
+                      style={{
+                        padding: '0.75rem',
+                        backgroundColor: '#8b5cf6',
+                        color: 'white',
+                        border: 'none',
+                        borderRadius: '6px',
+                        cursor: 'pointer',
+                        fontSize: '0.85rem',
+                        gridColumn: '1 / 3'
+                      }}
+                    >
+                      ⚙️ Impostazioni Voce
+                    </button>
                   </div>
                 </>
               )}
@@ -598,8 +653,43 @@ function App() {
             <h2 style={{ color: '#ffd700', marginBottom: '1rem', fontSize: '1.4rem' }}>
               ⏱️ {t('timer')}
             </h2>
+            
+            {/* Timer Settings */}
+            <div style={{ marginBottom: '1rem' }}>
+              <label style={{ 
+                display: 'block',
+                color: '#a0a0a0',
+                fontSize: '0.9rem',
+                marginBottom: '0.5rem'
+              }}>
+                Tempo per posizione (minuti):
+              </label>
+              <select
+                value={Math.floor(studyTimeLimit / 60)}
+                onChange={(e) => setStudyTimeLimit(parseInt(e.target.value) * 60)}
+                style={{
+                  width: '100%',
+                  padding: '0.5rem',
+                  backgroundColor: '#2d3142',
+                  color: 'white',
+                  border: '1px solid #666',
+                  borderRadius: '4px',
+                  fontSize: '0.9rem'
+                }}
+              >
+                <option value={1}>1 minuto</option>
+                <option value={2}>2 minuti</option>
+                <option value={3}>3 minuti</option>
+                <option value={5}>5 minuti</option>
+                <option value={10}>10 minuti</option>
+                <option value={15}>15 minuti</option>
+                <option value={30}>30 minuti</option>
+                <option value={0}>Illimitato</option>
+              </select>
+            </div>
+            
             <Timer
-              initialMinutes={5}
+              initialMinutes={Math.floor(studyTimeLimit / 60)}
               onTimeUp={handleTimeUp}
               onTick={setTimeRemaining}
               autoStart={isTimerActive}
@@ -623,7 +713,7 @@ function App() {
             }}>
               <input
                 type="file"
-                accept=".pgn"
+                accept=".pgn,.fns"
                 onChange={handleFileUpload}
                 style={{ display: 'none' }}
               />
@@ -649,6 +739,48 @@ function App() {
             >
               Load Sample Study
             </button>
+            
+            <button
+              onClick={() => {
+                const sampleFns = FnsParser.createSampleFns();
+                const collection = FnsParser.parseFnsFile(sampleFns, 'Sample Tactics');
+                tacticalActions.loadCollection(collection);
+              }}
+              style={{
+                width: '100%',
+                marginTop: '1rem',
+                padding: '0.75rem',
+                backgroundColor: '#f59e0b',
+                color: 'white',
+                border: 'none',
+                borderRadius: '6px',
+                cursor: 'pointer',
+                fontSize: '0.9rem',
+                fontWeight: 'bold'
+              }}
+            >
+              🧩 Load Sample Tactics
+            </button>
+            
+            {tacticalState.currentCollection && (
+              <button
+                onClick={() => setShowTacticalMode(true)}
+                style={{
+                  width: '100%',
+                  marginTop: '1rem',
+                  padding: '0.75rem',
+                  backgroundColor: '#10b981',
+                  color: 'white',
+                  border: 'none',
+                  borderRadius: '6px',
+                  cursor: 'pointer',
+                  fontSize: '0.9rem',
+                  fontWeight: 'bold'
+                }}
+              >
+                🎯 Start Tactical Training ({tacticalState.currentCollection.problems.length} problems)
+              </button>
+            )}
             
             <button
               onClick={() => setShowEngineGame(true)}
@@ -1493,6 +1625,43 @@ function App() {
           isVoiceEnabled={isVoiceEnabled}
         />
       )}
+
+      {/* Tactical Mode Modal */}
+      {showTacticalMode && tacticalState.currentProblem && (
+        <TacticalMode
+          problem={tacticalState.currentProblem}
+          config={tacticalState.config}
+          onComplete={(solved, attempts, timeMs) => {
+            tacticalActions.submitSolution(attempts, timeMs, solved);
+            // Record tactical training activity
+            (window as any).recordChessVisionActivity?.('tactical', solved ? 15 : 5);
+          }}
+          onExit={() => {
+            setShowTacticalMode(false);
+            tacticalActions.stopTraining();
+          }}
+          onNext={() => {
+            tacticalActions.nextProblem();
+            if (tacticalState.currentProblemIndex >= (tacticalState.currentCollection?.problems.length || 0) - 1) {
+              setShowTacticalMode(false);
+              if (isVoiceEnabled && speechService.current) {
+                speechService.current.speak('Allenamento tattico completato! Ottimo lavoro!');
+              }
+            }
+          }}
+          speechService={speechService.current}
+          isVoiceEnabled={isVoiceEnabled}
+          problemNumber={tacticalState.currentProblemIndex + 1}
+          totalProblems={tacticalState.currentCollection?.problems.length || 0}
+        />
+      )}
+
+      {/* Voice Settings Modal */}
+      <VoiceSettings
+        speechService={speechService.current}
+        isVisible={showVoiceSettings}
+        onClose={() => setShowVoiceSettings(false)}
+      />
     </div>
   );
 }

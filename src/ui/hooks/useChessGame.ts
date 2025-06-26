@@ -20,7 +20,7 @@ export interface GameActions {
   makeMove: (moveText: string) => void;
   resetGame: () => void;
   loadPgnStudy: (pgnText: string) => void;
-  loadStudyPosition: (moves: string[], moveIndex: number) => boolean;
+  loadStudyPosition: (moves: string[], moveIndex: number, startingFen?: string) => boolean;
   undoMove: () => void;
   getHint: () => string;
   listPieces: () => string;
@@ -156,10 +156,10 @@ export const useChessGame = (): [GameState, GameActions] => {
     }
   }, [stats]);
 
-  const loadStudyPosition = useCallback((moves: string[], moveIndex: number): boolean => {
+  const loadStudyPosition = useCallback((moves: string[], moveIndex: number, startingFen?: string): boolean => {
     try {
-      // Create fresh game from starting position
-      const newGame = new ChessGame();
+      // Create game from starting FEN if provided, otherwise from standard position
+      const newGame = startingFen ? new ChessGame(startingFen) : new ChessGame();
       
       // Apply moves up to the specified index
       const appliedMoves: ChessMove[] = [];
@@ -186,7 +186,7 @@ export const useChessGame = (): [GameState, GameActions] => {
       setStudyIndex(moveIndex);
       
       const positionText = moveIndex === 0 
-        ? 'posizione iniziale' 
+        ? (startingFen ? 'posizione studio' : 'posizione iniziale')
         : `posizione dopo ${moveIndex} moss${moveIndex === 1 ? 'a' : 'e'}`;
         
       setMessage(`Caricata ${positionText}`, 'success');

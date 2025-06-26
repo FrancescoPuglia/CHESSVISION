@@ -7,10 +7,17 @@ export class SpeechService {
   private synthesis: SpeechSynthesis;
   private isListening = false;
   private language: Language = 'en';
+  private selectedVoice: SpeechSynthesisVoice | null = null;
+  private speechRate: number = 1;
+  private speechPitch: number = 1;
+  private speechVolume: number = 1;
 
   constructor() {
     this.synthesis = window.speechSynthesis;
     this.initRecognition();
+    
+    // Load voice preferences from localStorage
+    this.loadVoicePreferences();
   }
 
   private initRecognition(): void {
@@ -32,6 +39,97 @@ export class SpeechService {
     if (this.recognition) {
       this.recognition.lang = lang === 'it' ? 'it-IT' : 'en-US';
     }
+    
+    // Try to find a good default voice for the new language
+    this.autoSelectVoiceForLanguage();
+  }
+
+  private loadVoicePreferences(): void {
+    try {
+      const prefs = localStorage.getItem('chessvision-voice-prefs');
+      if (prefs) {
+        const parsed = JSON.parse(prefs);
+        this.speechRate = parsed.rate || 1;
+        this.speechPitch = parsed.pitch || 1;
+        this.speechVolume = parsed.volume || 1;
+        
+        if (parsed.voiceName) {
+          // Wait for voices to load, then select the saved voice
+          setTimeout(() => {
+            const voices = this.getAvailableVoices();
+            const savedVoice = voices.find(v => v.name === parsed.voiceName);
+            if (savedVoice) {
+              this.selectedVoice = savedVoice;
+            }
+          }, 100);
+        }
+      }
+    } catch (error) {
+      console.warn('Failed to load voice preferences:', error);
+    }
+  }
+
+  private saveVoicePreferences(): void {
+    try {
+      const prefs = {
+        voiceName: this.selectedVoice?.name,
+        rate: this.speechRate,
+        pitch: this.speechPitch,
+        volume: this.speechVolume
+      };
+      localStorage.setItem('chessvision-voice-prefs', JSON.stringify(prefs));
+    } catch (error) {
+      console.warn('Failed to save voice preferences:', error);
+    }
+  }
+
+  getAvailableVoices(): SpeechSynthesisVoice[] {
+    return this.synthesis.getVoices();
+  }
+
+  getVoicesForCurrentLanguage(): SpeechSynthesisVoice[] {
+    const langCode = this.language === 'it' ? 'it' : 'en';
+    return this.getAvailableVoices().filter(voice => 
+      voice.lang.startsWith(langCode)
+    );
+  }
+
+  setVoice(voice: SpeechSynthesisVoice | null): void {
+    this.selectedVoice = voice;
+    this.saveVoicePreferences();
+  }
+
+  setSpeechRate(rate: number): void {
+    this.speechRate = Math.max(0.1, Math.min(3, rate));
+    this.saveVoicePreferences();
+  }
+
+  setSpeechPitch(pitch: number): void {
+    this.speechPitch = Math.max(0, Math.min(2, pitch));
+    this.saveVoicePreferences();
+  }
+
+  setSpeechVolume(volume: number): void {
+    this.speechVolume = Math.max(0, Math.min(1, volume));
+    this.saveVoicePreferences();
+  }
+
+  getSpeechSettings() {
+    return {
+      rate: this.speechRate,
+      pitch: this.speechPitch,
+      volume: this.speechVolume,
+      voice: this.selectedVoice
+    };
+  }
+
+  private autoSelectVoiceForLanguage(): void {
+    const voices = this.getVoicesForCurrentLanguage();
+    if (voices.length > 0) {
+      // Prefer local voices
+      const localVoice = voices.find(v => v.localService);
+      this.selectedVoice = localVoice || voices[0];
+    }
   }
 
   async speak(text: string, options: { rate?: number; pitch?: number; volume?: number } = {}): Promise<void> {
@@ -46,9 +144,16 @@ export class SpeechService {
 
       const utterance = new SpeechSynthesisUtterance(text);
       utterance.lang = this.language === 'it' ? 'it-IT' : 'en-US';
-      utterance.rate = options.rate || 1;
-      utterance.pitch = options.pitch || 1;
-      utterance.volume = options.volume || 1;
+      
+      // Use selected voice if available
+      if (this.selectedVoice) {
+        utterance.voice = this.selectedVoice;
+      }
+      
+      // Use saved settings or provided options
+      utterance.rate = options.rate || this.speechRate;
+      utterance.pitch = options.pitch || this.speechPitch;
+      utterance.volume = options.volume || this.speechVolume;
 
       utterance.onend = () => resolve();
       utterance.onerror = (e) => reject(new Error(`Speech error: ${e.error}`));

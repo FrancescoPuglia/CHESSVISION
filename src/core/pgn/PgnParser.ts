@@ -45,37 +45,46 @@ export class PgnParser {
     
     let currentGame = '';
     let inGame = false;
-    let foundFirstHeader = false;
+    let hasMovesInCurrentGame = false;
     
     for (const line of lines) {
       const trimmedLine = line.trim();
       
+      // Skip empty lines when not in a game
+      if (!trimmedLine && !inGame) {
+        continue;
+      }
+      
       // Check if this is a header line
       if (trimmedLine.startsWith('[') && trimmedLine.includes('"')) {
-        // This is a header line
-        
-        // If this is an Event header and we already have a game, save the previous one
-        if (trimmedLine.startsWith('[Event') && foundFirstHeader && inGame && currentGame.trim()) {
+        // If this is an Event header and we already have a complete game, save it
+        if (trimmedLine.startsWith('[Event') && inGame && hasMovesInCurrentGame && currentGame.trim()) {
           games.push(currentGame.trim());
           currentGame = '';
+          hasMovesInCurrentGame = false;
         }
         
         // Add this header to current game
         currentGame += line + '\n';
         inGame = true;
         
-        // Mark that we found at least one header
-        if (trimmedLine.startsWith('[Event')) {
-          foundFirstHeader = true;
-        }
       } else if (inGame) {
-        // This is either moves, comments, or empty lines - add to current game
+        // This is moves, comments, or continuation
         currentGame += line + '\n';
+        
+        // Check if this line contains actual moves (not just comments or empty)
+        if (trimmedLine && !trimmedLine.startsWith('{') && !trimmedLine.startsWith(';')) {
+          // Look for chess moves pattern
+          const movePattern = /\b[a-h][1-8]\b|\b[NBRQK][a-h]?[1-8]?\b|\bO-O\b/;
+          if (movePattern.test(trimmedLine)) {
+            hasMovesInCurrentGame = true;
+          }
+        }
       }
     }
     
-    // Don't forget the last game
-    if (inGame && currentGame.trim()) {
+    // Don't forget the last game if it has moves
+    if (inGame && hasMovesInCurrentGame && currentGame.trim()) {
       games.push(currentGame.trim());
     }
     
