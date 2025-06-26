@@ -189,6 +189,74 @@ export const AdvancedChessboard: React.FC<AdvancedChessboardProps> = ({
     updateBoardDOM(newBoardState);
   }, [gameToSquares, updateBoardDOM]);
 
+  // Helper functions for SVG elements
+  const createArrowElement = useCallback((from: string, to: string, color: string, opacity = 0.8): SVGElement => {
+    const arrow = document.createElementNS('http://www.w3.org/2000/svg', 'g');
+    arrow.setAttribute('class', 'annotation-arrow');
+    
+    const fromCoords = squareToCoordinates(from);
+    const toCoords = squareToCoordinates(to);
+    
+    const line = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+    line.setAttribute('x1', fromCoords.x.toString());
+    line.setAttribute('y1', fromCoords.y.toString());
+    line.setAttribute('x2', toCoords.x.toString());
+    line.setAttribute('y2', toCoords.y.toString());
+    line.setAttribute('stroke', color);
+    line.setAttribute('stroke-width', '8');
+    line.setAttribute('stroke-opacity', opacity.toString());
+    line.setAttribute('marker-end', 'url(#arrowhead)');
+    
+    arrow.appendChild(line);
+    return arrow;
+  }, []);
+
+  const createCircleElement = useCallback((square: string, color: string, opacity = 0.6): SVGElement => {
+    const circle = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+    const coords = squareToCoordinates(square);
+    
+    circle.setAttribute('cx', coords.x.toString());
+    circle.setAttribute('cy', coords.y.toString());
+    circle.setAttribute('r', '30');
+    circle.setAttribute('fill', 'none');
+    circle.setAttribute('stroke', color);
+    circle.setAttribute('stroke-width', '6');
+    circle.setAttribute('stroke-opacity', opacity.toString());
+    circle.setAttribute('class', 'annotation-circle');
+    
+    return circle;
+  }, []);
+
+  const createGhostPiece = useCallback((piece: ChessSquare['piece'], x: number, y: number): SVGElement => {
+    const ghost = document.createElementNS('http://www.w3.org/2000/svg', 'image');
+    ghost.setAttribute('href', `/pieces/${customPieceSet}/${piece!.color}${piece!.type.toUpperCase()}.svg`);
+    ghost.setAttribute('x', (x - 25).toString());
+    ghost.setAttribute('y', (y - 25).toString());
+    ghost.setAttribute('width', '50');
+    ghost.setAttribute('height', '50');
+    ghost.setAttribute('opacity', '0.8');
+    ghost.setAttribute('class', 'drag-ghost');
+    return ghost;
+  }, [customPieceSet]);
+
+  const coordinatesToSquare = useCallback((x: number, y: number): string | null => {
+    if (!boardRef.current) return null;
+    
+    const rect = boardRef.current.getBoundingClientRect();
+    const squareSize = rect.width / 8;
+    const fileIndex = Math.floor((x - rect.left) / squareSize);
+    const rankIndex = Math.floor((y - rect.top) / squareSize);
+    
+    if (fileIndex < 0 || fileIndex > 7 || rankIndex < 0 || rankIndex > 7) {
+      return null;
+    }
+    
+    const file = String.fromCharCode(97 + (orientation === 'white' ? fileIndex : 7 - fileIndex));
+    const rank = orientation === 'white' ? 8 - rankIndex : rankIndex + 1;
+    
+    return `${file}${rank}`;
+  }, [orientation]);
+
   // SVG overlay management
   const updateSVGOverlay = useCallback(() => {
     if (!svgRef.current) return;
@@ -212,57 +280,7 @@ export const AdvancedChessboard: React.FC<AdvancedChessboardProps> = ({
       const ghost = createGhostPiece(dragState.piece, dragState.currentX, dragState.currentY);
       svg.appendChild(ghost);
     }
-  }, [annotations, dragState]);
-
-  // Helper functions for SVG elements
-  const createArrowElement = (from: string, to: string, color: string, opacity = 0.8): SVGElement => {
-    const arrow = document.createElementNS('http://www.w3.org/2000/svg', 'g');
-    arrow.setAttribute('class', 'annotation-arrow');
-    
-    const fromCoords = squareToCoordinates(from);
-    const toCoords = squareToCoordinates(to);
-    
-    const line = document.createElementNS('http://www.w3.org/2000/svg', 'line');
-    line.setAttribute('x1', fromCoords.x.toString());
-    line.setAttribute('y1', fromCoords.y.toString());
-    line.setAttribute('x2', toCoords.x.toString());
-    line.setAttribute('y2', toCoords.y.toString());
-    line.setAttribute('stroke', color);
-    line.setAttribute('stroke-width', '8');
-    line.setAttribute('stroke-opacity', opacity.toString());
-    line.setAttribute('marker-end', 'url(#arrowhead)');
-    
-    arrow.appendChild(line);
-    return arrow;
-  };
-
-  const createCircleElement = (square: string, color: string, opacity = 0.6): SVGElement => {
-    const circle = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
-    const coords = squareToCoordinates(square);
-    
-    circle.setAttribute('cx', coords.x.toString());
-    circle.setAttribute('cy', coords.y.toString());
-    circle.setAttribute('r', '30');
-    circle.setAttribute('fill', 'none');
-    circle.setAttribute('stroke', color);
-    circle.setAttribute('stroke-width', '6');
-    circle.setAttribute('stroke-opacity', opacity.toString());
-    circle.setAttribute('class', 'annotation-circle');
-    
-    return circle;
-  };
-
-  const createGhostPiece = (piece: ChessSquare['piece'], x: number, y: number): SVGElement => {
-    const ghost = document.createElementNS('http://www.w3.org/2000/svg', 'image');
-    ghost.setAttribute('href', `/pieces/${customPieceSet}/${piece!.color}${piece!.type.toUpperCase()}.svg`);
-    ghost.setAttribute('x', (x - 25).toString());
-    ghost.setAttribute('y', (y - 25).toString());
-    ghost.setAttribute('width', '50');
-    ghost.setAttribute('height', '50');
-    ghost.setAttribute('opacity', '0.8');
-    ghost.setAttribute('class', 'drag-ghost');
-    return ghost;
-  };
+  }, [annotations, dragState, createArrowElement, createCircleElement, createGhostPiece]);
 
   const squareToCoordinates = (square: string): {x: number, y: number} => {
     const file = square.charCodeAt(0) - 97; // a-h to 0-7
@@ -273,24 +291,6 @@ export const AdvancedChessboard: React.FC<AdvancedChessboardProps> = ({
     const y = (orientation === 'white' ? 7 - rank : rank) * squareSize + squareSize / 2;
     
     return { x, y };
-  };
-
-  const coordinatesToSquare = (x: number, y: number): string | null => {
-    if (!boardRef.current) return null;
-    
-    const rect = boardRef.current.getBoundingClientRect();
-    const squareSize = rect.width / 8;
-    const fileIndex = Math.floor((x - rect.left) / squareSize);
-    const rankIndex = Math.floor((y - rect.top) / squareSize);
-    
-    if (fileIndex < 0 || fileIndex > 7 || rankIndex < 0 || rankIndex > 7) {
-      return null;
-    }
-    
-    const file = String.fromCharCode(97 + (orientation === 'white' ? fileIndex : 7 - fileIndex));
-    const rank = orientation === 'white' ? 8 - rankIndex : rankIndex + 1;
-    
-    return `${file}${rank}`;
   };
 
   // Mouse/touch event handlers
@@ -393,7 +393,7 @@ export const AdvancedChessboard: React.FC<AdvancedChessboardProps> = ({
         currentY: 0,
       });
     }
-  }, [dragState, coordinatesToSquare, onMove]);
+  }, [dragState, onMove, coordinatesToSquare]);
 
   // Update SVG overlay when drag state changes
   useEffect(() => {

@@ -28,7 +28,9 @@
       "Bash(npm run format:*)",
       "Bash(npm test)",
       "Bash(npm run lint:*)",
-      "WebFetch(domain:lichess.org)"
+      "WebFetch(domain:lichess.org)",
+      "Bash(dos2unix:*)",
+      "Bash(sed:*)"
     ],
     "deny": []
   }

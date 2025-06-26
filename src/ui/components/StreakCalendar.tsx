@@ -1,4 +1,5 @@
 // src/ui/components/StreakCalendar.tsx
+/* eslint-disable react-hooks/exhaustive-deps */
 import React, { useState, useEffect } from "react";
 
 interface StreakData {

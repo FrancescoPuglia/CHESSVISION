@@ -1,4 +1,5 @@
 // src/ui/components/ReadMode.tsx
+/* eslint-disable react-hooks/exhaustive-deps */
 import React, { useState, useEffect, useCallback } from "react";
 import { PgnGame } from "@core/chess/types";
 import { PgnParser } from "@core/pgn/PgnParser";

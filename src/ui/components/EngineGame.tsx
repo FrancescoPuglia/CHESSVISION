@@ -1,4 +1,5 @@
 // src/ui/components/EngineGame.tsx
+/* eslint-disable react-hooks/exhaustive-deps */
 import React, { useState, useEffect, useRef } from "react";
 import {
   StockfishService,

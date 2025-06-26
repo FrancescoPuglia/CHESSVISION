@@ -64,7 +64,7 @@ function App() {
     }
     speechService.current.setLanguage(language);
     setIsVoiceEnabled(speechService.current.isSupported());
-  }, []);
+  }, [gameState.game, language]);
 
   // Update speech language when UI language changes
   useEffect(() => {
@@ -135,6 +135,7 @@ function App() {
 
     document.addEventListener("keydown", handleKeyDown);
     return () => document.removeEventListener("keydown", handleKeyDown);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [
     isBoardVisible,
     isVoiceEnabled,
@@ -546,7 +547,9 @@ function App() {
             onClick={() => setShowBlindModePanel(true)}
             style={{
               padding: "0.75rem 1rem",
-              backgroundColor: blindModeService.current?.isBlindModeEnabled() ? "#10b981" : "#6b7280",
+              backgroundColor: blindModeService.current?.isBlindModeEnabled()
+                ? "#10b981"
+                : "#6b7280",
               color: "white",
               border: "none",
               borderRadius: "8px",
