@@ -57,7 +57,7 @@ function App() {
   useEffect(() => {
     speechService.current = new SpeechService();
     blindModeService.current = new BlindModeService(speechService.current);
-    
+
     // Set game reference for blind mode
     if (blindModeService.current) {
       blindModeService.current.setGame(gameState.game);
@@ -135,7 +135,7 @@ function App() {
 
     document.addEventListener("keydown", handleKeyDown);
     return () => document.removeEventListener("keydown", handleKeyDown);
-  // eslint-disable-next-line react-hooks/exhaustive-deps
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [
     isBoardVisible,
     isVoiceEnabled,

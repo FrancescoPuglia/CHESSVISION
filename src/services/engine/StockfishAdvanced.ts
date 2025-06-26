@@ -51,7 +51,7 @@ export const ELO_PRESETS: Record<number, AdvancedEngineSettings> = {
     hash: 16,
     ponder: false,
     errorRate: 0.35,
-    blunderChance: 0.20,
+    blunderChance: 0.2,
     timeManagement: 0.3,
     opening: 0.2,
     endgame: 0.2,
@@ -68,7 +68,7 @@ export const ELO_PRESETS: Record<number, AdvancedEngineSettings> = {
     threads: 1,
     hash: 16,
     ponder: false,
-    errorRate: 0.30,
+    errorRate: 0.3,
     blunderChance: 0.15,
     timeManagement: 0.35,
     opening: 0.25,
@@ -104,8 +104,8 @@ export const ELO_PRESETS: Record<number, AdvancedEngineSettings> = {
     threads: 1,
     hash: 32,
     ponder: false,
-    errorRate: 0.20,
-    blunderChance: 0.10,
+    errorRate: 0.2,
+    blunderChance: 0.1,
     timeManagement: 0.45,
     opening: 0.35,
     endgame: 0.35,
@@ -158,7 +158,7 @@ export const ELO_PRESETS: Record<number, AdvancedEngineSettings> = {
     threads: 2,
     hash: 128,
     ponder: false,
-    errorRate: 0.10,
+    errorRate: 0.1,
     blunderChance: 0.05,
     timeManagement: 0.6,
     opening: 0.5,
@@ -564,14 +564,14 @@ export class StockfishAdvanced {
 
   private createFallbackEngine(): void {
     console.warn("Using advanced fallback engine - trying alternative URL");
-    
+
     // Try alternative Stockfish URLs
     const alternativeUrls = [
       "https://cdn.jsdelivr.net/npm/stockfish@16/src/stockfish.js",
       "https://unpkg.com/stockfish.js@16.1.0/stockfish.js",
-      "https://cdnjs.cloudflare.com/ajax/libs/stockfish.js/16.0.0/stockfish.js"
+      "https://cdnjs.cloudflare.com/ajax/libs/stockfish.js/16.0.0/stockfish.js",
     ];
-    
+
     for (const url of alternativeUrls) {
       try {
         this.worker = new Worker(url);
@@ -587,7 +587,7 @@ export class StockfishAdvanced {
         // Try next URL
       }
     }
-    
+
     // If all fail, mark as ready for pure fallback
     this.isReady = true;
     if (this.readyCallback) {
@@ -620,25 +620,25 @@ export class StockfishAdvanced {
     // Use UCI_LimitStrength and UCI_Elo for accurate ELO control
     // Note: UCI_Elo range is 1320-3190 according to Stockfish documentation
     const uciElo = Math.max(1320, Math.min(3190, this.elo));
-    
+
     // First set UCI_LimitStrength to enable ELO mode
     this.sendCommand("setoption name UCI_LimitStrength value true");
     this.sendCommand(`setoption name UCI_Elo value ${uciElo}`);
-    
+
     // For ELOs below 2000, also use Skill Level for additional weakening
     if (this.elo < 2000) {
       this.sendCommand(
         `setoption name Skill Level value ${this.settings.skillLevel}`,
       );
     }
-    
+
     // Set other engine parameters
     this.sendCommand(`setoption name MultiPV value ${this.settings.multiPv}`);
     this.sendCommand(`setoption name Contempt value ${this.settings.contempt}`);
     this.sendCommand(`setoption name Threads value ${this.settings.threads}`);
     this.sendCommand(`setoption name Hash value ${this.settings.hash}`);
     this.sendCommand(`setoption name Ponder value ${this.settings.ponder}`);
-    
+
     // Additional settings for realistic play
     this.sendCommand("setoption name Move Overhead value 30");
     this.sendCommand("setoption name Slow Mover value 84");
@@ -675,7 +675,7 @@ export class StockfishAdvanced {
       }
       return bestMove;
     }
-    
+
     // For lower ELOs, apply more human-like errors
     const rand = Math.random();
 
@@ -792,7 +792,7 @@ export class StockfishAdvanced {
 
       // Set position and get best move
       this.sendCommand(`position fen ${fen}`);
-      
+
       // For stronger players (2000+), use pure time control
       // For weaker players, combine depth and time limits
       if (this.elo >= 2000) {

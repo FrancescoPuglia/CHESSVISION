@@ -92,6 +92,7 @@ export const StudyMode: React.FC<StudyModeProps> = ({
         clearTimeout(timerRef.current);
       }
     };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [state.isTimerActive, state.timeRemaining]);
 
   // Voice announcement on move changes
@@ -110,6 +111,7 @@ export const StudyMode: React.FC<StudyModeProps> = ({
 
       return () => clearTimeout(timer);
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isVoiceEnabled, speechService]);
 
   const speakInitialPosition = async () => {

@@ -10,7 +10,7 @@ import { SpeechService } from "@services/speech/SpeechService";
 export interface BlindModeCommand {
   command: string;
   description: string;
-  handler: (args?: string) => Promise<string>;
+  handler: () => Promise<string>;
 }
 
 export interface BlindModeSettings {
@@ -40,11 +40,11 @@ export class BlindModeService {
   }
 
   private loadSettings(): BlindModeSettings {
-    const stored = localStorage.getItem('chessvision-blind-mode-settings');
+    const stored = localStorage.getItem("chessvision-blind-mode-settings");
     if (stored) {
       return JSON.parse(stored);
     }
-    
+
     return {
       enabled: false,
       voiceSpeed: 1.0,
@@ -58,81 +58,84 @@ export class BlindModeService {
   }
 
   private saveSettings(): void {
-    localStorage.setItem('chessvision-blind-mode-settings', JSON.stringify(this.settings));
+    localStorage.setItem(
+      "chessvision-blind-mode-settings",
+      JSON.stringify(this.settings),
+    );
   }
 
   private initializeCommands(): void {
     // Lichess-inspired command system
-    this.commands.set('l', {
-      command: 'l',
-      description: 'Annuncia ultima mossa',
+    this.commands.set("l", {
+      command: "l",
+      description: "Annuncia ultima mossa",
       handler: () => this.announceLastMove(),
     });
 
-    this.commands.set('p', {
-      command: 'p',
-      description: 'Annuncia posizione di tutti i pezzi',
+    this.commands.set("p", {
+      command: "p",
+      description: "Annuncia posizione di tutti i pezzi",
       handler: () => this.announceAllPieces(),
     });
 
-    this.commands.set('s', {
-      command: 's',
-      description: 'Annuncia pezzi per traverse e colonne',
+    this.commands.set("s", {
+      command: "s",
+      description: "Annuncia pezzi per traverse e colonne",
       handler: () => this.announcePiecesByRankFile(),
     });
 
-    this.commands.set('o', {
-      command: 'o',
-      description: 'Informazioni avversario',
+    this.commands.set("o", {
+      command: "o",
+      description: "Informazioni avversario",
       handler: () => this.announceOpponentInfo(),
     });
 
-    this.commands.set('c', {
-      command: 'c',
-      description: 'Stato del tempo',
+    this.commands.set("c", {
+      command: "c",
+      description: "Stato del tempo",
       handler: () => this.announceClockStatus(),
     });
 
-    this.commands.set('board', {
-      command: 'board',
-      description: 'Descrizione completa della scacchiera',
+    this.commands.set("board", {
+      command: "board",
+      description: "Descrizione completa della scacchiera",
       handler: () => this.announceBoardDescription(),
     });
 
-    this.commands.set('turn', {
-      command: 'turn',
-      description: 'Chi deve muovere',
+    this.commands.set("turn", {
+      command: "turn",
+      description: "Chi deve muovere",
       handler: () => this.announceTurn(),
     });
 
-    this.commands.set('material', {
-      command: 'material',
-      description: 'Bilancio materiale',
+    this.commands.set("material", {
+      command: "material",
+      description: "Bilancio materiale",
       handler: () => this.announceMaterialBalance(),
     });
 
-    this.commands.set('legal', {
-      command: 'legal',
-      description: 'Mosse legali disponibili',
+    this.commands.set("legal", {
+      command: "legal",
+      description: "Mosse legali disponibili",
       handler: () => this.announceLegalMoves(),
     });
 
-    this.commands.set('help', {
-      command: 'help',
-      description: 'Lista comandi disponibili',
+    this.commands.set("help", {
+      command: "help",
+      description: "Lista comandi disponibili",
       handler: () => this.announceHelp(),
     });
   }
 
   private setupKeyboardListeners(): void {
-    document.addEventListener('keydown', (event) => {
+    document.addEventListener("keydown", (event) => {
       if (!this.isEnabled || !this.settings.keyboardNavigationEnabled) return;
 
       // Alt + key combinations for accessibility commands
       if (event.altKey) {
         const key = event.key.toLowerCase();
         const command = this.commands.get(key);
-        
+
         if (command) {
           event.preventDefault();
           command.handler();
@@ -140,7 +143,7 @@ export class BlindModeService {
       }
 
       // Escape to announce current focus
-      if (event.key === 'Escape') {
+      if (event.key === "Escape") {
         this.announceCurrentFocus();
       }
     });
@@ -163,27 +166,30 @@ export class BlindModeService {
 
   private setupAccessibilityAttributes(): void {
     // Add ARIA labels and roles for screen readers
-    document.body.setAttribute('aria-label', 'ChessVision - Modalità Accessibilità Attiva');
-    
+    document.body.setAttribute(
+      "aria-label",
+      "ChessVision - Modalità Accessibilità Attiva",
+    );
+
     // Mark important chess elements
-    const chessboard = document.querySelector('.chessboard');
+    const chessboard = document.querySelector(".chessboard");
     if (chessboard) {
-      chessboard.setAttribute('role', 'grid');
-      chessboard.setAttribute('aria-label', 'Scacchiera');
+      chessboard.setAttribute("role", "grid");
+      chessboard.setAttribute("aria-label", "Scacchiera");
     }
 
     // Add live regions for announcements
-    const liveRegion = document.createElement('div');
-    liveRegion.id = 'chess-live-region';
-    liveRegion.setAttribute('aria-live', 'polite');
-    liveRegion.setAttribute('aria-atomic', 'true');
-    liveRegion.style.position = 'absolute';
-    liveRegion.style.left = '-9999px';
+    const liveRegion = document.createElement("div");
+    liveRegion.id = "chess-live-region";
+    liveRegion.setAttribute("aria-live", "polite");
+    liveRegion.setAttribute("aria-atomic", "true");
+    liveRegion.style.position = "absolute";
+    liveRegion.style.left = "-9999px";
     document.body.appendChild(liveRegion);
   }
 
   private removeAccessibilityAttributes(): void {
-    const liveRegion = document.getElementById('chess-live-region');
+    const liveRegion = document.getElementById("chess-live-region");
     if (liveRegion) {
       liveRegion.remove();
     }
@@ -197,7 +203,7 @@ export class BlindModeService {
     if (!this.isEnabled) return "Modalità accessibility non attiva";
 
     const cleanInput = input.trim().toLowerCase();
-    
+
     // Check if it's a chess move
     if (this.isChessMove(cleanInput)) {
       return this.processMoveCommand(cleanInput);
@@ -214,7 +220,8 @@ export class BlindModeService {
 
   private isChessMove(input: string): boolean {
     // Basic chess move validation
-    const movePattern = /^[a-h][1-8][a-h][1-8][qrbn]?$|^[KQRBN]?[a-h]?[1-8]?x?[a-h][1-8]=?[QRBN]?[+#]?$|^O-O(-O)?[+#]?$/i;
+    const movePattern =
+      /^[a-h][1-8][a-h][1-8][qrbn]?$|^[KQRBN]?[a-h]?[1-8]?x?[a-h][1-8]=?[QRBN]?[+#]?$|^O-O(-O)?[+#]?$/i;
     return movePattern.test(input);
   }
 
@@ -226,7 +233,7 @@ export class BlindModeService {
       if (result) {
         this.lastMove = result.san;
         await this.announceMoveExecuted(result.san);
-        
+
         // Check for special game states
         if (this.game.isCheck()) {
           await this.speak("Scacco!");
@@ -276,20 +283,20 @@ export class BlindModeService {
           const file = String.fromCharCode(97 + fileIndex); // a-h
           const rank = 8 - rankIndex; // 8-1
           const square = `${file}${rank}`;
-          
+
           const pieceNames: { [key: string]: string } = {
             p: "Pedone",
-            r: "Torre", 
+            r: "Torre",
             n: "Cavallo",
             b: "Alfiere",
             q: "Donna",
             k: "Re",
           };
-          
+
           const pieceName = pieceNames[piece.type] || piece.type;
           const description = `${pieceName} in ${square}`;
-          
-          if (piece.color === 'w') {
+
+          if (piece.color === "w") {
             whitePieces.push(description);
           } else {
             blackPieces.push(description);
@@ -324,16 +331,20 @@ export class BlindModeService {
     for (let rankIndex = 0; rankIndex < 8; rankIndex++) {
       const rank = 8 - rankIndex;
       const pieces: string[] = [];
-      
+
       board[rankIndex].forEach((piece, fileIndex) => {
         if (piece) {
           const file = String.fromCharCode(97 + fileIndex);
           const pieceNames: { [key: string]: string } = {
-            p: "pedone", r: "torre", n: "cavallo", 
-            b: "alfiere", q: "donna", k: "re",
+            p: "pedone",
+            r: "torre",
+            n: "cavallo",
+            b: "alfiere",
+            q: "donna",
+            k: "re",
           };
           const pieceName = pieceNames[piece.type] || piece.type;
-          const color = piece.color === 'w' ? 'bianco' : 'nero';
+          const color = piece.color === "w" ? "bianco" : "nero";
           pieces.push(`${pieceName} ${color} in ${file}`);
         }
       });
@@ -367,9 +378,9 @@ export class BlindModeService {
     }
 
     const fen = this.game.getFen();
-    const turn = this.game.getTurn() === 'white' ? 'bianco' : 'nero';
+    const turn = this.game.getTurn() === "white" ? "bianco" : "nero";
     const message = `Descrizione scacchiera. È il turno del ${turn}. Posizione FEN: ${fen}`;
-    
+
     await this.speak(message);
     return message;
   }
@@ -381,7 +392,7 @@ export class BlindModeService {
       return message;
     }
 
-    const turn = this.game.getTurn() === 'white' ? 'bianco' : 'nero';
+    const turn = this.game.getTurn() === "white" ? "bianco" : "nero";
     const message = `È il turno del ${turn}`;
     await this.speak(message);
     return message;
@@ -398,14 +409,19 @@ export class BlindModeService {
     const board = this.game.getBoard();
     const material = { white: 0, black: 0 };
     const pieceValues: { [key: string]: number } = {
-      p: 1, r: 5, n: 3, b: 3, q: 9, k: 0
+      p: 1,
+      r: 5,
+      n: 3,
+      b: 3,
+      q: 9,
+      k: 0,
     };
 
-    board.forEach(row => {
-      row.forEach(piece => {
+    board.forEach((row) => {
+      row.forEach((piece) => {
         if (piece) {
           const value = pieceValues[piece.type] || 0;
-          if (piece.color === 'w') {
+          if (piece.color === "w") {
             material.white += value;
           } else {
             material.black += value;
@@ -416,7 +432,7 @@ export class BlindModeService {
 
     const difference = material.white - material.black;
     let message = `Bilancio materiale: Bianco ${material.white}, Nero ${material.black}. `;
-    
+
     if (difference > 0) {
       message += `Il bianco è avanti di ${difference} punti.`;
     } else if (difference < 0) {
@@ -444,9 +460,9 @@ export class BlindModeService {
 
   private async announceHelp(): Promise<string> {
     const commandList = Array.from(this.commands.values())
-      .map(cmd => `${cmd.command}: ${cmd.description}`)
+      .map((cmd) => `${cmd.command}: ${cmd.description}`)
       .join(". ");
-    
+
     const message = `Comandi disponibili: ${commandList}. Usa Alt più il tasto del comando per l'accesso rapido.`;
     await this.speak(message);
     return message;
@@ -454,13 +470,14 @@ export class BlindModeService {
 
   private async announceCurrentFocus(): Promise<string> {
     const activeElement = document.activeElement;
-    const message = `Focus corrente: ${activeElement?.tagName || 'elemento sconosciuto'}`;
+    const message = `Focus corrente: ${activeElement?.tagName || "elemento sconosciuto"}`;
     await this.speak(message);
     return message;
   }
 
   private async announceBlindModeEnabled(): Promise<string> {
-    const message = "Modalità accessibility attivata. Premi Alt+H per i comandi disponibili.";
+    const message =
+      "Modalità accessibility attivata. Premi Alt+H per i comandi disponibili.";
     await this.speak(message);
     return message;
   }
@@ -473,7 +490,7 @@ export class BlindModeService {
   }
 
   private updateLiveRegion(message: string): void {
-    const liveRegion = document.getElementById('chess-live-region');
+    const liveRegion = document.getElementById("chess-live-region");
     if (liveRegion) {
       liveRegion.textContent = message;
     }

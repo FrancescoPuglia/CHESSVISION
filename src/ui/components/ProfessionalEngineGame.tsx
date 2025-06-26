@@ -331,7 +331,8 @@ export const ProfessionalEngineGame: React.FC<ProfessionalEngineGameProps> = ({
   const startListening = useCallback(() => {
     if (!isVoiceEnabled || isListening || !speechService) return;
 
-    const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+    const SpeechRecognition =
+      window.SpeechRecognition || window.webkitSpeechRecognition;
     if (!SpeechRecognition) return;
 
     const recognition = new SpeechRecognition();
@@ -339,11 +340,11 @@ export const ProfessionalEngineGame: React.FC<ProfessionalEngineGameProps> = ({
     recognition.interimResults = false;
     recognition.lang = "it-IT";
 
-    recognition.addEventListener('start', () => {
+    recognition.addEventListener("start", () => {
       setIsListening(true);
     });
 
-    recognition.addEventListener('result', (event: any) => {
+    recognition.addEventListener("result", (event: any) => {
       const result = event.results[0];
       if (result.isFinal) {
         const transcript = result[0].transcript.trim().toLowerCase();
@@ -351,12 +352,12 @@ export const ProfessionalEngineGame: React.FC<ProfessionalEngineGameProps> = ({
       }
     });
 
-    recognition.addEventListener('error', (event: any) => {
+    recognition.addEventListener("error", (event: any) => {
       console.error("Speech recognition error:", event.error);
       setIsListening(false);
     });
 
-    recognition.addEventListener('end', () => {
+    recognition.addEventListener("end", () => {
       setIsListening(false);
     });
 
@@ -870,18 +871,26 @@ export const ProfessionalEngineGame: React.FC<ProfessionalEngineGameProps> = ({
                       border: "2px solid #333",
                     }}
                   >
-                    <h4 style={{ color: "#8b5cf6", marginTop: 0, marginBottom: "1rem" }}>
+                    <h4
+                      style={{
+                        color: "#8b5cf6",
+                        marginTop: 0,
+                        marginBottom: "1rem",
+                      }}
+                    >
                       🎤 Controllo Vocale
                     </h4>
-                    
+
                     {/* Voice Mode Toggle */}
                     <div style={{ marginBottom: "1rem" }}>
-                      <div style={{ 
-                        display: "flex", 
-                        gap: "0.5rem", 
-                        alignItems: "center",
-                        marginBottom: "0.5rem"
-                      }}>
+                      <div
+                        style={{
+                          display: "flex",
+                          gap: "0.5rem",
+                          alignItems: "center",
+                          marginBottom: "0.5rem",
+                        }}
+                      >
                         <label style={{ color: "#a0a0a0", fontSize: "0.9rem" }}>
                           Modalità microfono:
                         </label>
@@ -892,7 +901,9 @@ export const ProfessionalEngineGame: React.FC<ProfessionalEngineGameProps> = ({
                           style={{
                             flex: 1,
                             padding: "0.75rem",
-                            backgroundColor: continuousListening ? "#10b981" : "#374151",
+                            backgroundColor: continuousListening
+                              ? "#10b981"
+                              : "#374151",
                             color: "white",
                             border: "none",
                             borderRadius: "6px",
@@ -908,7 +919,9 @@ export const ProfessionalEngineGame: React.FC<ProfessionalEngineGameProps> = ({
                           style={{
                             flex: 1,
                             padding: "0.75rem",
-                            backgroundColor: !continuousListening ? "#10b981" : "#374151",
+                            backgroundColor: !continuousListening
+                              ? "#10b981"
+                              : "#374151",
                             color: "white",
                             border: "none",
                             borderRadius: "6px",
@@ -954,7 +967,7 @@ export const ProfessionalEngineGame: React.FC<ProfessionalEngineGameProps> = ({
                         )}
                       </div>
                     </div>
-                    
+
                     {/* Manual Voice Trigger (only in non-continuous mode) */}
                     {!continuousListening && (
                       <div style={{ marginTop: "1rem", textAlign: "center" }}>
@@ -968,7 +981,9 @@ export const ProfessionalEngineGame: React.FC<ProfessionalEngineGameProps> = ({
                           }}
                           style={{
                             padding: "0.75rem 1.5rem",
-                            backgroundColor: isListening ? "#ef4444" : "#10b981",
+                            backgroundColor: isListening
+                              ? "#ef4444"
+                              : "#10b981",
                             color: "white",
                             border: "none",
                             borderRadius: "8px",
@@ -977,7 +992,9 @@ export const ProfessionalEngineGame: React.FC<ProfessionalEngineGameProps> = ({
                             transition: "all 0.3s",
                           }}
                         >
-                          {isListening ? "🛑 Ferma Ascolto" : "🎤 Inizia Ascolto"}
+                          {isListening
+                            ? "🛑 Ferma Ascolto"
+                            : "🎤 Inizia Ascolto"}
                         </button>
                       </div>
                     )}
