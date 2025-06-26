@@ -11,11 +11,11 @@ interface ChessBoardProps {
   lastMove?: { from: string; to: string };
 }
 
-// Chess piece symbols with clear distinction between white and black
+// Chess piece symbols - Using distinct symbols for maximum visibility
 const PIECE_SYMBOLS: { [key: string]: string } = {
-  // White pieces (outlined)
+  // White pieces - Hollow/outlined symbols
   'wK': '♔', 'wQ': '♕', 'wR': '♖', 'wB': '♗', 'wN': '♘', 'wP': '♙',
-  // Black pieces (filled)
+  // Black pieces - Solid/filled symbols  
   'bK': '♚', 'bQ': '♛', 'bR': '♜', 'bB': '♝', 'bN': '♞', 'bP': '♟'
 };
 
