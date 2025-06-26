@@ -91,7 +91,15 @@ export const ProfessionalEngineGame: React.FC<ProfessionalEngineGameProps> = ({
 
   // Initialize continuous voice recognition
   useEffect(() => {
-    if (!isVisible || !isVoiceEnabled || !continuousListening) return;
+    if (!isVisible || !isVoiceEnabled || !continuousListening) {
+      // Clean up if switching to manual mode
+      if (recognitionRef.current && !continuousListening) {
+        recognitionRef.current.stop();
+        recognitionRef.current = null;
+        setIsListening(false);
+      }
+      return;
+    }
 
     const initializeContinuousVoice = async () => {
       if (
@@ -318,6 +326,51 @@ export const ProfessionalEngineGame: React.FC<ProfessionalEngineGameProps> = ({
       }
     }
   };
+
+  // Manual voice control functions for on-demand mode
+  const startListening = useCallback(() => {
+    if (!isVoiceEnabled || isListening || !speechService) return;
+
+    const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+    if (!SpeechRecognition) return;
+
+    const recognition = new SpeechRecognition();
+    recognition.continuous = false;
+    recognition.interimResults = false;
+    recognition.lang = "it-IT";
+
+    recognition.addEventListener('start', () => {
+      setIsListening(true);
+    });
+
+    recognition.addEventListener('result', (event: any) => {
+      const result = event.results[0];
+      if (result.isFinal) {
+        const transcript = result[0].transcript.trim().toLowerCase();
+        processVoiceCommand(transcript);
+      }
+    });
+
+    recognition.addEventListener('error', (event: any) => {
+      console.error("Speech recognition error:", event.error);
+      setIsListening(false);
+    });
+
+    recognition.addEventListener('end', () => {
+      setIsListening(false);
+    });
+
+    recognition.start();
+    recognitionRef.current = recognition;
+  }, [isVoiceEnabled, isListening, speechService]);
+
+  const stopListening = useCallback(() => {
+    if (recognitionRef.current) {
+      recognitionRef.current.stop();
+      recognitionRef.current = null;
+    }
+    setIsListening(false);
+  }, []);
 
   // Handle engine moves when it's engine's turn
   useEffect(() => {
@@ -806,37 +859,128 @@ export const ProfessionalEngineGame: React.FC<ProfessionalEngineGameProps> = ({
                   )}
                 </div>
 
-                {/* Voice Status */}
+                {/* Voice Control Panel */}
                 {isVoiceEnabled && (
                   <div
                     style={{
-                      backgroundColor: isListening ? "#065f46" : "#1a1a1a",
-                      padding: "1rem",
+                      backgroundColor: "#1a1a1a",
+                      padding: "1.5rem",
                       borderRadius: "10px",
                       marginBottom: "1.5rem",
-                      textAlign: "center",
-                      border: `2px solid ${isListening ? "#10b981" : "#333"}`,
-                      transition: "all 0.3s",
+                      border: "2px solid #333",
                     }}
                   >
+                    <h4 style={{ color: "#8b5cf6", marginTop: 0, marginBottom: "1rem" }}>
+                      🎤 Controllo Vocale
+                    </h4>
+                    
+                    {/* Voice Mode Toggle */}
+                    <div style={{ marginBottom: "1rem" }}>
+                      <div style={{ 
+                        display: "flex", 
+                        gap: "0.5rem", 
+                        alignItems: "center",
+                        marginBottom: "0.5rem"
+                      }}>
+                        <label style={{ color: "#a0a0a0", fontSize: "0.9rem" }}>
+                          Modalità microfono:
+                        </label>
+                      </div>
+                      <div style={{ display: "flex", gap: "0.5rem" }}>
+                        <button
+                          onClick={() => setContinuousListening(true)}
+                          style={{
+                            flex: 1,
+                            padding: "0.75rem",
+                            backgroundColor: continuousListening ? "#10b981" : "#374151",
+                            color: "white",
+                            border: "none",
+                            borderRadius: "6px",
+                            cursor: "pointer",
+                            fontSize: "0.9rem",
+                            transition: "all 0.3s",
+                          }}
+                        >
+                          🔴 Sempre Attivo
+                        </button>
+                        <button
+                          onClick={() => setContinuousListening(false)}
+                          style={{
+                            flex: 1,
+                            padding: "0.75rem",
+                            backgroundColor: !continuousListening ? "#10b981" : "#374151",
+                            color: "white",
+                            border: "none",
+                            borderRadius: "6px",
+                            cursor: "pointer",
+                            fontSize: "0.9rem",
+                            transition: "all 0.3s",
+                          }}
+                        >
+                          🎯 Su Richiesta
+                        </button>
+                      </div>
+                    </div>
+
+                    {/* Voice Status */}
                     <div
                       style={{
-                        color: isListening ? "#10b981" : "#666",
-                        display: "flex",
-                        alignItems: "center",
-                        justifyContent: "center",
-                        gap: "0.5rem",
+                        backgroundColor: isListening ? "#065f46" : "#2d3142",
+                        padding: "1rem",
+                        borderRadius: "8px",
+                        textAlign: "center",
+                        border: `2px solid ${isListening ? "#10b981" : "#444"}`,
+                        transition: "all 0.3s",
                       }}
                     >
-                      {isListening ? (
-                        <>
-                          <span className="pulse-dot"></span>
-                          🎤 Microfono attivo - Pronuncia la tua mossa
-                        </>
-                      ) : (
-                        <>🎤 Microfono disattivato</>
-                      )}
+                      <div
+                        style={{
+                          color: isListening ? "#10b981" : "#666",
+                          display: "flex",
+                          alignItems: "center",
+                          justifyContent: "center",
+                          gap: "0.5rem",
+                        }}
+                      >
+                        {isListening ? (
+                          <>
+                            <span className="pulse-dot"></span>
+                            Microfono attivo - Pronuncia la tua mossa
+                          </>
+                        ) : continuousListening ? (
+                          <>🎤 In attesa di comando vocale...</>
+                        ) : (
+                          <>🎤 Modalità manuale - Usa il pulsante o digita</>
+                        )}
+                      </div>
                     </div>
+                    
+                    {/* Manual Voice Trigger (only in non-continuous mode) */}
+                    {!continuousListening && (
+                      <div style={{ marginTop: "1rem", textAlign: "center" }}>
+                        <button
+                          onClick={() => {
+                            if (!isListening) {
+                              startListening();
+                            } else {
+                              stopListening();
+                            }
+                          }}
+                          style={{
+                            padding: "0.75rem 1.5rem",
+                            backgroundColor: isListening ? "#ef4444" : "#10b981",
+                            color: "white",
+                            border: "none",
+                            borderRadius: "8px",
+                            cursor: "pointer",
+                            fontSize: "1rem",
+                            transition: "all 0.3s",
+                          }}
+                        >
+                          {isListening ? "🛑 Ferma Ascolto" : "🎤 Inizia Ascolto"}
+                        </button>
+                      </div>
+                    )}
                   </div>
                 )}
 

@@ -37,20 +37,21 @@ export interface AdvancedEngineSettings {
   positional: number; // Positional understanding
 }
 
-// Professional ELO-calibrated presets with realistic playing characteristics
+// Professional ELO-calibrated presets based on UCI_Elo and realistic playing characteristics
+// Based on Stockfish's official UCI_Elo implementation (1320-3190 range)
 export const ELO_PRESETS: Record<number, AdvancedEngineSettings> = {
   1200: {
     elo: 1200,
     skillLevel: 0,
-    depth: 6,
-    moveTime: 500,
+    depth: 8,
+    moveTime: 100,
     multiPv: 1,
     contempt: -50,
     threads: 1,
     hash: 16,
     ponder: false,
-    errorRate: 0.25,
-    blunderChance: 0.15,
+    errorRate: 0.35,
+    blunderChance: 0.20,
     timeManagement: 0.3,
     opening: 0.2,
     endgame: 0.2,
@@ -60,15 +61,15 @@ export const ELO_PRESETS: Record<number, AdvancedEngineSettings> = {
   1300: {
     elo: 1300,
     skillLevel: 1,
-    depth: 7,
-    moveTime: 600,
+    depth: 8,
+    moveTime: 150,
     multiPv: 1,
     contempt: -40,
     threads: 1,
     hash: 16,
     ponder: false,
-    errorRate: 0.22,
-    blunderChance: 0.12,
+    errorRate: 0.30,
+    blunderChance: 0.15,
     timeManagement: 0.35,
     opening: 0.25,
     endgame: 0.25,
@@ -77,16 +78,16 @@ export const ELO_PRESETS: Record<number, AdvancedEngineSettings> = {
   },
   1400: {
     elo: 1400,
-    skillLevel: 2,
-    depth: 8,
-    moveTime: 700,
+    skillLevel: 3,
+    depth: 10,
+    moveTime: 200,
     multiPv: 1,
     contempt: -30,
     threads: 1,
     hash: 32,
     ponder: false,
-    errorRate: 0.2,
-    blunderChance: 0.1,
+    errorRate: 0.25,
+    blunderChance: 0.12,
     timeManagement: 0.4,
     opening: 0.3,
     endgame: 0.3,
@@ -95,16 +96,16 @@ export const ELO_PRESETS: Record<number, AdvancedEngineSettings> = {
   },
   1500: {
     elo: 1500,
-    skillLevel: 3,
-    depth: 9,
-    moveTime: 800,
+    skillLevel: 5,
+    depth: 12,
+    moveTime: 250,
     multiPv: 1,
     contempt: -20,
     threads: 1,
     hash: 32,
     ponder: false,
-    errorRate: 0.18,
-    blunderChance: 0.08,
+    errorRate: 0.20,
+    blunderChance: 0.10,
     timeManagement: 0.45,
     opening: 0.35,
     endgame: 0.35,
@@ -113,16 +114,16 @@ export const ELO_PRESETS: Record<number, AdvancedEngineSettings> = {
   },
   1600: {
     elo: 1600,
-    skillLevel: 5,
-    depth: 10,
-    moveTime: 1000,
+    skillLevel: 7,
+    depth: 14,
+    moveTime: 300,
     multiPv: 1,
     contempt: -10,
     threads: 2,
     hash: 64,
     ponder: false,
     errorRate: 0.15,
-    blunderChance: 0.06,
+    blunderChance: 0.08,
     timeManagement: 0.5,
     opening: 0.4,
     endgame: 0.4,
@@ -131,16 +132,16 @@ export const ELO_PRESETS: Record<number, AdvancedEngineSettings> = {
   },
   1700: {
     elo: 1700,
-    skillLevel: 7,
-    depth: 11,
-    moveTime: 1200,
+    skillLevel: 9,
+    depth: 16,
+    moveTime: 400,
     multiPv: 1,
     contempt: 0,
     threads: 2,
     hash: 64,
     ponder: false,
     errorRate: 0.12,
-    blunderChance: 0.05,
+    blunderChance: 0.06,
     timeManagement: 0.55,
     opening: 0.45,
     endgame: 0.45,
@@ -149,16 +150,16 @@ export const ELO_PRESETS: Record<number, AdvancedEngineSettings> = {
   },
   1800: {
     elo: 1800,
-    skillLevel: 9,
-    depth: 12,
-    moveTime: 1500,
+    skillLevel: 11,
+    depth: 18,
+    moveTime: 500,
     multiPv: 2,
     contempt: 10,
     threads: 2,
     hash: 128,
     ponder: false,
-    errorRate: 0.1,
-    blunderChance: 0.04,
+    errorRate: 0.10,
+    blunderChance: 0.05,
     timeManagement: 0.6,
     opening: 0.5,
     endgame: 0.5,
@@ -167,16 +168,16 @@ export const ELO_PRESETS: Record<number, AdvancedEngineSettings> = {
   },
   1900: {
     elo: 1900,
-    skillLevel: 11,
-    depth: 13,
-    moveTime: 2000,
+    skillLevel: 13,
+    depth: 20,
+    moveTime: 600,
     multiPv: 2,
     contempt: 20,
     threads: 3,
     hash: 128,
     ponder: true,
     errorRate: 0.08,
-    blunderChance: 0.03,
+    blunderChance: 0.04,
     timeManagement: 0.65,
     opening: 0.55,
     endgame: 0.55,
@@ -185,16 +186,16 @@ export const ELO_PRESETS: Record<number, AdvancedEngineSettings> = {
   },
   2000: {
     elo: 2000,
-    skillLevel: 13,
-    depth: 14,
-    moveTime: 2500,
+    skillLevel: 15,
+    depth: 22,
+    moveTime: 800,
     multiPv: 2,
     contempt: 30,
     threads: 3,
     hash: 256,
     ponder: true,
     errorRate: 0.06,
-    blunderChance: 0.02,
+    blunderChance: 0.03,
     timeManagement: 0.7,
     opening: 0.6,
     endgame: 0.6,
@@ -203,16 +204,16 @@ export const ELO_PRESETS: Record<number, AdvancedEngineSettings> = {
   },
   2100: {
     elo: 2100,
-    skillLevel: 14,
-    depth: 15,
-    moveTime: 3000,
+    skillLevel: 16,
+    depth: 24,
+    moveTime: 1000,
     multiPv: 3,
     contempt: 40,
     threads: 4,
     hash: 256,
     ponder: true,
     errorRate: 0.05,
-    blunderChance: 0.015,
+    blunderChance: 0.02,
     timeManagement: 0.75,
     opening: 0.65,
     endgame: 0.65,
@@ -221,16 +222,16 @@ export const ELO_PRESETS: Record<number, AdvancedEngineSettings> = {
   },
   2200: {
     elo: 2200,
-    skillLevel: 15,
-    depth: 16,
-    moveTime: 3500,
+    skillLevel: 17,
+    depth: 26,
+    moveTime: 1200,
     multiPv: 3,
     contempt: 50,
     threads: 4,
     hash: 512,
     ponder: true,
     errorRate: 0.04,
-    blunderChance: 0.01,
+    blunderChance: 0.015,
     timeManagement: 0.8,
     opening: 0.7,
     endgame: 0.7,
@@ -239,16 +240,16 @@ export const ELO_PRESETS: Record<number, AdvancedEngineSettings> = {
   },
   2300: {
     elo: 2300,
-    skillLevel: 16,
-    depth: 17,
-    moveTime: 4000,
+    skillLevel: 18,
+    depth: 28,
+    moveTime: 1500,
     multiPv: 3,
     contempt: 60,
     threads: 4,
     hash: 512,
     ponder: true,
     errorRate: 0.03,
-    blunderChance: 0.008,
+    blunderChance: 0.01,
     timeManagement: 0.85,
     opening: 0.75,
     endgame: 0.75,
@@ -257,16 +258,16 @@ export const ELO_PRESETS: Record<number, AdvancedEngineSettings> = {
   },
   2400: {
     elo: 2400,
-    skillLevel: 17,
-    depth: 18,
-    moveTime: 4500,
+    skillLevel: 19,
+    depth: 30,
+    moveTime: 2000,
     multiPv: 4,
     contempt: 70,
     threads: 6,
     hash: 1024,
     ponder: true,
     errorRate: 0.025,
-    blunderChance: 0.006,
+    blunderChance: 0.008,
     timeManagement: 0.88,
     opening: 0.8,
     endgame: 0.8,
@@ -275,16 +276,16 @@ export const ELO_PRESETS: Record<number, AdvancedEngineSettings> = {
   },
   2500: {
     elo: 2500,
-    skillLevel: 18,
-    depth: 19,
-    moveTime: 5000,
+    skillLevel: 20,
+    depth: 32,
+    moveTime: 2500,
     multiPv: 4,
     contempt: 80,
     threads: 6,
     hash: 1024,
     ponder: true,
     errorRate: 0.02,
-    blunderChance: 0.004,
+    blunderChance: 0.005,
     timeManagement: 0.9,
     opening: 0.85,
     endgame: 0.85,
@@ -293,9 +294,9 @@ export const ELO_PRESETS: Record<number, AdvancedEngineSettings> = {
   },
   2600: {
     elo: 2600,
-    skillLevel: 19,
-    depth: 20,
-    moveTime: 6000,
+    skillLevel: 20,
+    depth: 34,
+    moveTime: 3000,
     multiPv: 5,
     contempt: 90,
     threads: 8,
@@ -311,9 +312,9 @@ export const ELO_PRESETS: Record<number, AdvancedEngineSettings> = {
   },
   2700: {
     elo: 2700,
-    skillLevel: 19,
-    depth: 21,
-    moveTime: 7000,
+    skillLevel: 20,
+    depth: 36,
+    moveTime: 4000,
     multiPv: 5,
     contempt: 100,
     threads: 8,
@@ -330,8 +331,8 @@ export const ELO_PRESETS: Record<number, AdvancedEngineSettings> = {
   2800: {
     elo: 2800,
     skillLevel: 20,
-    depth: 22,
-    moveTime: 8000,
+    depth: 38,
+    moveTime: 5000,
     multiPv: 5,
     contempt: 100,
     threads: 8,
@@ -348,8 +349,8 @@ export const ELO_PRESETS: Record<number, AdvancedEngineSettings> = {
   2900: {
     elo: 2900,
     skillLevel: 20,
-    depth: 24,
-    moveTime: 10000,
+    depth: 40,
+    moveTime: 7000,
     multiPv: 6,
     contempt: 100,
     threads: 12,
@@ -366,8 +367,8 @@ export const ELO_PRESETS: Record<number, AdvancedEngineSettings> = {
   3000: {
     elo: 3000,
     skillLevel: 20,
-    depth: 26,
-    moveTime: 15000,
+    depth: 45,
+    moveTime: 10000,
     multiPv: 6,
     contempt: 100,
     threads: 16,
@@ -536,11 +537,11 @@ export class StockfishAdvanced {
 
   private async initializeEngine(): Promise<void> {
     try {
-      // Use local stockfish or CDN
+      // Use local stockfish or CDN - Try latest version for better UCI_Elo support
       const stockfishUrl =
         window.location.hostname === "localhost"
           ? "/stockfish/stockfish.js"
-          : "https://cdn.jsdelivr.net/npm/stockfish@16.0.0/src/stockfish.js";
+          : "https://cdn.jsdelivr.net/npm/stockfish.js@16.1.0/stockfish.js";
 
       this.worker = new Worker(stockfishUrl);
 
@@ -562,7 +563,32 @@ export class StockfishAdvanced {
   }
 
   private createFallbackEngine(): void {
-    console.warn("Using advanced fallback engine");
+    console.warn("Using advanced fallback engine - trying alternative URL");
+    
+    // Try alternative Stockfish URLs
+    const alternativeUrls = [
+      "https://cdn.jsdelivr.net/npm/stockfish@16/src/stockfish.js",
+      "https://unpkg.com/stockfish.js@16.1.0/stockfish.js",
+      "https://cdnjs.cloudflare.com/ajax/libs/stockfish.js/16.0.0/stockfish.js"
+    ];
+    
+    for (const url of alternativeUrls) {
+      try {
+        this.worker = new Worker(url);
+        this.worker.onmessage = (event) => {
+          this.handleEngineMessage(event.data);
+        };
+        this.worker.onerror = () => {
+          // Try next URL
+        };
+        this.sendCommand("uci");
+        return;
+      } catch (e) {
+        // Try next URL
+      }
+    }
+    
+    // If all fail, mark as ready for pure fallback
     this.isReady = true;
     if (this.readyCallback) {
       this.readyCallback();
@@ -591,19 +617,31 @@ export class StockfishAdvanced {
   }
 
   private configureEngine(): void {
-    // Set advanced engine options
-    this.sendCommand(
-      `setoption name Skill Level value ${this.settings.skillLevel}`,
-    );
+    // Use UCI_LimitStrength and UCI_Elo for accurate ELO control
+    // Note: UCI_Elo range is 1320-3190 according to Stockfish documentation
+    const uciElo = Math.max(1320, Math.min(3190, this.elo));
+    
+    // First set UCI_LimitStrength to enable ELO mode
+    this.sendCommand("setoption name UCI_LimitStrength value true");
+    this.sendCommand(`setoption name UCI_Elo value ${uciElo}`);
+    
+    // For ELOs below 2000, also use Skill Level for additional weakening
+    if (this.elo < 2000) {
+      this.sendCommand(
+        `setoption name Skill Level value ${this.settings.skillLevel}`,
+      );
+    }
+    
+    // Set other engine parameters
     this.sendCommand(`setoption name MultiPV value ${this.settings.multiPv}`);
     this.sendCommand(`setoption name Contempt value ${this.settings.contempt}`);
     this.sendCommand(`setoption name Threads value ${this.settings.threads}`);
     this.sendCommand(`setoption name Hash value ${this.settings.hash}`);
     this.sendCommand(`setoption name Ponder value ${this.settings.ponder}`);
-
-    // Additional UCI options for realistic play
-    this.sendCommand("setoption name UCI_LimitStrength value true");
-    this.sendCommand(`setoption name UCI_Elo value ${this.elo}`);
+    
+    // Additional settings for realistic play
+    this.sendCommand("setoption name Move Overhead value 30");
+    this.sendCommand("setoption name Slow Mover value 84");
 
     this.sendCommand("isready");
   }
@@ -627,6 +665,18 @@ export class StockfishAdvanced {
   }
 
   private applyHumanCharacteristics(bestMove: string): string {
+    // For ELO 2000+, rely mainly on UCI_Elo setting
+    // Only apply minimal human characteristics
+    if (this.elo >= 2000) {
+      const rand = Math.random();
+      // Very rare mistakes for strong players
+      if (rand < this.settings.blunderChance) {
+        return this.generateSuboptimalMove(bestMove);
+      }
+      return bestMove;
+    }
+    
+    // For lower ELOs, apply more human-like errors
     const rand = Math.random();
 
     // Check for blunder
@@ -742,9 +792,16 @@ export class StockfishAdvanced {
 
       // Set position and get best move
       this.sendCommand(`position fen ${fen}`);
-      this.sendCommand(
-        `go depth ${this.settings.depth} movetime ${this.settings.moveTime}`,
-      );
+      
+      // For stronger players (2000+), use pure time control
+      // For weaker players, combine depth and time limits
+      if (this.elo >= 2000) {
+        this.sendCommand(`go movetime ${this.settings.moveTime}`);
+      } else {
+        this.sendCommand(
+          `go depth ${this.settings.depth} movetime ${this.settings.moveTime}`,
+        );
+      }
 
       // Timeout fallback
       setTimeout(() => {
