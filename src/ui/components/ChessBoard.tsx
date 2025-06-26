@@ -17,17 +17,17 @@ const PIECE_SYMBOLS: { [key: string]: string } = {
   'bK': '♚', 'bQ': '♛', 'bR': '♜', 'bB': '♝', 'bN': '♞', 'bP': '♟'
 };
 
-// Modern Chess.com/Lichess inspired color palette
+// ChessBase-inspired high contrast color palette
 const BOARD_COLORS = {
-  light: '#f0d9b5',
-  dark: '#b58863',
-  border: '#8b7355',
-  coordinates: '#6b5b47',
-  highlight: '#cdd26a',
-  lastMoveLight: '#cdd26a',
-  lastMoveDark: '#aaa23a',
-  check: '#ff6b6b',
-  validMove: '#20bf6b'
+  light: '#e8d5b8',  // Cream white with warm tone
+  dark: '#8b6a42',   // Deep brown with strong contrast
+  border: '#6b5638', // Darker brown for frame
+  coordinates: '#4a3c28', // Dark brown for coordinates
+  highlight: '#f7f683',   // Bright yellow for highlights
+  lastMoveLight: '#f7f683',
+  lastMoveDark: '#e6d555',
+  check: '#ff5555',
+  validMove: '#44ee77'
 };
 
 export const ChessBoard: React.FC<ChessBoardProps> = ({ 
@@ -113,7 +113,7 @@ export const ChessBoard: React.FC<ChessBoardProps> = ({
       flexDirection: 'column',
       alignItems: 'center',
       padding: '1.5rem',
-      background: 'linear-gradient(135deg, #2c3e50 0%, #34495e 100%)',
+      background: 'linear-gradient(135deg, #3d2f23 0%, #2a1f16 100%)',
       borderRadius: '16px',
       boxShadow: '0 20px 60px rgba(0,0,0,0.3)',
       position: 'relative'
@@ -123,8 +123,8 @@ export const ChessBoard: React.FC<ChessBoardProps> = ({
         className="chess-board"
         style={{
           display: 'grid',
-          gridTemplateColumns: '24px repeat(8, 70px) 24px',
-          gridTemplateRows: '24px repeat(8, 70px) 24px',
+          gridTemplateColumns: '28px repeat(8, 76px) 28px',
+          gridTemplateRows: '28px repeat(8, 76px) 28px',
           gap: '0',
           background: BOARD_COLORS.border,
           padding: '12px',
@@ -142,7 +142,7 @@ export const ChessBoard: React.FC<ChessBoardProps> = ({
               alignItems: 'center',
               justifyContent: 'center',
               color: BOARD_COLORS.coordinates,
-              fontSize: '12px',
+              fontSize: '14px',
               fontWeight: '600',
               gridColumn: index + 1,
               gridRow: 1,
@@ -165,7 +165,7 @@ export const ChessBoard: React.FC<ChessBoardProps> = ({
                 alignItems: 'center',
                 justifyContent: 'center',
                 color: BOARD_COLORS.coordinates,
-                fontSize: '12px',
+                fontSize: '14px',
                 fontWeight: '600',
                 gridColumn: 1,
                 gridRow: rowIndex + 2,
@@ -190,12 +190,12 @@ export const ChessBoard: React.FC<ChessBoardProps> = ({
                     display: 'flex',
                     alignItems: 'center',
                     justifyContent: 'center',
-                    fontSize: '42px',
+                    fontSize: '52px',
                     position: 'relative',
                     gridColumn: colIndex + 2,
                     gridRow: rowIndex + 2,
-                    width: '70px',
-                    height: '70px',
+                    width: '76px',
+                    height: '76px',
                     cursor: onSquareClick ? 'pointer' : 'default',
                     transition: 'all 0.15s cubic-bezier(0.4, 0, 0.2, 1)',
                     transform: isHovered ? 'scale(1.02)' : 'scale(1)',
@@ -212,13 +212,15 @@ export const ChessBoard: React.FC<ChessBoardProps> = ({
                   {piece && (
                     <span style={{
                       textShadow: piece.color === 'w' 
-                        ? '0 2px 4px rgba(0,0,0,0.3), 0 1px 2px rgba(0,0,0,0.4)' 
-                        : '0 2px 4px rgba(255,255,255,0.2), 0 1px 2px rgba(255,255,255,0.3)',
-                      filter: piece.color === 'w' ? 'brightness(1.1)' : 'brightness(0.95)',
+                        ? '0 3px 6px rgba(0,0,0,0.5), 0 1px 3px rgba(0,0,0,0.6), 0 0 2px rgba(255,255,255,0.8) inset' 
+                        : '0 3px 6px rgba(0,0,0,0.7), 0 1px 3px rgba(0,0,0,0.8)',
+                      filter: piece.color === 'w' ? 'brightness(1.2) contrast(1.1)' : 'brightness(0.9) contrast(1.2)',
+                      color: piece.color === 'w' ? '#ffffff' : '#1a1a1a',
                       transform: isHovered ? 'scale(1.05)' : 'scale(1)',
                       transition: 'all 0.15s ease',
                       display: 'block',
-                      lineHeight: '1'
+                      lineHeight: '1',
+                      fontWeight: '700'
                     }}>
                       {PIECE_SYMBOLS[`${piece.color}${piece.type.toUpperCase()}`]}
                     </span>
@@ -232,7 +234,7 @@ export const ChessBoard: React.FC<ChessBoardProps> = ({
                       bottom: '3px',
                       right: '4px',
                       fontSize: '10px',
-                      color: (rowIndex + colIndex) % 2 === 0 ? '#8b7355' : '#f0d9b5',
+                      color: (rowIndex + colIndex) % 2 === 0 ? '#6b5638' : '#e8d5b8',
                       opacity: isHovered ? 0.8 : 0,
                       transition: 'opacity 0.2s ease',
                       fontWeight: '600',
@@ -266,7 +268,7 @@ export const ChessBoard: React.FC<ChessBoardProps> = ({
                 alignItems: 'center',
                 justifyContent: 'center',
                 color: BOARD_COLORS.coordinates,
-                fontSize: '12px',
+                fontSize: '14px',
                 fontWeight: '600',
                 gridColumn: 10,
                 gridRow: rowIndex + 2,
@@ -287,7 +289,7 @@ export const ChessBoard: React.FC<ChessBoardProps> = ({
               alignItems: 'center',
               justifyContent: 'center',
               color: BOARD_COLORS.coordinates,
-              fontSize: '12px',
+              fontSize: '14px',
               fontWeight: '600',
               gridColumn: index + 1,
               gridRow: 10,
