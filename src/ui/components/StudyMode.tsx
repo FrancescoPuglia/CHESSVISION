@@ -14,7 +14,6 @@ interface StudyModeProps {
   speechService: SpeechService | null;
   isVoiceEnabled: boolean;
   timeLimit: number; // seconds
-  gameState: ChessGame; // Use the already-loaded game state from main app
 }
 
 interface StudyState {
@@ -38,13 +37,30 @@ export const StudyMode: React.FC<StudyModeProps> = ({
   onExit,
   speechService,
   isVoiceEnabled,
-  timeLimit,
-  gameState
+  timeLimit
 }) => {
-  // Use the already-loaded game state from main app - no need to recreate!
+  // Initialize the study position correctly from the study data
+  const initializeStudyPosition = (): ChessGame => {
+    // Create a new game from the FEN if available, otherwise from starting position
+    const startingFen = study.headers?.FEN;
+    const game = startingFen ? new ChessGame(startingFen) : new ChessGame();
+    
+    // Apply moves up to startFromMoveIndex
+    for (let i = 0; i < startFromMoveIndex && i < study.moves.length; i++) {
+      const move = study.moves[i];
+      const result = game.makeMoveFromSan(move.san);
+      if (!result) {
+        console.error(`Failed to apply move ${i + 1}: ${move.san}`);
+        break;
+      }
+    }
+    
+    return game;
+  };
+  
   const [state, setState] = useState<StudyState>({
     currentMoveIndex: startFromMoveIndex,
-    studyGame: gameState, // Use the correctly loaded game state
+    studyGame: initializeStudyPosition(), // Create correct position from study
     expectedMove: study.moves[startFromMoveIndex]?.san || null,
     userInput: '',
     message: `Studio: ${PgnParser.getStudyTitle(study)}. ${startFromMoveIndex === 0 ? 'Trova la prima mossa!' : `Posizione alla mossa ${startFromMoveIndex + 1}. Trova la prossima mossa!`}`,

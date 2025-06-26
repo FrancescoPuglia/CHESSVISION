@@ -1,0 +1,32 @@
+[Event "Posizione 1 - Matto in 2"]
+[Site "Test"]
+[Date "2024.01.01"]
+[Round "1"]
+[White "Test"]
+[Black "Test"]
+[Result "1-0"]
+[FEN "r1bqkb1r/pppp1ppp/2n2n2/4p2Q/2B1P3/8/PPPP1PPP/RNB1K1NR w KQkq - 0 1"]
+
+1. Qxf7+ Kd8 2. Qf8# 1-0
+
+[Event "Posizione 2 - Torre in ottava"]
+[Site "Test"]
+[Date "2024.01.01"]
+[Round "2"]
+[White "Test"]
+[Black "Test"]
+[Result "1-0"]
+[FEN "6k1/5ppp/8/8/8/8/5PPP/R5K1 w - - 0 1"]
+
+1. Ra8# 1-0
+
+[Event "Posizione 3 - Forchetta di cavallo"]
+[Site "Test"]
+[Date "2024.01.01"]
+[Round "3"]
+[White "Test"]
+[Black "Test"]
+[Result "1-0"]
+[FEN "r1bqkb1r/pppp1ppp/5n2/4p3/4P3/5N2/PPPP1PPP/RNBQKB1R w KQkq - 0 1"]
+
+1. Nxe5 1-0
