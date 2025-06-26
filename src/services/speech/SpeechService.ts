@@ -1,12 +1,11 @@
 // src/services/speech/SpeechService.ts
-import { Language } from '@core/i18n/useTranslation';
-
+import { Language } from "@core/i18n/useTranslation";
 
 export class SpeechService {
   private recognition: SpeechRecognition | null = null;
   private synthesis: SpeechSynthesis;
   private isListening = false;
-  private language: Language = 'en';
+  private language: Language = "en";
   private selectedVoice: SpeechSynthesisVoice | null = null;
   private speechRate: number = 1;
   private speechPitch: number = 1;
@@ -15,49 +14,53 @@ export class SpeechService {
   constructor() {
     this.synthesis = window.speechSynthesis;
     this.initRecognition();
-    
+
     // Load voice preferences from localStorage
     this.loadVoicePreferences();
   }
 
   private initRecognition(): void {
-    if (!('webkitSpeechRecognition' in window) && !('SpeechRecognition' in window)) {
-      console.warn('Speech recognition not supported');
+    if (
+      !("webkitSpeechRecognition" in window) &&
+      !("SpeechRecognition" in window)
+    ) {
+      console.warn("Speech recognition not supported");
       return;
     }
 
-    const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+    const SpeechRecognition =
+      window.SpeechRecognition || window.webkitSpeechRecognition;
     this.recognition = new SpeechRecognition();
-    
+
     this.recognition.continuous = false;
     this.recognition.interimResults = false;
-    this.recognition.lang = this.language === 'it' ? 'it-IT' : 'en-US';
+    this.recognition.lang = this.language === "it" ? "it-IT" : "en-US";
   }
 
   setLanguage(lang: Language): void {
     this.language = lang;
     if (this.recognition) {
-      this.recognition.lang = lang === 'it' ? 'it-IT' : 'en-US';
+      this.recognition.lang = lang === "it" ? "it-IT" : "en-US";
     }
-    
+
     // Try to find a good default voice for the new language
     this.autoSelectVoiceForLanguage();
   }
 
   private loadVoicePreferences(): void {
     try {
-      const prefs = localStorage.getItem('chessvision-voice-prefs');
+      const prefs = localStorage.getItem("chessvision-voice-prefs");
       if (prefs) {
         const parsed = JSON.parse(prefs);
         this.speechRate = parsed.rate || 1;
         this.speechPitch = parsed.pitch || 1;
         this.speechVolume = parsed.volume || 1;
-        
+
         if (parsed.voiceName) {
           // Wait for voices to load, then select the saved voice
           setTimeout(() => {
             const voices = this.getAvailableVoices();
-            const savedVoice = voices.find(v => v.name === parsed.voiceName);
+            const savedVoice = voices.find((v) => v.name === parsed.voiceName);
             if (savedVoice) {
               this.selectedVoice = savedVoice;
             }
@@ -65,7 +68,7 @@ export class SpeechService {
         }
       }
     } catch (error) {
-      console.warn('Failed to load voice preferences:', error);
+      console.warn("Failed to load voice preferences:", error);
     }
   }
 
@@ -75,11 +78,11 @@ export class SpeechService {
         voiceName: this.selectedVoice?.name,
         rate: this.speechRate,
         pitch: this.speechPitch,
-        volume: this.speechVolume
+        volume: this.speechVolume,
       };
-      localStorage.setItem('chessvision-voice-prefs', JSON.stringify(prefs));
+      localStorage.setItem("chessvision-voice-prefs", JSON.stringify(prefs));
     } catch (error) {
-      console.warn('Failed to save voice preferences:', error);
+      console.warn("Failed to save voice preferences:", error);
     }
   }
 
@@ -88,9 +91,9 @@ export class SpeechService {
   }
 
   getVoicesForCurrentLanguage(): SpeechSynthesisVoice[] {
-    const langCode = this.language === 'it' ? 'it' : 'en';
-    return this.getAvailableVoices().filter(voice => 
-      voice.lang.startsWith(langCode)
+    const langCode = this.language === "it" ? "it" : "en";
+    return this.getAvailableVoices().filter((voice) =>
+      voice.lang.startsWith(langCode),
     );
   }
 
@@ -119,7 +122,7 @@ export class SpeechService {
       rate: this.speechRate,
       pitch: this.speechPitch,
       volume: this.speechVolume,
-      voice: this.selectedVoice
+      voice: this.selectedVoice,
     };
   }
 
@@ -127,15 +130,18 @@ export class SpeechService {
     const voices = this.getVoicesForCurrentLanguage();
     if (voices.length > 0) {
       // Prefer local voices
-      const localVoice = voices.find(v => v.localService);
+      const localVoice = voices.find((v) => v.localService);
       this.selectedVoice = localVoice || voices[0];
     }
   }
 
-  async speak(text: string, options: { rate?: number; pitch?: number; volume?: number } = {}): Promise<void> {
+  async speak(
+    text: string,
+    options: { rate?: number; pitch?: number; volume?: number } = {},
+  ): Promise<void> {
     return new Promise((resolve, reject) => {
       if (!this.synthesis) {
-        reject(new Error('Speech synthesis not supported'));
+        reject(new Error("Speech synthesis not supported"));
         return;
       }
 
@@ -143,13 +149,13 @@ export class SpeechService {
       this.synthesis.cancel();
 
       const utterance = new SpeechSynthesisUtterance(text);
-      utterance.lang = this.language === 'it' ? 'it-IT' : 'en-US';
-      
+      utterance.lang = this.language === "it" ? "it-IT" : "en-US";
+
       // Use selected voice if available
       if (this.selectedVoice) {
         utterance.voice = this.selectedVoice;
       }
-      
+
       // Use saved settings or provided options
       utterance.rate = options.rate || this.speechRate;
       utterance.pitch = options.pitch || this.speechPitch;
@@ -165,12 +171,12 @@ export class SpeechService {
   async listen(): Promise<string> {
     return new Promise((resolve, reject) => {
       if (!this.recognition) {
-        reject(new Error('Speech recognition not supported'));
+        reject(new Error("Speech recognition not supported"));
         return;
       }
 
       if (this.isListening) {
-        reject(new Error('Already listening'));
+        reject(new Error("Already listening"));
         return;
       }
 
@@ -223,28 +229,37 @@ export class SpeechService {
   }
 
   // Chess-specific speech functions
-  speakPieceList(pieces: Array<{ piece: string; color: string; square: string }>, translations: any): Promise<void> {
-    const pieceTexts = pieces.map(p => {
+  speakPieceList(
+    pieces: Array<{ piece: string; color: string; square: string }>,
+    translations: any,
+  ): Promise<void> {
+    const pieceTexts = pieces.map((p) => {
       const pieceName = translations[p.piece.toLowerCase()];
       const colorName = translations[p.color.toLowerCase()];
       return `${colorName} ${pieceName} ${translations.on} ${p.square}`;
     });
 
-    const text = pieceTexts.join(', ');
+    const text = pieceTexts.join(", ");
     return this.speak(text);
   }
 
   speakMove(move: string, translations: any): Promise<void> {
     // Convert algebraic notation to spoken form
     let spokenMove = move;
-    
+
     // Handle castling
-    if (move === 'O-O') {
-      spokenMove = translations.castles + ' ' + (this.language === 'it' ? 'corto' : 'kingside');
-    } else if (move === 'O-O-O') {
-      spokenMove = translations.castles + ' ' + (this.language === 'it' ? 'lungo' : 'queenside');
+    if (move === "O-O") {
+      spokenMove =
+        translations.castles +
+        " " +
+        (this.language === "it" ? "corto" : "kingside");
+    } else if (move === "O-O-O") {
+      spokenMove =
+        translations.castles +
+        " " +
+        (this.language === "it" ? "lungo" : "queenside");
     }
-    
+
     return this.speak(spokenMove);
   }
 
@@ -255,10 +270,12 @@ export class SpeechService {
     return this.speak(text);
   }
 
-  private parseFenForSpeech(fen: string): Array<{ piece: string; color: string; square: string }> {
+  private parseFenForSpeech(
+    fen: string,
+  ): Array<{ piece: string; color: string; square: string }> {
     const pieces: Array<{ piece: string; color: string; square: string }> = [];
-    const [board] = fen.split(' ');
-    const ranks = board.split('/');
+    const [board] = fen.split(" ");
+    const ranks = board.split("/");
 
     ranks.forEach((rank, rankIndex) => {
       let fileIndex = 0;
@@ -268,11 +285,11 @@ export class SpeechService {
           const isWhite = char === char.toUpperCase();
           const file = String.fromCharCode(97 + fileIndex); // a-h
           const rankNum = 8 - rankIndex; // 8-1
-          
+
           pieces.push({
             piece: this.getPieceType(char.toLowerCase()),
-            color: isWhite ? 'white' : 'black',
-            square: `${file}${rankNum}`
+            color: isWhite ? "white" : "black",
+            square: `${file}${rankNum}`,
           });
           fileIndex++;
         } else {
@@ -287,31 +304,38 @@ export class SpeechService {
 
   private getPieceType(piece: string): string {
     const pieceMap: { [key: string]: string } = {
-      'k': 'king',
-      'q': 'queen',
-      'r': 'rook',
-      'b': 'bishop',
-      'n': 'knight',
-      'p': 'pawn'
+      k: "king",
+      q: "queen",
+      r: "rook",
+      b: "bishop",
+      n: "knight",
+      p: "pawn",
     };
     return pieceMap[piece] || piece;
   }
 
-  private formatPositionForSpeech(pieces: Array<{ piece: string; color: string; square: string }>, translations: any): string {
-    const whitePieces = pieces.filter(p => p.color === 'white');
-    const blackPieces = pieces.filter(p => p.color === 'black');
+  private formatPositionForSpeech(
+    pieces: Array<{ piece: string; color: string; square: string }>,
+    translations: any,
+  ): string {
+    const whitePieces = pieces.filter((p) => p.color === "white");
+    const blackPieces = pieces.filter((p) => p.color === "black");
 
-    let text = '';
-    
+    let text = "";
+
     if (whitePieces.length > 0) {
       text += `${translations.white}: `;
-      text += whitePieces.map(p => `${translations[p.piece]} ${p.square}`).join(', ');
+      text += whitePieces
+        .map((p) => `${translations[p.piece]} ${p.square}`)
+        .join(", ");
     }
 
     if (blackPieces.length > 0) {
-      if (text) text += '. ';
+      if (text) text += ". ";
       text += `${translations.black}: `;
-      text += blackPieces.map(p => `${translations[p.piece]} ${p.square}`).join(', ');
+      text += blackPieces
+        .map((p) => `${translations[p.piece]} ${p.square}`)
+        .join(", ");
     }
 
     return text;

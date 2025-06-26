@@ -1,13 +1,13 @@
-import { Chess, Move, Square } from 'chess.js';
-import { ChessMove, ChessPosition, ChessTurn, ValidationResult } from './types';
+import { Chess, Move, Square } from "chess.js";
+import { ChessMove, ChessPosition, ChessTurn, ValidationResult } from "./types";
 
 /**
  * Type-safe wrapper around chess.js
  * Provides a clean API for chess game logic
  */
 export class ChessGame {
-  private game: Chess;  // ← CAMBIATO: Chess invece di ChessInstance
-  
+  private game: Chess; // ← CAMBIATO: Chess invece di ChessInstance
+
   constructor(fen?: string) {
     this.game = new Chess(fen);
   }
@@ -23,7 +23,7 @@ export class ChessGame {
    * Get current turn
    */
   getTurn(): ChessTurn {
-    return this.game.turn() === 'w' ? 'white' : 'black';
+    return this.game.turn() === "w" ? "white" : "black";
   }
 
   /**
@@ -38,7 +38,7 @@ export class ChessGame {
    */
   isLegalMove(from: Square, to: Square): boolean {
     try {
-      const move = this.game.move({ from, to, promotion: 'q' });
+      const move = this.game.move({ from, to, promotion: "q" });
       if (move) {
         this.game.undo();
         return true;
@@ -52,7 +52,11 @@ export class ChessGame {
   /**
    * Make a move
    */
-  makeMove(from: Square, to: Square, promotion: 'q' | 'r' | 'b' | 'n' = 'q'): ChessMove | null {
+  makeMove(
+    from: Square,
+    to: Square,
+    promotion: "q" | "r" | "b" | "n" = "q",
+  ): ChessMove | null {
     try {
       const move = this.game.move({ from, to, promotion });
       if (move) {
@@ -63,7 +67,7 @@ export class ChessGame {
           piece: move.piece,
           captured: move.captured,
           promotion: move.promotion,
-          fen: this.game.fen()
+          fen: this.game.fen(),
         };
       }
     } catch {
@@ -86,7 +90,7 @@ export class ChessGame {
           piece: move.piece,
           captured: move.captured,
           promotion: move.promotion,
-          fen: this.game.fen()
+          fen: this.game.fen(),
         };
       }
     } catch {
@@ -124,9 +128,9 @@ export class ChessGame {
       this.game.load(fen);
       return { valid: true };
     } catch (error) {
-      return { 
-        valid: false, 
-        error: error instanceof Error ? error.message : 'Invalid FEN'
+      return {
+        valid: false,
+        error: error instanceof Error ? error.message : "Invalid FEN",
       };
     }
   }
@@ -183,9 +187,9 @@ export class ChessGame {
   /**
    * Get piece at square
    */
- getPieceAt(square: Square): { type: string; color: 'w' | 'b' } | null {
-  return this.game.get(square) || null;
-}
+  getPieceAt(square: Square): { type: string; color: "w" | "b" } | null {
+    return this.game.get(square) || null;
+  }
 
   /**
    * Load from PGN
@@ -209,13 +213,15 @@ export class ChessGame {
   /**
    * Get valid moves from a specific square
    */
-  getValidMovesFrom(square: Square): Array<{ from: string; to: string; san: string }> {
+  getValidMovesFrom(
+    square: Square,
+  ): Array<{ from: string; to: string; san: string }> {
     try {
       const moves = this.game.moves({ square, verbose: true });
-      return moves.map(move => ({
+      return moves.map((move) => ({
         from: move.from,
         to: move.to,
-        san: move.san
+        san: move.san,
       }));
     } catch {
       return [];
@@ -237,17 +243,22 @@ export class ChessGame {
   /**
    * Validate and return move details if valid
    */
-  isValidMove(from: Square, to: Square): { san: string; from: string; to: string } | null {
+  isValidMove(
+    from: Square,
+    to: Square,
+  ): { san: string; from: string; to: string } | null {
     try {
       // Try the move without actually making it
       const moves = this.game.moves({ verbose: true });
-      const validMove = moves.find(move => move.from === from && move.to === to);
-      
+      const validMove = moves.find(
+        (move) => move.from === from && move.to === to,
+      );
+
       if (validMove) {
         return {
           san: validMove.san,
           from: validMove.from,
-          to: validMove.to
+          to: validMove.to,
         };
       }
       return null;
@@ -262,10 +273,10 @@ export class ChessGame {
   getValidMoves(): Array<{ from: string; to: string; san: string }> {
     try {
       const moves = this.game.moves({ verbose: true });
-      return moves.map(move => ({
+      return moves.map((move) => ({
         from: move.from,
         to: move.to,
-        san: move.san
+        san: move.san,
       }));
     } catch {
       return [];
@@ -275,7 +286,11 @@ export class ChessGame {
   /**
    * Make a move by coordinates (for interactive board)
    */
-  makeMoveByCoords(from: Square, to: Square, promotion?: string): ChessMove | null {
+  makeMoveByCoords(
+    from: Square,
+    to: Square,
+    promotion?: string,
+  ): ChessMove | null {
     try {
       const move = this.game.move({ from, to, promotion });
       if (move) {
@@ -286,12 +301,12 @@ export class ChessGame {
           piece: move.piece,
           captured: move.captured,
           promotion: move.promotion,
-          fen: this.game.fen()
+          fen: this.game.fen(),
         };
       }
       return null;
     } catch (error) {
-      console.error('Move error:', error);
+      console.error("Move error:", error);
       return null;
     }
   }

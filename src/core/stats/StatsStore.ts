@@ -1,13 +1,13 @@
 // src/core/stats/StatsStore.ts
-import { z } from 'zod';
-import { StudySession, UserStats } from '../chess/types';
+import { z } from "zod";
+import { StudySession, UserStats } from "../chess/types";
 
 // Zod schemas for data validation
 const MoveAttemptSchema = z.object({
   san: z.string(),
   correct: z.boolean(),
   timeMs: z.number().min(0),
-  hintsUsed: z.number().min(0)
+  hintsUsed: z.number().min(0),
 });
 
 const StudySessionSchema = z.object({
@@ -16,7 +16,7 @@ const StudySessionSchema = z.object({
   studyId: z.string(),
   moves: z.array(MoveAttemptSchema),
   completed: z.boolean(),
-  totalTimeMs: z.number().min(0)
+  totalTimeMs: z.number().min(0),
 });
 
 const UserStatsSchema = z.object({
@@ -28,8 +28,8 @@ const UserStatsSchema = z.object({
     totalTime: z.number().min(0),
     studiesCompleted: z.number().min(0),
     currentStreak: z.number().min(0),
-    lastPlayedDate: z.string().datetime().nullable()
-  })
+    lastPlayedDate: z.string().datetime().nullable(),
+  }),
 });
 
 export class StatsStore {
@@ -49,8 +49,8 @@ export class StatsStore {
         totalTime: 0,
         studiesCompleted: 0,
         currentStreak: 0,
-        lastPlayedDate: null
-      }
+        lastPlayedDate: null,
+      },
     };
   }
 
@@ -64,25 +64,28 @@ export class StatsStore {
       studyId,
       moves: [],
       completed: false,
-      totalTimeMs: 0
+      totalTimeMs: 0,
     };
 
     this.stats.sessions.push(session);
     this.updateStreak();
-    
+
     return session;
   }
 
   /**
    * Record a move attempt
    */
-  recordMove(sessionId: string, move: {
-    san: string;
-    correct: boolean;
-    timeMs: number;
-    hintsUsed: number;
-  }): void {
-    const session = this.stats.sessions.find(s => s.id === sessionId);
+  recordMove(
+    sessionId: string,
+    move: {
+      san: string;
+      correct: boolean;
+      timeMs: number;
+      hintsUsed: number;
+    },
+  ): void {
+    const session = this.stats.sessions.find((s) => s.id === sessionId);
     if (!session) {
       throw new Error(`Session ${sessionId} not found`);
     }
@@ -102,7 +105,7 @@ export class StatsStore {
    * Complete a session
    */
   completeSession(sessionId: string): void {
-    const session = this.stats.sessions.find(s => s.id === sessionId);
+    const session = this.stats.sessions.find((s) => s.id === sessionId);
     if (!session) {
       throw new Error(`Session ${sessionId} not found`);
     }
@@ -116,7 +119,7 @@ export class StatsStore {
    */
   private updateStreak(): void {
     const today = new Date().toDateString();
-    const lastPlayed = this.stats.aggregates.lastPlayedDate 
+    const lastPlayed = this.stats.aggregates.lastPlayedDate
       ? new Date(this.stats.aggregates.lastPlayedDate).toDateString()
       : null;
 
@@ -153,7 +156,8 @@ export class StatsStore {
   getAccuracy(): number {
     if (this.stats.aggregates.totalMoves === 0) return 0;
     return Math.round(
-      (this.stats.aggregates.correctMoves / this.stats.aggregates.totalMoves) * 100
+      (this.stats.aggregates.correctMoves / this.stats.aggregates.totalMoves) *
+        100,
     );
   }
 
@@ -169,14 +173,16 @@ export class StatsStore {
    */
   getAverageTime(): number {
     if (this.stats.aggregates.totalMoves === 0) return 0;
-    return Math.round(this.stats.aggregates.totalTime / this.stats.aggregates.totalMoves);
+    return Math.round(
+      this.stats.aggregates.totalTime / this.stats.aggregates.totalMoves,
+    );
   }
 
   /**
    * Get sessions for a specific study
    */
   getStudySessions(studyId: string): StudySession[] {
-    return this.stats.sessions.filter(s => s.studyId === studyId);
+    return this.stats.sessions.filter((s) => s.studyId === studyId);
   }
 
   /**
@@ -208,7 +214,7 @@ export class StatsStore {
    * Start session without studyId (for simplified usage)
    */
   startSimpleSession(): void {
-    const session = this.startSession('default-study');
+    const session = this.startSession("default-study");
     this.currentSessionId = session.id;
   }
 
@@ -217,15 +223,15 @@ export class StatsStore {
    */
   recordSimpleMove(correct: boolean, timeMs: number = 0): void {
     if (!this.currentSessionId) {
-      const session = this.startSession('default-study');
+      const session = this.startSession("default-study");
       this.currentSessionId = session.id;
     }
-    
+
     this.recordMove(this.currentSessionId, {
-      san: 'move',
+      san: "move",
       correct,
       timeMs,
-      hintsUsed: 0
+      hintsUsed: 0,
     });
   }
 

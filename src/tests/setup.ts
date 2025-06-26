@@ -1,5 +1,5 @@
 // src/tests/setup.ts
-import { beforeAll, vi } from 'vitest';
+import { beforeAll, vi } from "vitest";
 
 // Mock global APIs that might not be available in test environment
 beforeAll(() => {
@@ -10,17 +10,17 @@ beforeAll(() => {
     removeItem: vi.fn(),
     clear: vi.fn(),
   };
-  Object.defineProperty(window, 'localStorage', {
-    value: localStorageMock
+  Object.defineProperty(window, "localStorage", {
+    value: localStorageMock,
   });
 
   // Mock IndexedDB (used by idb-keyval)
   if (!window.indexedDB) {
-    Object.defineProperty(window, 'indexedDB', {
+    Object.defineProperty(window, "indexedDB", {
       value: {
         open: vi.fn(),
         deleteDatabase: vi.fn(),
-      }
+      },
     });
   }
 });

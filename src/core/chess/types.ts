@@ -1,11 +1,11 @@
 // src/core/chess/types.ts
-import { Square } from 'chess.js';
+import { Square } from "chess.js";
 
-export type ChessTurn = 'white' | 'black';
+export type ChessTurn = "white" | "black";
 
-export type ChessPiece = 'p' | 'n' | 'b' | 'r' | 'q' | 'k';
+export type ChessPiece = "p" | "n" | "b" | "r" | "q" | "k";
 
-export type ChessColor = 'w' | 'b';
+export type ChessColor = "w" | "b";
 
 export interface ChessMove {
   from: Square;
@@ -44,7 +44,7 @@ export interface PgnMove {
 }
 
 export interface PgnNode {
-  type: 'move' | 'comment' | 'variation';
+  type: "move" | "comment" | "variation";
   content: string;
   children?: PgnNode[];
 }
@@ -96,22 +96,22 @@ export interface UserStats {
 // Tactical Training Types (Lucas Chess style)
 export type ProblemDifficulty = 1 | 2 | 3 | 4 | 5;
 
-export type TacticalTheme = 
-  | 'mate' 
-  | 'pin' 
-  | 'fork' 
-  | 'skewer' 
-  | 'discovery' 
-  | 'deflection' 
-  | 'decoy' 
-  | 'sacrifice' 
-  | 'combination' 
-  | 'endgame' 
-  | 'opening' 
-  | 'tactics'
-  | 'middlegame'
-  | 'puzzle'
-  | 'study';
+export type TacticalTheme =
+  | "mate"
+  | "pin"
+  | "fork"
+  | "skewer"
+  | "discovery"
+  | "deflection"
+  | "decoy"
+  | "sacrifice"
+  | "combination"
+  | "endgame"
+  | "opening"
+  | "tactics"
+  | "middlegame"
+  | "puzzle"
+  | "study";
 
 export interface TacticalProblem {
   id: string;
@@ -151,7 +151,7 @@ export interface TacticalSession {
   attempts: TacticalAttempt[];
   completed: boolean;
   hintsUsed: number;
-  finalResult: 'solved' | 'failed' | 'skipped';
+  finalResult: "solved" | "failed" | "skipped";
 }
 
 export interface TacticalAttempt {
@@ -171,16 +171,22 @@ export interface TacticalStats {
   averageTime: number;
   currentStreak: number;
   longestStreak: number;
-  difficultyStats: Record<ProblemDifficulty, {
-    attempted: number;
-    solved: number;
-    averageTime: number;
-  }>;
-  themeStats: Record<TacticalTheme, {
-    attempted: number;
-    solved: number;
-    averageTime: number;
-  }>;
+  difficultyStats: Record<
+    ProblemDifficulty,
+    {
+      attempted: number;
+      solved: number;
+      averageTime: number;
+    }
+  >;
+  themeStats: Record<
+    TacticalTheme,
+    {
+      attempted: number;
+      solved: number;
+      averageTime: number;
+    }
+  >;
   recentSessions: TacticalSession[];
   lastPlayedDate: string | null;
 }
@@ -195,9 +201,9 @@ export interface ProblemState {
   hintsUsed: number;
   startTime: number;
   timeRemaining?: number;
-  status: 'waiting' | 'thinking' | 'solved' | 'failed' | 'hint';
+  status: "waiting" | "thinking" | "solved" | "failed" | "hint";
   message: string;
-  messageType: 'info' | 'success' | 'error' | 'warning';
+  messageType: "info" | "success" | "error" | "warning";
 }
 
 // Training configuration

@@ -1,7 +1,7 @@
 // src/services/storage/StorageService.ts
-import { get, set, clear } from 'idb-keyval';  // ← RIMOSSO 'del'
-import { UserStats } from '@core/chess/types';
-import { StatsStore } from '@core/stats/StatsStore';
+import { get, set, clear } from "idb-keyval"; // ← RIMOSSO 'del'
+import { UserStats } from "@core/chess/types";
+import { StatsStore } from "@core/stats/StatsStore";
 
 export interface StorageData {
   version: number;
@@ -11,11 +11,11 @@ export interface StorageData {
 }
 
 export interface UserSettings {
-  language: 'it' | 'en';
+  language: "it" | "en";
   soundEnabled: boolean;
   voiceEnabled: boolean;
   autoNext: boolean;
-  theme: 'dark' | 'light';
+  theme: "dark" | "light";
 }
 
 export interface SavedStudy {
@@ -27,7 +27,7 @@ export interface SavedStudy {
 }
 
 const STORAGE_VERSION = 1;
-const STORAGE_KEY = 'blindfold-chess-data';
+const STORAGE_KEY = "blindfold-chess-data";
 
 export class StorageService {
   /**
@@ -35,7 +35,7 @@ export class StorageService {
    */
   async initialize(): Promise<void> {
     const data = await this.load();
-    
+
     if (!data) {
       // First time user
       await this.save(this.createDefaultData());
@@ -56,16 +56,16 @@ export class StorageService {
     try {
       const data = await get(STORAGE_KEY);
       if (!data) return null;
-      
+
       // Validate data structure
-      if (typeof data === 'object' && 'version' in data) {
+      if (typeof data === "object" && "version" in data) {
         return data as StorageData;
       }
-      
+
       // Try to recover from legacy localStorage
       return this.loadLegacyData();
     } catch (error) {
-      console.error('Failed to load storage:', error);
+      console.error("Failed to load storage:", error);
       return null;
     }
   }
@@ -77,7 +77,7 @@ export class StorageService {
     try {
       await set(STORAGE_KEY, data);
     } catch (error) {
-      console.error('Failed to save storage:', error);
+      console.error("Failed to save storage:", error);
       throw error;
     }
   }
@@ -97,7 +97,7 @@ export class StorageService {
    * Save stats
    */
   async saveStats(stats: StatsStore): Promise<void> {
-    const data = await this.load() || this.createDefaultData();
+    const data = (await this.load()) || this.createDefaultData();
     data.stats = stats.toJSON();
     await this.save(data);
   }
@@ -114,7 +114,7 @@ export class StorageService {
    * Save settings
    */
   async saveSettings(settings: UserSettings): Promise<void> {
-    const data = await this.load() || this.createDefaultData();
+    const data = (await this.load()) || this.createDefaultData();
     data.settings = settings;
     await this.save(data);
   }
@@ -131,15 +131,15 @@ export class StorageService {
    * Save study
    */
   async saveStudy(study: SavedStudy): Promise<void> {
-    const data = await this.load() || this.createDefaultData();
-    
-    const existingIndex = data.studies.findIndex(s => s.id === study.id);
+    const data = (await this.load()) || this.createDefaultData();
+
+    const existingIndex = data.studies.findIndex((s) => s.id === study.id);
     if (existingIndex >= 0) {
       data.studies[existingIndex] = study;
     } else {
       data.studies.push(study);
     }
-    
+
     await this.save(data);
   }
 
@@ -149,8 +149,8 @@ export class StorageService {
   async deleteStudy(studyId: string): Promise<void> {
     const data = await this.load();
     if (!data) return;
-    
-    data.studies = data.studies.filter(s => s.id !== studyId);
+
+    data.studies = data.studies.filter((s) => s.id !== studyId);
     await this.save(data);
   }
 
@@ -169,7 +169,7 @@ export class StorageService {
       version: STORAGE_VERSION,
       stats: new StatsStore().toJSON(),
       settings: this.createDefaultSettings(),
-      studies: []
+      studies: [],
     };
   }
 
@@ -178,11 +178,11 @@ export class StorageService {
    */
   private createDefaultSettings(): UserSettings {
     return {
-      language: 'it',
+      language: "it",
       soundEnabled: true,
       voiceEnabled: false,
       autoNext: false,
-      theme: 'dark'
+      theme: "dark",
     };
   }
 
@@ -191,14 +191,14 @@ export class StorageService {
    */
   private loadLegacyData(): StorageData | null {
     try {
-      const statsJson = localStorage.getItem('blindfoldStats');
+      const statsJson = localStorage.getItem("blindfoldStats");
       if (!statsJson) return null;
 
       const legacyStats = JSON.parse(statsJson);
-      
+
       // Convert legacy format to new format
       const data = this.createDefaultData();
-      
+
       // Map legacy stats
       if (legacyStats.completed !== undefined) {
         data.stats.aggregates.studiesCompleted = legacyStats.completed;
@@ -206,13 +206,13 @@ export class StorageService {
       if (legacyStats.streak !== undefined) {
         data.stats.aggregates.currentStreak = legacyStats.streak;
       }
-      
+
       // Clear legacy storage
-      localStorage.removeItem('blindfoldStats');
-      
+      localStorage.removeItem("blindfoldStats");
+
       return data;
     } catch (error) {
-      console.error('Failed to load legacy data:', error);
+      console.error("Failed to load legacy data:", error);
       return null;
     }
   }

@@ -1,7 +1,15 @@
 // src/ui/hooks/useTacticalTraining.ts
-import { useState, useCallback, useRef } from 'react';
-import { TacticalCollection, TacticalProblem, TacticalSession, TacticalAttempt, TacticalConfig, TacticalStats } from '@core/chess/types';
-import { FnsParser } from '@core/fns/FnsParser';
+/* eslint-disable no-unused-vars */
+import { useState, useCallback, useRef } from "react";
+import {
+  TacticalCollection,
+  TacticalProblem,
+  TacticalSession,
+  TacticalAttempt,
+  TacticalConfig,
+  TacticalStats,
+} from "@core/chess/types";
+import { FnsParser } from "@core/fns/FnsParser";
 
 export interface TacticalTrainingState {
   currentCollection: TacticalCollection | null;
@@ -24,13 +32,20 @@ export interface TacticalTrainingActions {
   nextProblem: () => void;
   previousProblem: () => void;
   goToProblem: (index: number) => void;
-  submitSolution: (attempts: TacticalAttempt[], timeMs: number, solved: boolean) => void;
+  submitSolution: (
+    attempts: TacticalAttempt[],
+    timeMs: number,
+    solved: boolean,
+  ) => void;
   updateConfig: (newConfig: Partial<TacticalConfig>) => void;
   resetStats: () => void;
   getCurrentProblem: () => TacticalProblem | null;
   getProgress: () => { current: number; total: number; percent: number };
   filterProblemsByTheme: (theme: string) => TacticalProblem[];
-  filterProblemsByDifficulty: (minDiff: number, maxDiff: number) => TacticalProblem[];
+  filterProblemsByDifficulty: (
+    minDiff: number,
+    maxDiff: number,
+  ) => TacticalProblem[];
 }
 
 const DEFAULT_CONFIG: TacticalConfig = {
@@ -41,7 +56,7 @@ const DEFAULT_CONFIG: TacticalConfig = {
   autoAdvance: false,
   difficultyRange: [1, 5],
   preferredThemes: [],
-  reinforcementMode: true
+  reinforcementMode: true,
 };
 
 const DEFAULT_STATS: TacticalStats = {
@@ -57,7 +72,7 @@ const DEFAULT_STATS: TacticalStats = {
     2: { attempted: 0, solved: 0, averageTime: 0 },
     3: { attempted: 0, solved: 0, averageTime: 0 },
     4: { attempted: 0, solved: 0, averageTime: 0 },
-    5: { attempted: 0, solved: 0, averageTime: 0 }
+    5: { attempted: 0, solved: 0, averageTime: 0 },
   },
   themeStats: {
     mate: { attempted: 0, solved: 0, averageTime: 0 },
@@ -74,30 +89,33 @@ const DEFAULT_STATS: TacticalStats = {
     tactics: { attempted: 0, solved: 0, averageTime: 0 },
     middlegame: { attempted: 0, solved: 0, averageTime: 0 },
     puzzle: { attempted: 0, solved: 0, averageTime: 0 },
-    study: { attempted: 0, solved: 0, averageTime: 0 }
+    study: { attempted: 0, solved: 0, averageTime: 0 },
   },
   recentSessions: [],
-  lastPlayedDate: null
+  lastPlayedDate: null,
 };
 
-export const useTacticalTraining = (): [TacticalTrainingState, TacticalTrainingActions] => {
+export const useTacticalTraining = (): [
+  TacticalTrainingState,
+  TacticalTrainingActions,
+] => {
   // Load saved state from localStorage
   const loadSavedState = (): TacticalTrainingState => {
     try {
-      const saved = localStorage.getItem('chessvision-tactical-training');
+      const saved = localStorage.getItem("chessvision-tactical-training");
       if (saved) {
         const parsed = JSON.parse(saved);
         return {
           ...parsed,
           isActive: false,
           isPaused: false,
-          config: { ...DEFAULT_CONFIG, ...parsed.config }
+          config: { ...DEFAULT_CONFIG, ...parsed.config },
         };
       }
     } catch (error) {
-      console.error('Error loading tactical training state:', error);
+      console.error("Error loading tactical training state:", error);
     }
-    
+
     return {
       currentCollection: null,
       currentProblemIndex: 0,
@@ -106,7 +124,7 @@ export const useTacticalTraining = (): [TacticalTrainingState, TacticalTrainingA
       stats: DEFAULT_STATS,
       sessions: [],
       isActive: false,
-      isPaused: false
+      isPaused: false,
     };
   };
 
@@ -119,38 +137,50 @@ export const useTacticalTraining = (): [TacticalTrainingState, TacticalTrainingA
       const stateToSave = {
         ...newState,
         isActive: false,
-        isPaused: false
+        isPaused: false,
       };
-      localStorage.setItem('chessvision-tactical-training', JSON.stringify(stateToSave));
+      localStorage.setItem(
+        "chessvision-tactical-training",
+        JSON.stringify(stateToSave),
+      );
     } catch (error) {
-      console.error('Error saving tactical training state:', error);
+      console.error("Error saving tactical training state:", error);
     }
   }, []);
 
-  const loadCollection = useCallback((collection: TacticalCollection) => {
-    setState(prev => {
-      const newState = {
-        ...prev,
-        currentCollection: collection,
-        currentProblemIndex: 0,
-        currentProblem: collection.problems.length > 0 ? collection.problems[0] : null,
-        isActive: false,
-        isPaused: false
-      };
-      saveState(newState);
-      return newState;
-    });
-  }, [saveState]);
+  const loadCollection = useCallback(
+    (collection: TacticalCollection) => {
+      setState((prev) => {
+        const newState = {
+          ...prev,
+          currentCollection: collection,
+          currentProblemIndex: 0,
+          currentProblem:
+            collection.problems.length > 0 ? collection.problems[0] : null,
+          isActive: false,
+          isPaused: false,
+        };
+        saveState(newState);
+        return newState;
+      });
+    },
+    [saveState],
+  );
 
-  const loadFnsFile = useCallback((content: string, fileName: string) => {
-    try {
-      const collection = FnsParser.parseFnsFile(content, fileName);
-      loadCollection(collection);
-    } catch (error) {
-      console.error('Error parsing FNS file:', error);
-      throw new Error('Failed to parse FNS file. Please check the file format.');
-    }
-  }, [loadCollection]);
+  const loadFnsFile = useCallback(
+    (content: string, fileName: string) => {
+      try {
+        const collection = FnsParser.parseFnsFile(content, fileName);
+        loadCollection(collection);
+      } catch (error) {
+        console.error("Error parsing FNS file:", error);
+        throw new Error(
+          "Failed to parse FNS file. Please check the file format.",
+        );
+      }
+    },
+    [loadCollection],
+  );
 
   const startTraining = useCallback(() => {
     if (!state.currentCollection || !state.currentProblem) return;
@@ -163,43 +193,43 @@ export const useTacticalTraining = (): [TacticalTrainingState, TacticalTrainingA
       attempts: [],
       completed: false,
       hintsUsed: 0,
-      finalResult: 'failed'
+      finalResult: "failed",
     };
 
     currentSessionRef.current = session;
 
-    setState(prev => ({
+    setState((prev) => ({
       ...prev,
       isActive: true,
-      isPaused: false
+      isPaused: false,
     }));
   }, [state.currentCollection, state.currentProblem]);
 
   const pauseTraining = useCallback(() => {
-    setState(prev => ({
+    setState((prev) => ({
       ...prev,
-      isPaused: true
+      isPaused: true,
     }));
   }, []);
 
   const resumeTraining = useCallback(() => {
-    setState(prev => ({
+    setState((prev) => ({
       ...prev,
-      isPaused: false
+      isPaused: false,
     }));
   }, []);
 
   const stopTraining = useCallback(() => {
     if (currentSessionRef.current && !currentSessionRef.current.completed) {
       currentSessionRef.current.endTime = Date.now();
-      currentSessionRef.current.finalResult = 'skipped';
+      currentSessionRef.current.finalResult = "skipped";
     }
 
-    setState(prev => {
+    setState((prev) => {
       const newState = {
         ...prev,
         isActive: false,
-        isPaused: false
+        isPaused: false,
       };
       saveState(newState);
       return newState;
@@ -207,16 +237,19 @@ export const useTacticalTraining = (): [TacticalTrainingState, TacticalTrainingA
   }, [saveState]);
 
   const nextProblem = useCallback(() => {
-    setState(prev => {
+    setState((prev) => {
       if (!prev.currentCollection) return prev;
-      
-      const nextIndex = Math.min(prev.currentProblemIndex + 1, prev.currentCollection.problems.length - 1);
+
+      const nextIndex = Math.min(
+        prev.currentProblemIndex + 1,
+        prev.currentCollection.problems.length - 1,
+      );
       const newState = {
         ...prev,
         currentProblemIndex: nextIndex,
         currentProblem: prev.currentCollection.problems[nextIndex],
         isActive: false,
-        isPaused: false
+        isPaused: false,
       };
       saveState(newState);
       return newState;
@@ -224,127 +257,151 @@ export const useTacticalTraining = (): [TacticalTrainingState, TacticalTrainingA
   }, [saveState]);
 
   const previousProblem = useCallback(() => {
-    setState(prev => {
+    setState((prev) => {
       if (!prev.currentCollection) return prev;
-      
+
       const prevIndex = Math.max(prev.currentProblemIndex - 1, 0);
       const newState = {
         ...prev,
         currentProblemIndex: prevIndex,
         currentProblem: prev.currentCollection.problems[prevIndex],
         isActive: false,
-        isPaused: false
+        isPaused: false,
       };
       saveState(newState);
       return newState;
     });
   }, [saveState]);
 
-  const goToProblem = useCallback((index: number) => {
-    setState(prev => {
-      if (!prev.currentCollection || index < 0 || index >= prev.currentCollection.problems.length) {
-        return prev;
+  const goToProblem = useCallback(
+    (index: number) => {
+      setState((prev) => {
+        if (
+          !prev.currentCollection ||
+          index < 0 ||
+          index >= prev.currentCollection.problems.length
+        ) {
+          return prev;
+        }
+
+        const newState = {
+          ...prev,
+          currentProblemIndex: index,
+          currentProblem: prev.currentCollection.problems[index],
+          isActive: false,
+          isPaused: false,
+        };
+        saveState(newState);
+        return newState;
+      });
+    },
+    [saveState],
+  );
+
+  const submitSolution = useCallback(
+    (attempts: TacticalAttempt[], timeMs: number, solved: boolean) => {
+      if (!currentSessionRef.current || !state.currentProblem) return;
+
+      // Complete the session
+      currentSessionRef.current.endTime = Date.now();
+      currentSessionRef.current.attempts = attempts;
+      currentSessionRef.current.completed = true;
+      currentSessionRef.current.finalResult = solved ? "solved" : "failed";
+
+      setState((prev) => {
+        // Update stats
+        const newStats = { ...prev.stats };
+
+        // Update totals
+        newStats.totalProblems++;
+        if (solved) {
+          newStats.solvedProblems++;
+          newStats.currentStreak++;
+          newStats.longestStreak = Math.max(
+            newStats.longestStreak,
+            newStats.currentStreak,
+          );
+        } else {
+          newStats.failedProblems++;
+          newStats.currentStreak = 0;
+        }
+
+        // Update average time
+        const totalTime =
+          newStats.averageTime * (newStats.totalProblems - 1) + timeMs;
+        newStats.averageTime = totalTime / newStats.totalProblems;
+
+        // Update difficulty stats
+        const difficulty = state.currentProblem?.difficulty;
+        if (difficulty && difficulty >= 1 && difficulty <= 5) {
+          const diffStats = newStats.difficultyStats[difficulty];
+          diffStats.attempted++;
+          if (solved) diffStats.solved++;
+          diffStats.averageTime =
+            (diffStats.averageTime * (diffStats.attempted - 1) + timeMs) /
+            diffStats.attempted;
+        }
+
+        // Update theme stats
+        const theme = state.currentProblem?.theme;
+        if (theme && theme in newStats.themeStats) {
+          const themeStats = newStats.themeStats[theme];
+          themeStats.attempted++;
+          if (solved) themeStats.solved++;
+          themeStats.averageTime =
+            (themeStats.averageTime * (themeStats.attempted - 1) + timeMs) /
+            themeStats.attempted;
+        }
+
+        newStats.lastPlayedDate = new Date().toISOString();
+
+        // Add session to recent sessions (keep last 50)
+        const newSessions = [
+          currentSessionRef.current!,
+          ...prev.sessions,
+        ].slice(0, 50);
+        newStats.recentSessions = newSessions.slice(0, 10);
+
+        const newState = {
+          ...prev,
+          stats: newStats,
+          sessions: newSessions,
+          isActive: false,
+        };
+
+        saveState(newState);
+        return newState;
+      });
+
+      // Auto-advance if configured
+      if (state.config.autoAdvance && solved) {
+        setTimeout(() => nextProblem(), 2000);
       }
-      
-      const newState = {
-        ...prev,
-        currentProblemIndex: index,
-        currentProblem: prev.currentCollection.problems[index],
-        isActive: false,
-        isPaused: false
-      };
-      saveState(newState);
-      return newState;
-    });
-  }, [saveState]);
+    },
+    [state.currentProblem, state.config.autoAdvance, nextProblem, saveState],
+  );
 
-  const submitSolution = useCallback((attempts: TacticalAttempt[], timeMs: number, solved: boolean) => {
-    if (!currentSessionRef.current || !state.currentProblem) return;
-
-    // Complete the session
-    currentSessionRef.current.endTime = Date.now();
-    currentSessionRef.current.attempts = attempts;
-    currentSessionRef.current.completed = true;
-    currentSessionRef.current.finalResult = solved ? 'solved' : 'failed';
-
-    setState(prev => {
-      // Update stats
-      const newStats = { ...prev.stats };
-      
-      // Update totals
-      newStats.totalProblems++;
-      if (solved) {
-        newStats.solvedProblems++;
-        newStats.currentStreak++;
-        newStats.longestStreak = Math.max(newStats.longestStreak, newStats.currentStreak);
-      } else {
-        newStats.failedProblems++;
-        newStats.currentStreak = 0;
-      }
-
-      // Update average time
-      const totalTime = newStats.averageTime * (newStats.totalProblems - 1) + timeMs;
-      newStats.averageTime = totalTime / newStats.totalProblems;
-
-      // Update difficulty stats
-      const difficulty = state.currentProblem?.difficulty;
-      if (difficulty && difficulty >= 1 && difficulty <= 5) {
-        const diffStats = newStats.difficultyStats[difficulty];
-        diffStats.attempted++;
-        if (solved) diffStats.solved++;
-        diffStats.averageTime = ((diffStats.averageTime * (diffStats.attempted - 1)) + timeMs) / diffStats.attempted;
-      }
-
-      // Update theme stats
-      const theme = state.currentProblem?.theme;
-      if (theme && theme in newStats.themeStats) {
-        const themeStats = newStats.themeStats[theme];
-        themeStats.attempted++;
-        if (solved) themeStats.solved++;
-        themeStats.averageTime = ((themeStats.averageTime * (themeStats.attempted - 1)) + timeMs) / themeStats.attempted;
-      }
-
-      newStats.lastPlayedDate = new Date().toISOString();
-
-      // Add session to recent sessions (keep last 50)
-      const newSessions = [currentSessionRef.current!, ...prev.sessions].slice(0, 50);
-      newStats.recentSessions = newSessions.slice(0, 10);
-
-      const newState = {
-        ...prev,
-        stats: newStats,
-        sessions: newSessions,
-        isActive: false
-      };
-
-      saveState(newState);
-      return newState;
-    });
-
-    // Auto-advance if configured
-    if (state.config.autoAdvance && solved) {
-      setTimeout(() => nextProblem(), 2000);
-    }
-  }, [state.currentProblem, state.config.autoAdvance, nextProblem, saveState]);
-
-  const updateConfig = useCallback((newConfig: Partial<TacticalConfig>) => {
-    setState(prev => {
-      const updatedConfig = { ...prev.config, ...newConfig };
-      const newState = {
-        ...prev,
-        config: updatedConfig
-      };
-      saveState(newState);
-      return newState;
-    });
-  }, [saveState]);
+  const updateConfig = useCallback(
+    (newConfig: Partial<TacticalConfig>) => {
+      setState((prev) => {
+        const updatedConfig = { ...prev.config, ...newConfig };
+        const newState = {
+          ...prev,
+          config: updatedConfig,
+        };
+        saveState(newState);
+        return newState;
+      });
+    },
+    [saveState],
+  );
 
   const resetStats = useCallback(() => {
-    setState(prev => {
+    setState((prev) => {
       const newState = {
         ...prev,
         stats: DEFAULT_STATS,
-        sessions: []
+        sessions: [],
       };
       saveState(newState);
       return newState;
@@ -367,17 +424,24 @@ export const useTacticalTraining = (): [TacticalTrainingState, TacticalTrainingA
     return { current, total, percent };
   }, [state.currentCollection, state.currentProblemIndex]);
 
-  const filterProblemsByTheme = useCallback((theme: string) => {
-    if (!state.currentCollection) return [];
-    return state.currentCollection.problems.filter(p => p.theme === theme);
-  }, [state.currentCollection]);
+  const filterProblemsByTheme = useCallback(
+    (theme: string) => {
+      if (!state.currentCollection) return [];
+      return state.currentCollection.problems.filter((p) => p.theme === theme);
+    },
+    [state.currentCollection],
+  );
 
-  const filterProblemsByDifficulty = useCallback((minDiff: number, maxDiff: number) => {
-    if (!state.currentCollection) return [];
-    return state.currentCollection.problems.filter(p => 
-      p.difficulty && p.difficulty >= minDiff && p.difficulty <= maxDiff
-    );
-  }, [state.currentCollection]);
+  const filterProblemsByDifficulty = useCallback(
+    (minDiff: number, maxDiff: number) => {
+      if (!state.currentCollection) return [];
+      return state.currentCollection.problems.filter(
+        (p) =>
+          p.difficulty && p.difficulty >= minDiff && p.difficulty <= maxDiff,
+      );
+    },
+    [state.currentCollection],
+  );
 
   return [
     state,
@@ -397,7 +461,7 @@ export const useTacticalTraining = (): [TacticalTrainingState, TacticalTrainingA
       getCurrentProblem,
       getProgress,
       filterProblemsByTheme,
-      filterProblemsByDifficulty
-    }
+      filterProblemsByDifficulty,
+    },
   ];
 };

@@ -4,7 +4,7 @@
  * Implements enterprise-grade security practices
  */
 
-import DOMPurify from 'dompurify';
+import DOMPurify from "dompurify";
 
 /**
  * Sanitizes HTML content to prevent XSS attacks
@@ -13,13 +13,12 @@ import DOMPurify from 'dompurify';
  */
 export function sanitizeHTML(dirty: string): string {
   return DOMPurify.sanitize(dirty, {
-    ALLOWED_TAGS: ['em', 'strong', 'p', 'br'],
+    ALLOWED_TAGS: ["em", "strong", "p", "br"],
     ALLOWED_ATTR: [],
     KEEP_CONTENT: true,
     RETURN_DOM: false,
     RETURN_DOM_FRAGMENT: false,
-    RETURN_DOM_IMPORT: false,
-    SANITIZE_DOM: true
+    SANITIZE_DOM: true,
   });
 }
 
@@ -29,7 +28,7 @@ export function sanitizeHTML(dirty: string): string {
  * @returns Escaped text safe for display
  */
 export function sanitizeText(text: string): string {
-  const div = document.createElement('div');
+  const div = document.createElement("div");
   div.textContent = text;
   return div.innerHTML;
 }
@@ -41,13 +40,13 @@ export function sanitizeText(text: string): string {
  */
 export function sanitizePGN(pgn: string): string {
   // Remove any HTML tags completely
-  const textOnly = pgn.replace(/<[^>]*>/g, '');
-  
+  const textOnly = pgn.replace(/<[^>]*>/g, "");
+
   // Validate PGN structure
   if (!isValidPGNStructure(textOnly)) {
-    throw new Error('Invalid PGN format detected');
+    throw new Error("Invalid PGN format detected");
   }
-  
+
   return textOnly.trim();
 }
 
@@ -58,7 +57,7 @@ function isValidPGNStructure(pgn: string): boolean {
   // Must contain move numbers or metadata
   const hasMoves = /\d+\.\s*[a-h1-8NBRQK+#=\-O]+/.test(pgn);
   const hasMetadata = /\[.*\]/.test(pgn);
-  
+
   return hasMoves || hasMetadata;
 }
 
@@ -68,21 +67,24 @@ function isValidPGNStructure(pgn: string): boolean {
  * @param key - Encryption key
  * @returns Encrypted data as base64 string
  */
-export async function encryptData(data: string, key: CryptoKey): Promise<string> {
+export async function encryptData(
+  data: string,
+  key: CryptoKey,
+): Promise<string> {
   const encoder = new TextEncoder();
   const dataBuffer = encoder.encode(data);
-  
+
   const iv = crypto.getRandomValues(new Uint8Array(12));
   const encrypted = await crypto.subtle.encrypt(
-    { name: 'AES-GCM', iv },
+    { name: "AES-GCM", iv },
     key,
-    dataBuffer
+    dataBuffer,
   );
-  
+
   const combined = new Uint8Array(iv.length + encrypted.byteLength);
   combined.set(iv);
   combined.set(new Uint8Array(encrypted), iv.length);
-  
+
   return btoa(String.fromCharCode(...combined));
 }
 
@@ -92,20 +94,25 @@ export async function encryptData(data: string, key: CryptoKey): Promise<string>
  * @param key - Decryption key
  * @returns Decrypted string
  */
-export async function decryptData(encryptedData: string, key: CryptoKey): Promise<string> {
+export async function decryptData(
+  encryptedData: string,
+  key: CryptoKey,
+): Promise<string> {
   const combined = new Uint8Array(
-    atob(encryptedData).split('').map(char => char.charCodeAt(0))
+    atob(encryptedData)
+      .split("")
+      .map((char) => char.charCodeAt(0)),
   );
-  
+
   const iv = combined.slice(0, 12);
   const encrypted = combined.slice(12);
-  
+
   const decrypted = await crypto.subtle.decrypt(
-    { name: 'AES-GCM', iv },
+    { name: "AES-GCM", iv },
     key,
-    encrypted
+    encrypted,
   );
-  
+
   const decoder = new TextDecoder();
   return decoder.decode(decrypted);
 }
@@ -116,9 +123,9 @@ export async function decryptData(encryptedData: string, key: CryptoKey): Promis
  */
 export async function generateEncryptionKey(): Promise<CryptoKey> {
   return await crypto.subtle.generateKey(
-    { name: 'AES-GCM', length: 256 },
+    { name: "AES-GCM", length: 256 },
     true,
-    ['encrypt', 'decrypt']
+    ["encrypt", "decrypt"],
   );
 }
 
@@ -126,7 +133,7 @@ export async function generateEncryptionKey(): Promise<CryptoKey> {
  * Content Security Policy helper
  */
 export const CSP_HEADERS = {
-  'Content-Security-Policy': [
+  "Content-Security-Policy": [
     "default-src 'self'",
     "script-src 'self' 'unsafe-inline' https://fonts.googleapis.com",
     "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com",
@@ -135,6 +142,6 @@ export const CSP_HEADERS = {
     "connect-src 'self'",
     "object-src 'none'",
     "base-uri 'self'",
-    "form-action 'self'"
-  ].join('; ')
+    "form-action 'self'",
+  ].join("; "),
 };
