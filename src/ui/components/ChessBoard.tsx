@@ -208,20 +208,19 @@ export const ChessBoard: React.FC<ChessBoardProps> = ({
                   onMouseEnter={() => setHoveredSquare(square)}
                   onMouseLeave={() => setHoveredSquare(null)}
                 >
-                  {/* Piece rendering with shadows and effects */}
+                  {/* Piece rendering with 3D effects */}
                   {piece && (
-                    <span style={{
-                      textShadow: piece.color === 'w' 
-                        ? '0 3px 6px rgba(0,0,0,0.5), 0 1px 3px rgba(0,0,0,0.6), 0 0 2px rgba(255,255,255,0.8) inset' 
-                        : '0 3px 6px rgba(0,0,0,0.7), 0 1px 3px rgba(0,0,0,0.8)',
-                      filter: piece.color === 'w' ? 'brightness(1.2) contrast(1.1)' : 'brightness(0.9) contrast(1.2)',
-                      color: piece.color === 'w' ? '#ffffff' : '#1a1a1a',
-                      transform: isHovered ? 'scale(1.05)' : 'scale(1)',
-                      transition: 'all 0.15s ease',
-                      display: 'block',
-                      lineHeight: '1',
-                      fontWeight: '700'
-                    }}>
+                    <span 
+                      className={piece.color === 'w' ? 'chess-piece-white' : 'chess-piece-black'}
+                      style={{
+                        transform: isHovered ? 'scale(1.05)' : 'scale(1)',
+                        transition: 'all 0.15s ease',
+                        display: 'block',
+                        lineHeight: '1',
+                        fontWeight: '700',
+                        fontSize: 'inherit'
+                      }}
+                    >
                       {PIECE_SYMBOLS[`${piece.color}${piece.type.toUpperCase()}`]}
                     </span>
                   )}
