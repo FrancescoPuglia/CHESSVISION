@@ -317,4 +317,12 @@ export class ChessGame {
   clone(): ChessGame {
     return new ChessGame(this.getFen());
   }
+
+  /**
+   * Get the internal chess.js instance
+   * (for advanced operations)
+   */
+  getInternalChess(): Chess {
+    return this.game;
+  }
 }

@@ -11,6 +11,7 @@ import { SpeechService } from "./services/speech/SpeechService";
 import { PgnParser, PgnCollection } from "./core/pgn/PgnParser";
 import { FnsParser } from "./core/fns/FnsParser";
 import { EngineGame } from "./ui/components/EngineGame";
+import { ProfessionalEngineGame } from "./ui/components/ProfessionalEngineGame";
 import { StudyMode } from "./ui/components/StudyMode";
 import { TacticalMode } from "./ui/components/TacticalMode";
 import { ReadMode } from "./ui/components/ReadMode";
@@ -38,6 +39,7 @@ function App() {
   const [timeRemaining, setTimeRemaining] = useState(0);
   const [isTimerActive, setIsTimerActive] = useState(false);
   const [showEngineGame, setShowEngineGame] = useState(false);
+  const [showProfessionalEngine, setShowProfessionalEngine] = useState(false);
   const [showStudyMode, setShowStudyMode] = useState(false);
   const [showTacticalMode, setShowTacticalMode] = useState(false);
   const [showReadMode, setShowReadMode] = useState(false);
@@ -878,7 +880,35 @@ function App() {
                 fontWeight: "bold",
               }}
             >
-              🤖 Gioca vs Motore
+              🤖 Gioca vs Motore (Base)
+            </button>
+
+            <button
+              onClick={() => setShowProfessionalEngine(true)}
+              style={{
+                width: "100%",
+                marginTop: "0.5rem",
+                padding: "1rem",
+                backgroundColor: "#dc2626",
+                color: "white",
+                border: "2px solid #ffd700",
+                borderRadius: "8px",
+                cursor: "pointer",
+                fontSize: "1rem",
+                fontWeight: "bold",
+                boxShadow: "0 4px 15px rgba(220, 38, 38, 0.3)",
+                transition: "all 0.3s",
+              }}
+              onMouseEnter={(e) => {
+                e.currentTarget.style.transform = "scale(1.05)";
+                e.currentTarget.style.boxShadow = "0 6px 20px rgba(220, 38, 38, 0.5)";
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.transform = "scale(1)";
+                e.currentTarget.style.boxShadow = "0 4px 15px rgba(220, 38, 38, 0.3)";
+              }}
+            >
+              🏆 MOTORE PROFESSIONALE (ELO 1200-3000)
             </button>
 
             {currentCollection && currentCollection.studies.length > 0 && (
@@ -1946,6 +1976,18 @@ function App() {
           setShowEngineGame(false);
           // Record engine game activity
           (window as any).recordChessVisionActivity?.("engine", 6);
+        }}
+        speechService={speechService.current}
+        isVoiceEnabled={isVoiceEnabled}
+      />
+
+      {/* Professional Engine Game Modal */}
+      <ProfessionalEngineGame
+        isVisible={showProfessionalEngine}
+        onClose={() => {
+          setShowProfessionalEngine(false);
+          // Record professional engine game activity
+          (window as any).recordChessVisionActivity?.("professional_engine", 10);
         }}
         speechService={speechService.current}
         isVoiceEnabled={isVoiceEnabled}
