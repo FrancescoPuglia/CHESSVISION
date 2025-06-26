@@ -1,7 +1,10 @@
 // src/ui/components/ProfessionalEngineGame.tsx
 /* eslint-disable no-unused-vars, react-hooks/exhaustive-deps, react/no-unescaped-entities, no-empty-pattern */
 import React, { useState, useEffect, useRef, useCallback } from "react";
-import { StockfishAdvanced, LICHESS_LEVELS } from "@services/engine/StockfishAdvanced";
+import {
+  StockfishAdvanced,
+  LICHESS_LEVELS,
+} from "@services/engine/StockfishAdvanced";
 import { useChessGame } from "@ui/hooks/useChessGame";
 import { SpeechService } from "@services/speech/SpeechService";
 import { InteractiveChessBoard } from "./InteractiveChessBoard";
@@ -49,7 +52,6 @@ export const ProfessionalEngineGame: React.FC<ProfessionalEngineGameProps> = ({
   const recognitionRef = useRef<any>(null);
   const isProcessingVoice = useRef(false);
   // const voiceQueueRef = useRef<string[]>([]);
-
 
   // Initialize engine with selected Lichess level
   useEffect(() => {
@@ -569,7 +571,9 @@ export const ProfessionalEngineGame: React.FC<ProfessionalEngineGameProps> = ({
                       marginBottom: "0.5rem",
                     }}
                   >
-                    <span style={{ color: "#a0a0a0" }}>Livello: {selectedLevel}</span>
+                    <span style={{ color: "#a0a0a0" }}>
+                      Livello: {selectedLevel}
+                    </span>
                     <span style={{ color: "#ffd700" }}>
                       {engine?.getLevelInfo() || ""}
                     </span>
@@ -587,7 +591,7 @@ export const ProfessionalEngineGame: React.FC<ProfessionalEngineGameProps> = ({
                     {[1, 2, 3, 4, 5, 6, 7, 8].map((level) => {
                       const lichessLevel = LICHESS_LEVELS[level];
                       const isSelected = selectedLevel === level;
-                      
+
                       return (
                         <button
                           key={level}
@@ -596,15 +600,17 @@ export const ProfessionalEngineGame: React.FC<ProfessionalEngineGameProps> = ({
                             padding: "0.75rem 0.5rem",
                             backgroundColor: isSelected ? "#10b981" : "#2d3142",
                             color: "white",
-                            border: isSelected ? "2px solid #20bf6b" : "2px solid transparent",
+                            border: isSelected
+                              ? "2px solid #20bf6b"
+                              : "2px solid transparent",
                             borderRadius: "8px",
                             cursor: "pointer",
                             fontSize: "0.9rem",
                             fontWeight: isSelected ? "bold" : "normal",
                             transition: "all 0.3s ease",
                             transform: isSelected ? "scale(1.05)" : "scale(1)",
-                            boxShadow: isSelected 
-                              ? "0 4px 12px rgba(16, 185, 129, 0.3)" 
+                            boxShadow: isSelected
+                              ? "0 4px 12px rgba(16, 185, 129, 0.3)"
                               : "0 2px 4px rgba(0,0,0,0.1)",
                           }}
                           onMouseEnter={(e) => {
@@ -620,7 +626,12 @@ export const ProfessionalEngineGame: React.FC<ProfessionalEngineGameProps> = ({
                             }
                           }}
                         >
-                          <div style={{ fontSize: "1.1rem", marginBottom: "0.2rem" }}>
+                          <div
+                            style={{
+                              fontSize: "1.1rem",
+                              marginBottom: "0.2rem",
+                            }}
+                          >
                             Livello {level}
                           </div>
                           <div style={{ fontSize: "0.7rem", opacity: 0.8 }}>

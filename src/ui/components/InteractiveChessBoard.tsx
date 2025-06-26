@@ -36,7 +36,7 @@ const PIECE_SYMBOLS: { [key: string]: string } = {
 // Professional Lichess-style color palette from reference image
 const BOARD_COLORS = {
   light: "#f0d9b5", // Light wooden squares
-  dark: "#b58863",  // Dark wooden squares
+  dark: "#b58863", // Dark wooden squares
   border: "#8b7355", // Board frame
   coordinates: "#8b7355", // Coordinate labels
   highlight: "#cdd26a", // Move highlights (yellow-green)
@@ -357,12 +357,14 @@ export const InteractiveChessBoard: React.FC<InteractiveChessBoardProps> = ({
                         style={{
                           // LICHESS-STYLE MAXIMUM CONTRAST PIECES
                           color: piece.color === "w" ? "#f8f8f8" : "#2c2c2c",
-                          textShadow: piece.color === "w" 
-                            ? "0 0 3px #000000, 0 2px 4px #000000, 2px 2px 2px #000000, -1px -1px 1px #000000" 
-                            : "0 0 3px #ffffff, 0 2px 4px #ffffff, 2px 2px 2px #ffffff, -1px -1px 1px #ffffff",
-                          filter: piece.color === "w" 
-                            ? "brightness(1.2) contrast(1.3) drop-shadow(2px 2px 4px rgba(0,0,0,0.8))"
-                            : "brightness(0.8) contrast(1.5) drop-shadow(2px 2px 4px rgba(255,255,255,0.8))",
+                          textShadow:
+                            piece.color === "w"
+                              ? "0 0 3px #000000, 0 2px 4px #000000, 2px 2px 2px #000000, -1px -1px 1px #000000"
+                              : "0 0 3px #ffffff, 0 2px 4px #ffffff, 2px 2px 2px #ffffff, -1px -1px 1px #ffffff",
+                          filter:
+                            piece.color === "w"
+                              ? "brightness(1.2) contrast(1.3) drop-shadow(2px 2px 4px rgba(0,0,0,0.8))"
+                              : "brightness(0.8) contrast(1.5) drop-shadow(2px 2px 4px rgba(255,255,255,0.8))",
                           transform:
                             isHovered || isSelected
                               ? "scale(1.08)"
@@ -373,7 +375,8 @@ export const InteractiveChessBoard: React.FC<InteractiveChessBoardProps> = ({
                           fontWeight: "900",
                           fontSize: "42px",
                           zIndex: 2,
-                          WebkitTextStroke: piece.color === "w" ? "1px #000000" : "1px #ffffff",
+                          WebkitTextStroke:
+                            piece.color === "w" ? "1px #000000" : "1px #ffffff",
                         }}
                       >
                         {

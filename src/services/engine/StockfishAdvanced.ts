@@ -18,7 +18,7 @@ export interface EngineMove {
 
 export interface LichessLevelSettings {
   level: number; // 1-8
-  elo: number; // Estimated ELO 
+  elo: number; // Estimated ELO
   skillLevel: number; // Stockfish skill 0-20
   depth: number; // Search depth
   moveTime: number; // Time per move in ms
@@ -58,7 +58,7 @@ export const LICHESS_LEVELS: Record<number, LichessLevelSettings> = {
     hash: 16,
     ponder: false,
   },
-  // Level 3 → Skill ~6 ≈ 1000 ELO  
+  // Level 3 → Skill ~6 ≈ 1000 ELO
   3: {
     level: 3,
     elo: 1000,
@@ -110,7 +110,7 @@ export const LICHESS_LEVELS: Record<number, LichessLevelSettings> = {
     hash: 128,
     ponder: false,
   },
-  // Level 7 → Skill ~18 ≈ 2200-2300 ELO  
+  // Level 7 → Skill ~18 ≈ 2200-2300 ELO
   7: {
     level: 7,
     elo: 2250,
@@ -168,7 +168,7 @@ export class StockfishAdvanced {
   setLevel(level: number): void {
     this.level = Math.max(1, Math.min(8, level));
     this.settings = LICHESS_LEVELS[this.level];
-    
+
     if (this.worker) {
       // Send new UCI options to engine
       this.sendUCIOptions();
@@ -180,7 +180,9 @@ export class StockfishAdvanced {
 
     // Send Lichess-style UCI options
     this.sendCommand("uci");
-    this.sendCommand(`setoption name Skill Level value ${this.settings.skillLevel}`);
+    this.sendCommand(
+      `setoption name Skill Level value ${this.settings.skillLevel}`,
+    );
     this.sendCommand(`setoption name Threads value ${this.settings.threads}`);
     this.sendCommand(`setoption name Hash value ${this.settings.hash}`);
     this.sendCommand(`setoption name MultiPV value ${this.settings.multiPv}`);
@@ -218,8 +220,10 @@ export class StockfishAdvanced {
 
       // Send position and start search
       this.sendCommand(`position fen ${fen}`);
-      this.sendCommand(`go movetime ${this.settings.moveTime} depth ${this.settings.depth}`);
-      
+      this.sendCommand(
+        `go movetime ${this.settings.moveTime} depth ${this.settings.depth}`,
+      );
+
       // In a real implementation, this would be called when the engine returns a move
       // For now, simulate move calculation with a timeout
       setTimeout(() => {
