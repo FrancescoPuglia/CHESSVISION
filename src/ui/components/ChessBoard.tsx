@@ -30,15 +30,15 @@ const PIECE_SYMBOLS: { [key: string]: string } = {
   bP: "♟",
 };
 
-// ChessBase-inspired high contrast color palette
+// Professional color palette like the reference image
 const BOARD_COLORS = {
-  light: "#e8d5b8", // Cream white with warm tone
-  dark: "#8b6a42", // Deep brown with strong contrast
-  border: "#6b5638", // Darker brown for frame
-  coordinates: "#4a3c28", // Dark brown for coordinates
-  highlight: "#f7f683", // Bright yellow for highlights
-  lastMoveLight: "#f7f683",
-  lastMoveDark: "#e6d555",
+  light: "#f0d9b5", // Light beige squares
+  dark: "#b58863", // Dark brown squares  
+  border: "#8b7355", // Board border
+  coordinates: "#6b5b47", // Coordinate labels
+  highlight: "#cdd26a", // Move highlights
+  lastMoveLight: "#cdd26a",
+  lastMoveDark: "#aaa23a", 
   check: "#ff5555",
   validMove: "#44ee77",
 };
@@ -251,7 +251,7 @@ export const ChessBoard: React.FC<ChessBoardProps> = ({
                     onMouseEnter={() => setHoveredSquare(square)}
                     onMouseLeave={() => setHoveredSquare(null)}
                   >
-                    {/* Piece rendering with 3D effects */}
+                    {/* Professional piece rendering like reference image */}
                     {piece && (
                       <span
                         className={
@@ -260,12 +260,21 @@ export const ChessBoard: React.FC<ChessBoardProps> = ({
                             : "chess-piece-black"
                         }
                         style={{
-                          transform: isHovered ? "scale(1.05)" : "scale(1)",
-                          transition: "all 0.15s ease",
+                          transform: isHovered ? "scale(1.08)" : "scale(1)",
+                          transition: "all 0.2s ease-out",
                           display: "block",
                           lineHeight: "1",
-                          fontWeight: "700",
-                          fontSize: "inherit",
+                          fontWeight: "900",
+                          fontSize: "52px",
+                          // Beautiful piece colors matching the reference
+                          color: piece.color === "w" ? "#FFFFFF" : "#1a1a1a",
+                          textShadow: piece.color === "w" 
+                            ? "0 0 2px #000000, 0 1px 3px #000000, 1px 1px 1px #000000" 
+                            : "0 0 2px #FFFFFF, 0 1px 3px #FFFFFF, 1px 1px 1px #FFFFFF",
+                          filter: piece.color === "w" 
+                            ? "brightness(1.0) contrast(1.1) drop-shadow(1px 1px 2px rgba(0,0,0,0.7))"
+                            : "brightness(0.9) contrast(1.2) drop-shadow(1px 1px 2px rgba(255,255,255,0.6))",
+                          WebkitTextStroke: piece.color === "w" ? "0.5px #000000" : "0.5px #FFFFFF",
                         }}
                       >
                         {

@@ -1,7 +1,7 @@
 // src/ui/components/ProfessionalEngineGame.tsx
 /* eslint-disable no-unused-vars, react-hooks/exhaustive-deps, react/no-unescaped-entities, no-empty-pattern */
 import React, { useState, useEffect, useRef, useCallback } from "react";
-import { StockfishAdvanced } from "@services/engine/StockfishAdvanced";
+import { StockfishAdvanced, LICHESS_LEVELS } from "@services/engine/StockfishAdvanced";
 import { useChessGame } from "@ui/hooks/useChessGame";
 import { SpeechService } from "@services/speech/SpeechService";
 import { InteractiveChessBoard } from "./InteractiveChessBoard";
@@ -28,7 +28,7 @@ export const ProfessionalEngineGame: React.FC<ProfessionalEngineGameProps> = ({
   const {} = useTranslation();
   const [gameState, gameActions] = useChessGame();
   const [engine, setEngine] = useState<StockfishAdvanced | null>(null);
-  const [selectedElo, setSelectedElo] = useState(1500);
+  const [selectedLevel, setSelectedLevel] = useState(4); // Lichess Level 1-8
   const [isEngineThinking, setIsEngineThinking] = useState(false);
   const [gameStarted, setGameStarted] = useState(false);
   const [playerColor, setPlayerColor] = useState<"white" | "black">("white");
@@ -50,29 +50,16 @@ export const ProfessionalEngineGame: React.FC<ProfessionalEngineGameProps> = ({
   const isProcessingVoice = useRef(false);
   // const voiceQueueRef = useRef<string[]>([]);
 
-  // ELO Ranges for selection
-  const eloRanges = [
-    { label: "Principiante", range: [1200, 1399], color: "#10b981" },
-    { label: "Amatore", range: [1400, 1599], color: "#3b82f6" },
-    { label: "Club Player", range: [1600, 1799], color: "#8b5cf6" },
-    { label: "Esperto", range: [1800, 1999], color: "#f59e0b" },
-    { label: "Candidato Maestro", range: [2000, 2199], color: "#ef4444" },
-    { label: "Maestro FIDE", range: [2200, 2399], color: "#dc2626" },
-    { label: "Maestro Internazionale", range: [2400, 2599], color: "#991b1b" },
-    { label: "Grande Maestro", range: [2600, 2799], color: "#7c3aed" },
-    { label: "Super GM", range: [2800, 2899], color: "#4c1d95" },
-    { label: "Elite Mondiale", range: [2900, 3000], color: "#1e1b4b" },
-  ];
 
-  // Initialize engine with selected ELO
+  // Initialize engine with selected Lichess level
   useEffect(() => {
     if (!isVisible) return;
 
-    const stockfish = new StockfishAdvanced(selectedElo);
+    const stockfish = new StockfishAdvanced(selectedLevel);
     setEngine(stockfish);
     engineRef.current = stockfish;
 
-    stockfish.setEvaluationCallback((info) => {
+    stockfish.onEvaluation((info: string) => {
       // Parse engine evaluation info
       if (info.includes("score cp")) {
         const cpMatch = info.match(/score cp (-?\d+)/);
@@ -87,7 +74,7 @@ export const ProfessionalEngineGame: React.FC<ProfessionalEngineGameProps> = ({
     return () => {
       stockfish.destroy();
     };
-  }, [selectedElo, isVisible]);
+  }, [selectedLevel, isVisible]);
 
   // Initialize continuous voice recognition
   useEffect(() => {
@@ -465,7 +452,7 @@ export const ProfessionalEngineGame: React.FC<ProfessionalEngineGameProps> = ({
     if (isVoiceEnabled && speechService) {
       const colorText = playerColor === "white" ? "bianco" : "nero";
       speechService.speak(
-        `Nuova partita iniziata contro motore ELO ${selectedElo}. ` +
+        `Nuova partita iniziata contro motore Livello ${selectedLevel}. ` +
           `Giochi con i pezzi ${colorText}. ` +
           `${continuousListening ? "Microfono sempre attivo." : ""}`,
       );
@@ -582,62 +569,66 @@ export const ProfessionalEngineGame: React.FC<ProfessionalEngineGameProps> = ({
                       marginBottom: "0.5rem",
                     }}
                   >
-                    <span style={{ color: "#a0a0a0" }}>ELO: {selectedElo}</span>
+                    <span style={{ color: "#a0a0a0" }}>Livello: {selectedLevel}</span>
                     <span style={{ color: "#ffd700" }}>
-                      {engine?.getEloInfo() || ""}
+                      {engine?.getLevelInfo() || ""}
                     </span>
                   </div>
-                  <input
-                    type="range"
-                    min="1200"
-                    max="3000"
-                    step="50"
-                    value={selectedElo}
-                    onChange={(e) => setSelectedElo(parseInt(e.target.value))}
-                    style={{
-                      width: "100%",
-                      height: "8px",
-                      background: `linear-gradient(to right, #10b981 0%, #8b5cf6 50%, #ef4444 100%)`,
-                      borderRadius: "4px",
-                      outline: "none",
-                      cursor: "pointer",
-                    }}
-                  />
 
-                  {/* ELO Categories */}
+                  {/* Lichess Level Selector (1-8) */}
                   <div
                     style={{
                       display: "grid",
-                      gridTemplateColumns: "repeat(5, 1fr)",
+                      gridTemplateColumns: "repeat(4, 1fr)",
                       gap: "0.5rem",
                       marginTop: "1rem",
                     }}
                   >
-                    {eloRanges.map((range) => (
-                      <button
-                        key={range.label}
-                        onClick={() => setSelectedElo(range.range[0])}
-                        style={{
-                          padding: "0.5rem",
-                          backgroundColor:
-                            selectedElo >= range.range[0] &&
-                            selectedElo <= range.range[1]
-                              ? range.color
-                              : "#2d3142",
-                          color: "white",
-                          border: "none",
-                          borderRadius: "6px",
-                          cursor: "pointer",
-                          fontSize: "0.8rem",
-                          transition: "all 0.3s",
-                        }}
-                      >
-                        {range.label}
-                        <div style={{ fontSize: "0.7rem", opacity: 0.8 }}>
-                          {range.range[0]}-{range.range[1]}
-                        </div>
-                      </button>
-                    ))}
+                    {[1, 2, 3, 4, 5, 6, 7, 8].map((level) => {
+                      const lichessLevel = LICHESS_LEVELS[level];
+                      const isSelected = selectedLevel === level;
+                      
+                      return (
+                        <button
+                          key={level}
+                          onClick={() => setSelectedLevel(level)}
+                          style={{
+                            padding: "0.75rem 0.5rem",
+                            backgroundColor: isSelected ? "#10b981" : "#2d3142",
+                            color: "white",
+                            border: isSelected ? "2px solid #20bf6b" : "2px solid transparent",
+                            borderRadius: "8px",
+                            cursor: "pointer",
+                            fontSize: "0.9rem",
+                            fontWeight: isSelected ? "bold" : "normal",
+                            transition: "all 0.3s ease",
+                            transform: isSelected ? "scale(1.05)" : "scale(1)",
+                            boxShadow: isSelected 
+                              ? "0 4px 12px rgba(16, 185, 129, 0.3)" 
+                              : "0 2px 4px rgba(0,0,0,0.1)",
+                          }}
+                          onMouseEnter={(e) => {
+                            if (!isSelected) {
+                              e.currentTarget.style.backgroundColor = "#3d4663";
+                              e.currentTarget.style.transform = "scale(1.02)";
+                            }
+                          }}
+                          onMouseLeave={(e) => {
+                            if (!isSelected) {
+                              e.currentTarget.style.backgroundColor = "#2d3142";
+                              e.currentTarget.style.transform = "scale(1)";
+                            }
+                          }}
+                        >
+                          <div style={{ fontSize: "1.1rem", marginBottom: "0.2rem" }}>
+                            Livello {level}
+                          </div>
+                          <div style={{ fontSize: "0.7rem", opacity: 0.8 }}>
+                            ~{lichessLevel.elo} ELO
+                          </div>
+                        </button>
+                      );
+                    })}
                   </div>
                 </div>
 
@@ -1084,7 +1075,7 @@ export const ProfessionalEngineGame: React.FC<ProfessionalEngineGameProps> = ({
                     <div>
                       Tempo medio motore: {Math.round(gameStats.avgThinkTime)}ms
                     </div>
-                    <div>ELO Motore: {selectedElo}</div>
+                    <div>Livello Motore: {selectedLevel}</div>
                   </div>
                 </div>
 
