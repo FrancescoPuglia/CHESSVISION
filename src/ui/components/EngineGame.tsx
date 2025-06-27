@@ -25,7 +25,7 @@ export const EngineGame: React.FC<EngineGameProps> = ({
   const [gameState, gameActions] = useChessGame();
   const [engine, setEngine] = useState<StockfishService | null>(null);
   const [engineStrength, setEngineStrength] =
-    useState<EngineStrength>("intermediate");
+    useState<EngineStrength>("expert");
   const [isEngineThinking, setIsEngineThinking] = useState(false);
   const [gameStarted, setGameStarted] = useState(false);
   const [playerColor, setPlayerColor] = useState<"white" | "black">("white");

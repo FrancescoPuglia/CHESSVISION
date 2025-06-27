@@ -34,8 +34,9 @@ export const LichessPiece: React.FC<LichessPieceProps> = ({
   const pieceName = pieceTypeMap[piece.type.toLowerCase()];
   const pieceColor = piece.color === "w" ? "white" : "black";
 
-  // Build CSS classes exactly like Lichess
+  // Build CSS classes exactly like Lichess (including is2d for cburnett pieces)
   const cssClasses = [
+    "is2d", // Required for cburnett-pieces.css selectors
     "piece",
     pieceName,
     pieceColor,
@@ -50,10 +51,8 @@ export const LichessPiece: React.FC<LichessPieceProps> = ({
     <div
       className={cssClasses}
       style={{
-        // Lichess-style positioning
-        position: "absolute",
-        top: 0,
-        left: 0,
+        // Interactive chessboard positioning - stay within grid square
+        position: "relative",
         width: "100%",
         height: "100%",
         backgroundSize: "cover",
