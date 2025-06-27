@@ -18,7 +18,6 @@ interface InteractiveChessBoardProps {
   game: ChessGame; // Add game instance for move validation
 }
 
-
 // Professional Lichess-style color palette from reference image
 const BOARD_COLORS = {
   light: "#f0d9b5", // Light wooden squares

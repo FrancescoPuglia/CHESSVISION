@@ -32,7 +32,7 @@ export const PieceIcon: React.FC<PieceIconProps> = ({
 
   const pieceName = pieceMap[piece.type.toLowerCase()];
   const pieceColor = piece.color === "w" ? "white" : "black";
-  
+
   // SVG path following Lichess naming convention
   const svgPath = `/pieces/cburnett/${pieceColor}-${pieceName}.svg`;
 
@@ -78,9 +78,10 @@ export const PieceIcon: React.FC<PieceIconProps> = ({
           height: "100%",
           objectFit: "contain",
           // High contrast filter for visibility
-          filter: piece.color === "w" 
-            ? "drop-shadow(1px 1px 2px rgba(0,0,0,0.8))"
-            : "drop-shadow(1px 1px 2px rgba(255,255,255,0.4))",
+          filter:
+            piece.color === "w"
+              ? "drop-shadow(1px 1px 2px rgba(0,0,0,0.8))"
+              : "drop-shadow(1px 1px 2px rgba(255,255,255,0.4))",
         }}
         onError={(e) => {
           // Fallback to Unicode if SVG fails to load

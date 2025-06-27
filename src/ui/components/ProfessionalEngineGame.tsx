@@ -412,7 +412,12 @@ export const ProfessionalEngineGame: React.FC<ProfessionalEngineGameProps> = ({
           console.error("Invalid engine move:", engineMove.move);
         }
       } catch (e) {
-        console.error("Failed to convert engine move:", e, "Move:", engineMove.move);
+        console.error(
+          "Failed to convert engine move:",
+          e,
+          "Move:",
+          engineMove.move,
+        );
         // Don't return here - let it continue to finally block
       }
 

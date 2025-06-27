@@ -13,7 +13,6 @@ interface ChessBoardProps {
   lastMove?: { from: string; to: string };
 }
 
-
 // Professional color palette like the reference image
 const BOARD_COLORS = {
   light: "#f0d9b5", // Light beige squares

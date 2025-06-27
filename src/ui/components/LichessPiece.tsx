@@ -33,7 +33,7 @@ export const LichessPiece: React.FC<LichessPieceProps> = ({
 
   const pieceName = pieceTypeMap[piece.type.toLowerCase()];
   const pieceColor = piece.color === "w" ? "white" : "black";
-  
+
   // Build CSS classes exactly like Lichess
   const cssClasses = [
     "piece",
@@ -42,7 +42,9 @@ export const LichessPiece: React.FC<LichessPieceProps> = ({
     isSelected ? "selected" : "",
     isDragging ? "dragging" : "",
     className,
-  ].filter(Boolean).join(" ");
+  ]
+    .filter(Boolean)
+    .join(" ");
 
   return (
     <div
@@ -61,7 +63,9 @@ export const LichessPiece: React.FC<LichessPieceProps> = ({
         willChange: "transform",
         pointerEvents: "none",
         // Additional styling for better visibility
-        filter: isSelected ? "drop-shadow(0 0 8px rgba(32, 191, 107, 0.8))" : "none",
+        filter: isSelected
+          ? "drop-shadow(0 0 8px rgba(32, 191, 107, 0.8))"
+          : "none",
         transform: isSelected ? "scale(1.05)" : "scale(1)",
         transition: "all 0.2s ease-out",
       }}
