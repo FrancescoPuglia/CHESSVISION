@@ -2,7 +2,7 @@
 /* eslint-disable no-unused-vars */
 import React from "react";
 import { ChessPosition } from "@core/chess/types";
-import { LichessChessBoard } from "./LichessChessBoard";
+import { ChessgroundBoard } from "./ChessgroundBoard";
 
 interface ChessBoardProps {
   position: ChessPosition;
@@ -22,7 +22,7 @@ export const ChessBoard: React.FC<ChessBoardProps> = ({
   lastMove,
 }) => {
   return (
-    <LichessChessBoard
+    <ChessgroundBoard
       position={position}
       isVisible={isVisible}
       className={className}

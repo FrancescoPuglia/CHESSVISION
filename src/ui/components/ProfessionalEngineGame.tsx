@@ -7,7 +7,7 @@ import {
 } from "@services/engine/StockfishAdvanced";
 import { useChessGame } from "@ui/hooks/useChessGame";
 import { SpeechService } from "@services/speech/SpeechService";
-import { InteractiveChessBoard } from "./InteractiveChessBoard";
+import { ChessgroundBoard } from "./ChessgroundBoard";
 import { useTranslation } from "@core/i18n/useTranslation";
 
 interface ProfessionalEngineGameProps {
@@ -808,15 +808,20 @@ export const ProfessionalEngineGame: React.FC<ProfessionalEngineGameProps> = ({
                       justifyContent: "center",
                     }}
                   >
-                    <InteractiveChessBoard
-                      game={gameState.game}
+                    <ChessgroundBoard
                       position={gameState.game.getBoard()}
                       isVisible={true}
-                      onMove={(move) => {
-                        gameActions.makeMove(move.san);
+                      onMove={(from, to) => {
+                        // Convert from/to notation to SAN notation
+                        try {
+                          const moveString = `${from}${to}`;
+                          gameActions.makeMove(moveString);
+                        } catch (error) {
+                          console.error("Invalid move:", error);
+                        }
                       }}
-                      allowMoves={true}
-                      showCoordinates={true}
+                      orientation={playerColor}
+                      size={500}
                     />
                   </div>
                 )}
