@@ -259,7 +259,7 @@ export const ChessgroundBoard: React.FC<ChessgroundBoardProps> = ({
     >
       <div
         ref={boardRef}
-        className="cg-wrap blue cburnett"
+        className="cg-wrap blue cburnett is2d"
         style={{
           width: size,
           height: size,

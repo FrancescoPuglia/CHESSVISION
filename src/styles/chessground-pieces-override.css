@@ -1,0 +1,192 @@
+/* CHESSGROUND PIECES OVERRIDE - Force visibility with direct URLs */
+
+/* White pieces */
+.cg-wrap piece.pawn.white,
+.cg-wrap .pawn.white,
+piece.pawn.white {
+  background-image: url('/piece/cburnett/wP.svg') !important;
+  background-size: contain !important;
+  background-repeat: no-repeat !important;
+  background-position: center !important;
+}
+
+.cg-wrap piece.knight.white,
+.cg-wrap .knight.white,
+piece.knight.white {
+  background-image: url('/piece/cburnett/wN.svg') !important;
+  background-size: contain !important;
+  background-repeat: no-repeat !important;
+  background-position: center !important;
+}
+
+.cg-wrap piece.bishop.white,
+.cg-wrap .bishop.white,
+piece.bishop.white {
+  background-image: url('/piece/cburnett/wB.svg') !important;
+  background-size: contain !important;
+  background-repeat: no-repeat !important;
+  background-position: center !important;
+}
+
+.cg-wrap piece.rook.white,
+.cg-wrap .rook.white,
+piece.rook.white {
+  background-image: url('/piece/cburnett/wR.svg') !important;
+  background-size: contain !important;
+  background-repeat: no-repeat !important;
+  background-position: center !important;
+}
+
+.cg-wrap piece.queen.white,
+.cg-wrap .queen.white,
+piece.queen.white {
+  background-image: url('/piece/cburnett/wQ.svg') !important;
+  background-size: contain !important;
+  background-repeat: no-repeat !important;
+  background-position: center !important;
+}
+
+.cg-wrap piece.king.white,
+.cg-wrap .king.white,
+piece.king.white {
+  background-image: url('/piece/cburnett/wK.svg') !important;
+  background-size: contain !important;
+  background-repeat: no-repeat !important;
+  background-position: center !important;
+}
+
+/* Black pieces */
+.cg-wrap piece.pawn.black,
+.cg-wrap .pawn.black,
+piece.pawn.black {
+  background-image: url('/piece/cburnett/bP.svg') !important;
+  background-size: contain !important;
+  background-repeat: no-repeat !important;
+  background-position: center !important;
+}
+
+.cg-wrap piece.knight.black,
+.cg-wrap .knight.black,
+piece.knight.black {
+  background-image: url('/piece/cburnett/bN.svg') !important;
+  background-size: contain !important;
+  background-repeat: no-repeat !important;
+  background-position: center !important;
+}
+
+.cg-wrap piece.bishop.black,
+.cg-wrap .bishop.black,
+piece.bishop.black {
+  background-image: url('/piece/cburnett/bB.svg') !important;
+  background-size: contain !important;
+  background-repeat: no-repeat !important;
+  background-position: center !important;
+}
+
+.cg-wrap piece.rook.black,
+.cg-wrap .rook.black,
+piece.rook.black {
+  background-image: url('/piece/cburnett/bR.svg') !important;
+  background-size: contain !important;
+  background-repeat: no-repeat !important;
+  background-position: center !important;
+}
+
+.cg-wrap piece.queen.black,
+.cg-wrap .queen.black,
+piece.queen.black {
+  background-image: url('/piece/cburnett/bQ.svg') !important;
+  background-size: contain !important;
+  background-repeat: no-repeat !important;
+  background-position: center !important;
+}
+
+.cg-wrap piece.king.black,
+.cg-wrap .king.black,
+piece.king.black {
+  background-image: url('/piece/cburnett/bK.svg') !important;
+  background-size: contain !important;
+  background-repeat: no-repeat !important;
+  background-position: center !important;
+}
+
+/* Additional selectors for all possible combinations */
+[data-piece="wP"], [data-role="pawn"][data-color="white"] {
+  background-image: url('/piece/cburnett/wP.svg') !important;
+  background-size: contain !important;
+}
+
+[data-piece="wN"], [data-role="knight"][data-color="white"] {
+  background-image: url('/piece/cburnett/wN.svg') !important;
+  background-size: contain !important;
+}
+
+[data-piece="wB"], [data-role="bishop"][data-color="white"] {
+  background-image: url('/piece/cburnett/wB.svg') !important;
+  background-size: contain !important;
+}
+
+[data-piece="wR"], [data-role="rook"][data-color="white"] {
+  background-image: url('/piece/cburnett/wR.svg') !important;
+  background-size: contain !important;
+}
+
+[data-piece="wQ"], [data-role="queen"][data-color="white"] {
+  background-image: url('/piece/cburnett/wQ.svg') !important;
+  background-size: contain !important;
+}
+
+[data-piece="wK"], [data-role="king"][data-color="white"] {
+  background-image: url('/piece/cburnett/wK.svg') !important;
+  background-size: contain !important;
+}
+
+[data-piece="bP"], [data-role="pawn"][data-color="black"] {
+  background-image: url('/piece/cburnett/bP.svg') !important;
+  background-size: contain !important;
+}
+
+[data-piece="bN"], [data-role="knight"][data-color="black"] {
+  background-image: url('/piece/cburnett/bN.svg') !important;
+  background-size: contain !important;
+}
+
+[data-piece="bB"], [data-role="bishop"][data-color="black"] {
+  background-image: url('/piece/cburnett/bB.svg') !important;
+  background-size: contain !important;
+}
+
+[data-piece="bR"], [data-role="rook"][data-color="black"] {
+  background-image: url('/piece/cburnett/bR.svg') !important;
+  background-size: contain !important;
+}
+
+[data-piece="bQ"], [data-role="queen"][data-color="black"] {
+  background-image: url('/piece/cburnett/bQ.svg') !important;
+  background-size: contain !important;
+}
+
+[data-piece="bK"], [data-role="king"][data-color="black"] {
+  background-image: url('/piece/cburnett/bK.svg') !important;
+  background-size: contain !important;
+}
+
+/* Fallback with extreme specificity */
+div[style*="piece"],
+span[data-role],
+.cg-board > div {
+  background-size: contain !important;
+  background-repeat: no-repeat !important;
+  background-position: center !important;
+}
+
+/* Force display for all pieces */
+.cg-wrap .cg-board piece,
+.cg-wrap cg-board piece,
+cg-board piece {
+  display: block !important;
+  visibility: visible !important;
+  opacity: 1 !important;
+  width: 100% !important;
+  height: 100% !important;
+}
