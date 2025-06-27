@@ -96,7 +96,7 @@ export const ChessgroundBoard: React.FC<ChessgroundBoardProps> = ({
     if (!boardRef.current || !isVisible) return;
 
     const config: Config = {
-      fen: positionToFen(position),
+      fen: "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1", // Forza posizione iniziale
       orientation,
       turnColor: "white",
       check: false,
@@ -105,7 +105,7 @@ export const ChessgroundBoard: React.FC<ChessgroundBoardProps> = ({
         : undefined,
       coordinates: true,
       autoCastle: true,
-      viewOnly: true, // Start as view-only, can be changed later
+      viewOnly: false, // Cambiato a false per permettere interazione
       disableContextMenu: false,
       addPieceZIndex: false,
       highlight: {
@@ -170,6 +170,46 @@ export const ChessgroundBoard: React.FC<ChessgroundBoardProps> = ({
 
     // Initialize Chessground
     chessgroundRef.current = Chessground(boardRef.current, config);
+
+    // FORZA la posizione iniziale per test
+    const initialPieces = new Map();
+    initialPieces.set("a1", { role: "rook", color: "white" });
+    initialPieces.set("b1", { role: "knight", color: "white" });
+    initialPieces.set("c1", { role: "bishop", color: "white" });
+    initialPieces.set("d1", { role: "queen", color: "white" });
+    initialPieces.set("e1", { role: "king", color: "white" });
+    initialPieces.set("f1", { role: "bishop", color: "white" });
+    initialPieces.set("g1", { role: "knight", color: "white" });
+    initialPieces.set("h1", { role: "rook", color: "white" });
+    
+    initialPieces.set("a2", { role: "pawn", color: "white" });
+    initialPieces.set("b2", { role: "pawn", color: "white" });
+    initialPieces.set("c2", { role: "pawn", color: "white" });
+    initialPieces.set("d2", { role: "pawn", color: "white" });
+    initialPieces.set("e2", { role: "pawn", color: "white" });
+    initialPieces.set("f2", { role: "pawn", color: "white" });
+    initialPieces.set("g2", { role: "pawn", color: "white" });
+    initialPieces.set("h2", { role: "pawn", color: "white" });
+
+    initialPieces.set("a8", { role: "rook", color: "black" });
+    initialPieces.set("b8", { role: "knight", color: "black" });
+    initialPieces.set("c8", { role: "bishop", color: "black" });
+    initialPieces.set("d8", { role: "queen", color: "black" });
+    initialPieces.set("e8", { role: "king", color: "black" });
+    initialPieces.set("f8", { role: "bishop", color: "black" });
+    initialPieces.set("g8", { role: "knight", color: "black" });
+    initialPieces.set("h8", { role: "rook", color: "black" });
+    
+    initialPieces.set("a7", { role: "pawn", color: "black" });
+    initialPieces.set("b7", { role: "pawn", color: "black" });
+    initialPieces.set("c7", { role: "pawn", color: "black" });
+    initialPieces.set("d7", { role: "pawn", color: "black" });
+    initialPieces.set("e7", { role: "pawn", color: "black" });
+    initialPieces.set("f7", { role: "pawn", color: "black" });
+    initialPieces.set("g7", { role: "pawn", color: "black" });
+    initialPieces.set("h7", { role: "pawn", color: "black" });
+
+    chessgroundRef.current.setPieces(initialPieces);
 
     return () => {
       // Cleanup
