@@ -2,7 +2,7 @@
 /* eslint-disable no-unused-vars */
 import React, { useState } from "react";
 import { ChessPosition } from "@core/chess/types";
-import { PieceIcon } from "./PieceIcon";
+import { LichessPiece } from "./LichessPiece";
 
 interface ChessBoardProps {
   position: ChessPosition;
@@ -235,12 +235,12 @@ export const ChessBoard: React.FC<ChessBoardProps> = ({
                     onMouseEnter={() => setHoveredSquare(square)}
                     onMouseLeave={() => setHoveredSquare(null)}
                   >
-                    {/* LICHESS-STYLE SVG PIECES */}
+                    {/* EXACT LICHESS PIECE RENDERING */}
                     {piece && (
-                      <PieceIcon
+                      <LichessPiece
                         piece={piece}
-                        size={60}
-                        className={isHovered ? "piece-hover" : ""}
+                        isSelected={isHovered}
+                        className="square-piece"
                       />
                     )}
 

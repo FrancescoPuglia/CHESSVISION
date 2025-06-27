@@ -4,7 +4,7 @@ import React, { useState, useEffect } from "react";
 import { ChessPosition } from "@core/chess/types";
 import { ChessGame } from "@core/chess/ChessGame";
 import { Square } from "chess.js";
-import { PieceIcon } from "./PieceIcon";
+import { LichessPiece } from "./LichessPiece";
 
 interface InteractiveChessBoardProps {
   position: ChessPosition;
@@ -337,12 +337,13 @@ export const InteractiveChessBoard: React.FC<InteractiveChessBoardProps> = ({
                     onMouseEnter={() => setHoveredSquare(square)}
                     onMouseLeave={() => setHoveredSquare(null)}
                   >
-                    {/* LICHESS-STYLE SVG PIECES */}
+                    {/* EXACT LICHESS PIECE RENDERING */}
                     {piece && (
-                      <PieceIcon
+                      <LichessPiece
                         piece={piece}
-                        size={56}
-                        className={isHovered || isSelected ? "piece-active" : ""}
+                        isSelected={isSelected}
+                        isDragging={false}
+                        className="interactive-piece"
                       />
                     )}
 
