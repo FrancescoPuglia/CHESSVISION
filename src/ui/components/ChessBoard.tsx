@@ -2,6 +2,7 @@
 /* eslint-disable no-unused-vars */
 import React, { useState } from "react";
 import { ChessPosition } from "@core/chess/types";
+import { PieceIcon } from "./PieceIcon";
 
 interface ChessBoardProps {
   position: ChessPosition;
@@ -12,23 +13,6 @@ interface ChessBoardProps {
   lastMove?: { from: string; to: string };
 }
 
-// Professional chess piece symbols - FIXED VISIBILITY
-const PIECE_SYMBOLS: { [key: string]: string } = {
-  // White pieces - Outline symbols for contrast
-  wK: "♔", // King outline
-  wQ: "♕", // Queen outline
-  wR: "♖", // Rook outline
-  wB: "♗", // Bishop outline
-  wN: "♘", // Knight outline
-  wP: "♙", // Pawn outline
-  // Black pieces - Solid symbols for contrast
-  bK: "♚", // King solid
-  bQ: "♛", // Queen solid
-  bR: "♜", // Rook solid
-  bB: "♝", // Bishop solid
-  bN: "♞", // Knight solid
-  bP: "♟", // Pawn solid
-};
 
 // Professional color palette like the reference image
 const BOARD_COLORS = {
@@ -251,41 +235,13 @@ export const ChessBoard: React.FC<ChessBoardProps> = ({
                     onMouseEnter={() => setHoveredSquare(square)}
                     onMouseLeave={() => setHoveredSquare(null)}
                   >
-                    {/* Professional piece rendering like reference image */}
+                    {/* LICHESS-STYLE SVG PIECES */}
                     {piece && (
-                      <span
-                        className={
-                          piece.color === "w"
-                            ? "chess-piece-white"
-                            : "chess-piece-black"
-                        }
-                        style={{
-                          transform: isHovered ? "scale(1.08)" : "scale(1)",
-                          transition: "all 0.2s ease-out",
-                          display: "block",
-                          lineHeight: "1",
-                          fontWeight: "900",
-                          fontSize: "52px",
-                          // ULTRA HIGH CONTRAST - LIKE LICHESS.ORG ANALYSIS
-                          color: piece.color === "w" ? "#ffffff" : "#000000",
-                          textShadow:
-                            piece.color === "w"
-                              ? "0 0 4px #000000, 1px 1px 2px #000000, -1px -1px 2px #000000, 2px 2px 4px #000000"
-                              : "0 0 4px #ffffff, 1px 1px 2px #ffffff, -1px -1px 2px #ffffff, 2px 2px 4px #ffffff",
-                          filter:
-                            piece.color === "w"
-                              ? "brightness(1.0) contrast(2.0) drop-shadow(3px 3px 6px rgba(0,0,0,1))"
-                              : "brightness(1.0) contrast(2.0) drop-shadow(3px 3px 6px rgba(255,255,255,0.9))",
-                          WebkitTextStroke:
-                            piece.color === "w" ? "2px #000000" : "2px #ffffff",
-                        }}
-                      >
-                        {
-                          PIECE_SYMBOLS[
-                            `${piece.color}${piece.type.toUpperCase()}`
-                          ]
-                        }
-                      </span>
+                      <PieceIcon
+                        piece={piece}
+                        size={60}
+                        className={isHovered ? "piece-hover" : ""}
+                      />
                     )}
 
                     {/* Square coordinates on hover */}

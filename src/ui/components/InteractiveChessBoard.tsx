@@ -4,6 +4,7 @@ import React, { useState, useEffect } from "react";
 import { ChessPosition } from "@core/chess/types";
 import { ChessGame } from "@core/chess/ChessGame";
 import { Square } from "chess.js";
+import { PieceIcon } from "./PieceIcon";
 
 interface InteractiveChessBoardProps {
   position: ChessPosition;
@@ -17,21 +18,6 @@ interface InteractiveChessBoardProps {
   game: ChessGame; // Add game instance for move validation
 }
 
-// Professional chess piece symbols
-const PIECE_SYMBOLS: { [key: string]: string } = {
-  wK: "♔",
-  wQ: "♕",
-  wR: "♖",
-  wB: "♗",
-  wN: "♘",
-  wP: "♙",
-  bK: "♚",
-  bQ: "♛",
-  bR: "♜",
-  bB: "♝",
-  bN: "♞",
-  bP: "♟",
-};
 
 // Professional Lichess-style color palette from reference image
 const BOARD_COLORS = {
@@ -351,40 +337,13 @@ export const InteractiveChessBoard: React.FC<InteractiveChessBoardProps> = ({
                     onMouseEnter={() => setHoveredSquare(square)}
                     onMouseLeave={() => setHoveredSquare(null)}
                   >
-                    {/* Professional piece rendering like reference image */}
+                    {/* LICHESS-STYLE SVG PIECES */}
                     {piece && (
-                      <span
-                        style={{
-                          // ULTRA HIGH CONTRAST - LIKE LICHESS.ORG ANALYSIS
-                          color: piece.color === "w" ? "#ffffff" : "#000000",
-                          textShadow:
-                            piece.color === "w"
-                              ? "0 0 4px #000000, 1px 1px 2px #000000, -1px -1px 2px #000000, 2px 2px 4px #000000"
-                              : "0 0 4px #ffffff, 1px 1px 2px #ffffff, -1px -1px 2px #ffffff, 2px 2px 4px #ffffff",
-                          filter:
-                            piece.color === "w"
-                              ? "brightness(1.0) contrast(2.0) drop-shadow(3px 3px 6px rgba(0,0,0,1))"
-                              : "brightness(1.0) contrast(2.0) drop-shadow(3px 3px 6px rgba(255,255,255,0.9))",
-                          transform:
-                            isHovered || isSelected
-                              ? "scale(1.08)"
-                              : "scale(1)",
-                          transition: "all 0.2s ease-out",
-                          display: "block",
-                          lineHeight: "1",
-                          fontWeight: "900",
-                          fontSize: "42px",
-                          zIndex: 2,
-                          WebkitTextStroke:
-                            piece.color === "w" ? "2px #000000" : "2px #ffffff",
-                        }}
-                      >
-                        {
-                          PIECE_SYMBOLS[
-                            `${piece.color}${piece.type.toUpperCase()}`
-                          ]
-                        }
-                      </span>
+                      <PieceIcon
+                        piece={piece}
+                        size={56}
+                        className={isHovered || isSelected ? "piece-active" : ""}
+                      />
                     )}
 
                     {/* Possible move indicator */}

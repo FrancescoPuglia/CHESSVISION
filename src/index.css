@@ -49,43 +49,32 @@
   }
 }
 
-/* Chess Pieces - ULTRA HIGH CONTRAST for Maximum Visibility */
-.chess-piece-white {
-  color: #ffffff !important;
-  font-family:
-    "Noto Sans Symbols 2", "Segoe UI Symbol", "Arial Unicode MS",
-    "Lucida Sans Unicode", sans-serif;
-  text-shadow:
-    0 0 0 3px #000000,
-    0 0 0 4px #000000,
-    0 3px 6px rgba(0, 0, 0, 0.9),
-    0 1px 3px rgba(0, 0, 0, 1);
-  filter: drop-shadow(0 3px 6px rgba(0, 0, 0, 0.8)) contrast(1.5)
-    brightness(1.2);
-  -webkit-text-stroke: 2px #000000;
-  text-stroke: 2px #000000;
-  background: radial-gradient(
-    circle,
-    rgba(255, 255, 255, 0.1) 0%,
-    transparent 70%
-  );
-  border-radius: 50%;
+/* LICHESS-STYLE SVG CHESS PIECES */
+.chess-piece {
+  transition: transform 0.2s ease-out;
+  cursor: pointer;
+  user-select: none;
+  position: relative;
 }
 
-.chess-piece-black {
-  color: #000000 !important;
+.chess-piece.piece-hover {
+  transform: scale(1.08);
+}
+
+.chess-piece.piece-active {
+  transform: scale(1.1);
+  filter: drop-shadow(0 0 8px rgba(32, 191, 107, 0.8));
+}
+
+.chess-piece img {
+  image-rendering: crisp-edges;
+  image-rendering: -webkit-optimize-contrast;
+  pointer-events: none;
+}
+
+/* Fallback styles for Unicode pieces if SVG fails */
+.chess-piece span {
   font-family:
     "Noto Sans Symbols 2", "Segoe UI Symbol", "Arial Unicode MS",
     "Lucida Sans Unicode", sans-serif;
-  text-shadow:
-    0 0 0 2px #ffffff,
-    0 0 0 3px #ffffff,
-    0 2px 4px rgba(255, 255, 255, 0.8),
-    0 1px 2px rgba(255, 255, 255, 0.9);
-  filter: drop-shadow(0 2px 4px rgba(255, 255, 255, 0.6)) contrast(1.3)
-    brightness(0.8);
-  -webkit-text-stroke: 1.5px #ffffff;
-  text-stroke: 1.5px #ffffff;
-  background: radial-gradient(circle, rgba(0, 0, 0, 0.1) 0%, transparent 70%);
-  border-radius: 50%;
 }

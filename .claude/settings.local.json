@@ -30,7 +30,8 @@
       "Bash(npm run lint:*)",
       "WebFetch(domain:lichess.org)",
       "Bash(dos2unix:*)",
-      "Bash(sed:*)"
+      "Bash(sed:*)",
+      "Bash(mkdir:*)"
     ],
     "deny": []
   }
