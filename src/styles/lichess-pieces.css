@@ -1,18 +1,28 @@
 /* EXACT LICHESS CHESSGROUND PIECE STYLES */
 
-/* Base piece styles - like chessground.base.css */
+/* Base piece styles - ULTRA VISIBILITY */
 .piece {
   position: absolute;
   top: 0;
   left: 0;
   width: 100%;
   height: 100%;
-  background-size: cover;
+  background-size: contain !important;
   background-position: center;
   background-repeat: no-repeat;
+  background-color: transparent;
   z-index: 2;
   will-change: transform;
   pointer-events: none;
+  /* ULTRA STRONG VISIBILITY */
+  filter: 
+    contrast(3.0) 
+    brightness(1.1) 
+    drop-shadow(0 0 2px #000) 
+    drop-shadow(0 0 4px #000) 
+    drop-shadow(0 0 6px #fff) 
+    drop-shadow(2px 2px 4px #000) 
+    drop-shadow(-2px -2px 4px #fff) !important;
 }
 
 .piece.dragging {
