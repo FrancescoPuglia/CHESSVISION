@@ -181,7 +181,7 @@ export const ChessgroundBoard: React.FC<ChessgroundBoardProps> = ({
     initialPieces.set("f1", { role: "bishop", color: "white" });
     initialPieces.set("g1", { role: "knight", color: "white" });
     initialPieces.set("h1", { role: "rook", color: "white" });
-    
+
     initialPieces.set("a2", { role: "pawn", color: "white" });
     initialPieces.set("b2", { role: "pawn", color: "white" });
     initialPieces.set("c2", { role: "pawn", color: "white" });
@@ -199,7 +199,7 @@ export const ChessgroundBoard: React.FC<ChessgroundBoardProps> = ({
     initialPieces.set("f8", { role: "bishop", color: "black" });
     initialPieces.set("g8", { role: "knight", color: "black" });
     initialPieces.set("h8", { role: "rook", color: "black" });
-    
+
     initialPieces.set("a7", { role: "pawn", color: "black" });
     initialPieces.set("b7", { role: "pawn", color: "black" });
     initialPieces.set("c7", { role: "pawn", color: "black" });
