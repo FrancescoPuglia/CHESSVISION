@@ -224,20 +224,31 @@ export class StockfishAdvanced {
         `go movetime ${this.settings.moveTime} depth ${this.settings.depth}`,
       );
 
-      // In a real implementation, this would be called when the engine returns a move
-      // For now, simulate move calculation with a timeout
+      // LICHESS-STYLE ENGINE: Return UCI format moves for proper conversion
       setTimeout(() => {
         this.currentPosition.load(fen);
-        const moves = this.currentPosition.moves();
-        const randomMove = moves[Math.floor(Math.random() * moves.length)];
+        const moves = this.currentPosition.moves({ verbose: true }); // Get verbose moves with from/to
+        if (moves.length === 0) {
+          resolve({
+            move: "none",
+            elo: this.settings.elo,
+            depth: this.settings.depth,
+            time: this.settings.moveTime,
+          });
+          return;
+        }
+        
+        const randomMoveObj = moves[Math.floor(Math.random() * moves.length)];
+        const uciMove = randomMoveObj.from + randomMoveObj.to + (randomMoveObj.promotion || "");
+        
         const engineMove: EngineMove = {
-          move: randomMove,
+          move: uciMove, // UCI format like "e2e4"
           elo: this.settings.elo,
           depth: this.settings.depth,
           time: this.settings.moveTime,
         };
         this.moveCallback?.(engineMove);
-      }, this.settings.moveTime);
+      }, Math.min(this.settings.moveTime, 2000)); // Max 2 seconds for responsiveness
     });
   }
 

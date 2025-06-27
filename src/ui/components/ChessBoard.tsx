@@ -266,18 +266,18 @@ export const ChessBoard: React.FC<ChessBoardProps> = ({
                           lineHeight: "1",
                           fontWeight: "900",
                           fontSize: "52px",
-                          // LICHESS-STYLE PIECE COLORS - MAXIMUM CONTRAST
-                          color: piece.color === "w" ? "#f8f8f8" : "#2c2c2c",
+                          // ULTRA HIGH CONTRAST - LIKE LICHESS.ORG ANALYSIS
+                          color: piece.color === "w" ? "#ffffff" : "#000000",
                           textShadow:
                             piece.color === "w"
-                              ? "0 0 3px #000000, 0 2px 4px #000000, 2px 2px 2px #000000, -1px -1px 1px #000000"
-                              : "0 0 3px #ffffff, 0 2px 4px #ffffff, 2px 2px 2px #ffffff, -1px -1px 1px #ffffff",
+                              ? "0 0 4px #000000, 1px 1px 2px #000000, -1px -1px 2px #000000, 2px 2px 4px #000000"
+                              : "0 0 4px #ffffff, 1px 1px 2px #ffffff, -1px -1px 2px #ffffff, 2px 2px 4px #ffffff",
                           filter:
                             piece.color === "w"
-                              ? "brightness(1.2) contrast(1.3) drop-shadow(2px 2px 4px rgba(0,0,0,0.8))"
-                              : "brightness(0.8) contrast(1.5) drop-shadow(2px 2px 4px rgba(255,255,255,0.8))",
+                              ? "brightness(1.0) contrast(2.0) drop-shadow(3px 3px 6px rgba(0,0,0,1))"
+                              : "brightness(1.0) contrast(2.0) drop-shadow(3px 3px 6px rgba(255,255,255,0.9))",
                           WebkitTextStroke:
-                            piece.color === "w" ? "1px #000000" : "1px #ffffff",
+                            piece.color === "w" ? "2px #000000" : "2px #ffffff",
                         }}
                       >
                         {

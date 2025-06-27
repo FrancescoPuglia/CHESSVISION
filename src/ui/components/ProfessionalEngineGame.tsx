@@ -401,17 +401,19 @@ export const ProfessionalEngineGame: React.FC<ProfessionalEngineGameProps> = ({
       const to = engineMove.move.substring(2, 4);
       const promotion = engineMove.move[4];
 
-      // Try to make the move
+      // Try to make the move - NEVER RETURN WITHOUT RESETTING isEngineThinking
       let san = "";
       try {
         const chess = tempChess.getInternalChess();
         const moveResult = chess.move({ from, to, promotion });
         if (moveResult) {
           san = moveResult.san;
+        } else {
+          console.error("Invalid engine move:", engineMove.move);
         }
       } catch (e) {
-        console.error("Failed to convert engine move:", e);
-        return;
+        console.error("Failed to convert engine move:", e, "Move:", engineMove.move);
+        // Don't return here - let it continue to finally block
       }
 
       if (san) {
@@ -432,6 +434,8 @@ export const ProfessionalEngineGame: React.FC<ProfessionalEngineGameProps> = ({
               `Confidenza: ${Math.round((engineMove.confidence || 0) * 100)}%`,
           );
         }
+      } else {
+        console.warn("Engine move failed, no valid SAN generated");
       }
     } catch (error) {
       console.error("Engine move error:", error);
@@ -855,7 +859,7 @@ export const ProfessionalEngineGame: React.FC<ProfessionalEngineGameProps> = ({
                       Analizzando posizione...
                     </div>
                   )}
-                  {showEvaluation && engineEvaluation && (
+                  {showEvaluation && engineEvaluation && !boardHidden && (
                     <div style={{ color: "#10b981", marginTop: "0.5rem" }}>
                       {engineEvaluation}
                     </div>
