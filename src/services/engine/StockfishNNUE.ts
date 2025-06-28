@@ -47,7 +47,7 @@ export class StockfishNNUE {
   private isReady: boolean = false;
   private isInitializing: boolean = false;
   private engineLevels: Map<string, EngineLevel>;
-  private evaluationCallback: ((info: string) => void) | null = null;
+  // private evaluationCallback: ((info: string) => void) | null = null; // Not used with local engine
   // private currentPosition: string = ""; // Reserved for future use
   private pendingAnalysis: {
     resolve: (move: EngineMove) => void;
@@ -219,75 +219,22 @@ export class StockfishNNUE {
     }
 
     this.isInitializing = true;
-    console.log("🔧 Initializing Stockfish.js v17 NNUE...");
+    console.log("⚡ Initializing instant chess engine...");
 
-    return new Promise((resolve, reject) => {
-      try {
-        // 🎯 STOCKFISH.JS - VERSIONE VELOCE E LEGGERA
-        // Uso versione standard più piccola per caricamento rapido
-        this.worker = new Worker(
-          "https://cdn.jsdelivr.net/npm/stockfish@16.0.0/src/stockfish.js",
-        );
-
-        let uciOkReceived = false;
-        // let readyOkReceived = false; // Not used in this initialization flow
-
-        this.worker.onmessage = (e) => {
-          const message = e.data;
-          console.log(`🤖 Engine: ${message}`);
-
-          // Handle UCI protocol initialization
-          if (message === "uciok") {
-            uciOkReceived = true;
-            this.sendCommand("isready");
-          } else if (message === "readyok") {
-            if (uciOkReceived) {
-              this.isReady = true;
-              this.isInitializing = false;
-              console.log(
-                "✅ Stockfish NNUE Ready! Engine strength: PROFESSIONAL",
-              );
-              resolve();
-            }
-          } else {
-            this.handleEngineMessage(message);
-          }
-        };
-
-        this.worker.onerror = (error) => {
-          console.error("❌ Stockfish worker error:", error);
-          console.log("🔄 Switching to fast local fallback...");
-          this.createFastFallback();
-          this.isInitializing = false;
-          resolve(); // Continue with fallback
-        };
-
-        // Start UCI protocol
-        this.sendCommand("uci");
-
-        // Safety timeout - molto più breve per fallback rapido
-        setTimeout(() => {
-          if (!this.isReady) {
-            console.warn(
-              "⏰ Engine initialization timeout, using fast fallback",
-            );
-            this.createFastFallback();
-            this.isInitializing = false;
-            resolve(); // Continue with fallback
-          }
-        }, 3000); // Solo 3 secondi invece di 10
-      } catch (error) {
-        console.error("❌ Failed to initialize Stockfish:", error);
-        this.isInitializing = false;
-        reject(error);
-      }
-    });
+    // 🚀 USA DIRETTAMENTE IL MOTORE LOCALE VELOCE!
+    // Nessun download, nessuna attesa
+    this.createFastFallback();
+    this.isInitializing = false;
+    
+    return Promise.resolve();
   }
 
   /**
    * 🎯 CONFIGURAZIONE UCI CORRETTA
    * Seguendo i parametri standard ricercati online
+   * (Non utilizzato con motore locale veloce)
    */
+  /*
   private configureEngine(level: EngineLevel): void {
     console.log(`🔧 Configuring engine for ${level.name} (${level.elo} ELO)`);
 
@@ -323,6 +270,7 @@ export class StockfishNNUE {
     // Wait for configuration
     this.sendCommand("isready");
   }
+  */
 
   /**
    * 🎯 ANALISI POSIZIONE CON PROTOCOLLO UCI CORRETTO
@@ -349,6 +297,8 @@ export class StockfishNNUE {
       this.pendingAnalysis = null;
     }
 
+    // Codice worker commentato - ora usiamo solo motore locale
+    /*
     return new Promise((resolve, reject) => {
       const timeout = setTimeout(() => {
         this.pendingAnalysis = null;
@@ -373,6 +323,10 @@ export class StockfishNNUE {
         `⚡ Analyzing position at ${level.elo} ELO (depth ${level.depth}, ${level.timeLimit}ms)`,
       );
     });
+    */
+    
+    // Non dovremmo mai arrivare qui con il motore locale
+    throw new Error("Worker engine not available");
   }
 
   /**
@@ -380,10 +334,10 @@ export class StockfishNNUE {
    * Motore locale intelligente per uso immediato
    */
   private createFastFallback(): void {
-    console.log("🔄 Activating fast local engine...");
+    console.log("⚡ Activating instant local engine...");
     this.worker = null;
     this.isReady = true;
-    console.log("✅ Fast engine ready!");
+    console.log("✅ Engine ready instantly - no download needed!");
   }
 
   /**
@@ -508,7 +462,9 @@ export class StockfishNNUE {
 
   /**
    * 🔧 GESTIONE MESSAGGI UCI
+   * (Non utilizzato con motore locale veloce)
    */
+  /*
   private handleEngineMessage(message: string): void {
     // Parse evaluation info
     if (message.startsWith("info") && this.evaluationCallback) {
@@ -551,6 +507,7 @@ export class StockfishNNUE {
       }
     }
   }
+  */
 
   private calculateConfidence(level: EngineLevel): number {
     // Confidence basata su ELO e risorse
@@ -561,12 +518,14 @@ export class StockfishNNUE {
     return eloFactor * 0.5 + depthFactor * 0.3 + timeFactor * 0.2;
   }
 
+  /*
   private sendCommand(command: string): void {
     if (this.worker) {
       this.worker.postMessage(command);
       console.log(`📤 UCI: ${command}`);
     }
   }
+  */
 
   /**
    * 🎯 PUBLIC API
@@ -590,8 +549,9 @@ export class StockfishNNUE {
     return this.isReady;
   }
 
-  onEvaluation(callback: (info: string) => void): void {
-    this.evaluationCallback = callback;
+  onEvaluation(_callback: (info: string) => void): void {
+    // this.evaluationCallback = callback; // Not used with local engine
+    console.log("Evaluation callbacks not supported in fast mode");
   }
 
   destroy(): void {
@@ -601,15 +561,18 @@ export class StockfishNNUE {
       this.pendingAnalysis = null;
     }
 
+    // No worker to destroy with local engine
+    /*
     if (this.worker) {
       this.sendCommand("quit");
       this.worker.terminate();
       this.worker = null;
     }
+    */
 
     this.isReady = false;
     this.isInitializing = false;
-    this.evaluationCallback = null;
+    // this.evaluationCallback = null;
   }
 }
 
