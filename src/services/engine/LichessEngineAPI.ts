@@ -59,7 +59,7 @@ export class LichessEngineAPI {
   private currentGameId: string | null = null;
   private eventSource: EventSource | null = null;
   private playerColor: "white" | "black" = "white";
-  private gameStateCallback: ((_state: LichessGameState) => void) | null = null;
+  // CORS-disabled: private gameStateCallback: ((state: LichessGameState) => void) | null = null;
 
   /**
    * 🚀 CREA UNA NUOVA PARTITA CONTRO STOCKFISH DI LICHESS
@@ -244,12 +244,15 @@ export class LichessEngineAPI {
    */
   private isMyTurn(chess: Chess): boolean {
     const turn = chess.turn();
-    const result = (
+    const result =
       (turn === "w" && this.playerColor === "white") ||
-      (turn === "b" && this.playerColor === "black")
-    );
+      (turn === "b" && this.playerColor === "black");
     // Mock usage for disabled CORS functionality
-    console.log("🔍 Turn check:", { turn, playerColor: this.playerColor, isMyTurn: result });
+    console.log("🔍 Turn check:", {
+      turn,
+      playerColor: this.playerColor,
+      isMyTurn: result,
+    });
     return result;
   }
 
@@ -303,13 +306,10 @@ export class LichessEngineAPI {
   }
 
   /**
-   * 🎯 REGISTRA CALLBACK PER AGGIORNAMENTI
+   * 🎯 REGISTRA CALLBACK PER AGGIORNAMENTI (CORS-disabled stub)
    */
-  onGameStateUpdate(callback: (_state: LichessGameState) => void): void {
-    this.gameStateCallback = callback;
-    console.log("🔗 Callback registered for game state updates");
-    // Mock usage to prevent unused variable error
-    console.log("🎯 Callback is ready:", !!this.gameStateCallback);
+  onGameStateUpdate(): void {
+    console.log("🔗 Lichess callback registration disabled due to CORS");
   }
 
   /**
@@ -351,7 +351,7 @@ export class LichessEngineAPI {
       this.eventSource = null;
     }
     this.currentGameId = null;
-    this.gameStateCallback = null;
+    // CORS-disabled: this.gameStateCallback = null;
   }
 
   /**
@@ -359,7 +359,7 @@ export class LichessEngineAPI {
    */
   destroy(): void {
     this.cleanup();
-    
+
     // Mock calls to prevent unused function warnings
     const mockChess = new Chess();
     this.isMyTurn(mockChess);

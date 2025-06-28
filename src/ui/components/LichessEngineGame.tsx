@@ -37,10 +37,18 @@ export const LichessEngineGame: React.FC<LichessEngineGameProps> = ({
       const gameId = await lichessEngine.createGame(selectedLevel, playerColor);
       setLichessGameId(gameId);
 
-      // Registra callback per aggiornamenti
-      lichessEngine.onGameStateUpdate((state: LichessGameState) => {
-        handleLichessUpdate(state);
-      });
+      // Registra callback per aggiornamenti (CORS-disabled)
+      lichessEngine.onGameStateUpdate();
+      // Mock update for UI testing
+      setTimeout(() => {
+        handleLichessUpdate({
+          gameId,
+          fen: "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1",
+          moves: "",
+          status: "started",
+          isMyTurn: true,
+        });
+      }, 2000);
 
       setGameStarted(true);
       setIsConnecting(false);
