@@ -1,8 +1,7 @@
 // src/ui/components/EngineTestSuite.tsx
-/* eslint-disable no-unused-vars */
 import { useState, useEffect } from "react";
 import { Chess } from "chess.js";
-import { professionalStockfish } from "@services/engine/ProfessionalStockfish";
+import { stockfishNNUE } from "@services/engine/StockfishNNUE";
 
 interface TestResult {
   position: string;
@@ -91,7 +90,7 @@ export default function EngineTestSuite() {
   const initializeEngine = async () => {
     setCurrentTest("Inizializzando motore professionale...");
     try {
-      await professionalStockfish.initialize();
+      await stockfishNNUE.initialize();
       setEngineReady(true);
       setCurrentTest("✅ Motore pronto per i test");
     } catch (error) {
@@ -110,7 +109,7 @@ export default function EngineTestSuite() {
     setTestResults([]);
     setSummary({});
 
-    const levels = professionalStockfish.getAllLevels();
+    const levels = stockfishNNUE.getAllLevels();
     const results: TestResult[] = [];
     const levelStats: { [key: string]: { passed: number; total: number } } = {};
 
@@ -132,7 +131,7 @@ export default function EngineTestSuite() {
         const startTime = Date.now();
 
         try {
-          const result = await professionalStockfish.analyzePosition(
+          const result = await stockfishNNUE.analyzePosition(
             position.fen,
             level.key,
           );
@@ -236,7 +235,7 @@ export default function EngineTestSuite() {
             🔧 Suite di Test Motori Professionali
           </h1>
           <p className="text-gray-300 text-lg">
-            Validazione sistematica dei livelli di forza secondo l'analisi
+            Validazione sistematica dei livelli di forza secondo l&apos;analisi
             strategica
           </p>
         </div>
@@ -273,7 +272,7 @@ export default function EngineTestSuite() {
           {Object.keys(summary).length > 0 && (
             <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mt-6">
               {Object.entries(summary).map(([levelKey, stats]) => {
-                const level = professionalStockfish
+                const level = stockfishNNUE
                   .getAllLevels()
                   .find((l) => l.key === levelKey);
                 const percentage =

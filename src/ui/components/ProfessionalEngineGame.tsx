@@ -1,10 +1,7 @@
 // src/ui/components/ProfessionalEngineGame.tsx
 /* eslint-disable no-unused-vars, react-hooks/exhaustive-deps, react/no-unescaped-entities, no-empty-pattern */
 import React, { useState, useEffect, useRef, useCallback } from "react";
-import {
-  ProfessionalStockfish,
-  professionalStockfish,
-} from "@services/engine/ProfessionalStockfish";
+import { StockfishNNUE, stockfishNNUE } from "@services/engine/StockfishNNUE";
 import { useChessGame } from "@ui/hooks/useChessGame";
 import { SpeechService } from "@services/speech/SpeechService";
 import { InteractiveChessBoard } from "./InteractiveChessBoard";
@@ -31,8 +28,8 @@ export const ProfessionalEngineGame: React.FC<ProfessionalEngineGameProps> = ({
 }) => {
   const {} = useTranslation();
   const [gameState, gameActions] = useChessGame();
-  const [engine, setEngine] = useState<ProfessionalStockfish | null>(null);
-  const [selectedLevel, setSelectedLevel] = useState("professional-1"); // Professional level default
+  const [engine, setEngine] = useState<StockfishNNUE | null>(null);
+  const [selectedLevel, setSelectedLevel] = useState("intermediate-1"); // Start with intermediate level
   const [isEngineThinking, setIsEngineThinking] = useState(false);
   const [gameStarted, setGameStarted] = useState(false);
   const [playerColor, setPlayerColor] = useState<"white" | "black">("white");
@@ -49,7 +46,7 @@ export const ProfessionalEngineGame: React.FC<ProfessionalEngineGameProps> = ({
     accuracy: 100,
   });
 
-  const engineRef = useRef<ProfessionalStockfish | null>(null);
+  const engineRef = useRef<StockfishNNUE | null>(null);
   const recognitionRef = useRef<any>(null);
   const isProcessingVoice = useRef(false);
   // const voiceQueueRef = useRef<string[]>([]);
@@ -64,13 +61,13 @@ export const ProfessionalEngineGame: React.FC<ProfessionalEngineGameProps> = ({
 
     const initEngine = async () => {
       try {
-        console.log("🔧 Initializing Professional Stockfish...");
-        await professionalStockfish.initialize();
-        console.log("✅ Professional Stockfish initialized successfully");
-        setEngine(professionalStockfish);
-        engineRef.current = professionalStockfish;
+        console.log("🔧 Initializing Stockfish NNUE v17...");
+        await stockfishNNUE.initialize();
+        console.log("✅ Stockfish NNUE initialized successfully");
+        setEngine(stockfishNNUE);
+        engineRef.current = stockfishNNUE;
 
-        professionalStockfish.onEvaluation((info: string) => {
+        stockfishNNUE.onEvaluation((info: string) => {
           // Parse engine evaluation info
           if (info.includes("score cp")) {
             const cpMatch = info.match(/score cp (-?\d+)/);
@@ -82,8 +79,8 @@ export const ProfessionalEngineGame: React.FC<ProfessionalEngineGameProps> = ({
           }
         });
       } catch (error) {
-        console.error("❌ Failed to initialize professional engine:", error);
-        console.log("🔄 Will use fallback mode");
+        console.error("❌ Failed to initialize NNUE engine:", error);
+        console.log("🔄 Engine initialization failed");
       }
     };
 
@@ -710,7 +707,7 @@ export const ProfessionalEngineGame: React.FC<ProfessionalEngineGameProps> = ({
                         marginTop: "1rem",
                       }}
                     >
-                      {professionalStockfish.getAllLevels().map((level) => {
+                      {stockfishNNUE.getAllLevels().map((level) => {
                         const isSelected = selectedLevel === level.key;
 
                         const getLevelColor = (elo: number) => {
