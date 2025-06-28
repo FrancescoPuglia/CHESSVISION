@@ -180,12 +180,12 @@ export class LichessEngineAPI {
       moves: state.moves || "",
       status: state.status,
       winner: state.winner,
-      isMyTurn: this.isMyTurn(chess, state.moves),
+      isMyTurn: this.isMyTurn(chess),
     };
 
     // Se è il turno di Stockfish e non ci sono ancora mosse
     if (
-      !this.isMyTurn(chess, state.moves) &&
+      !this.isMyTurn(chess) &&
       !state.moves &&
       this.playerColor === "black"
     ) {
@@ -211,7 +211,7 @@ export class LichessEngineAPI {
   /**
    * 🎯 CONTROLLA SE È IL NOSTRO TURNO
    */
-  private isMyTurn(chess: Chess, _moves: string): boolean {
+  private isMyTurn(chess: Chess): boolean {
     const turn = chess.turn();
     return (
       (turn === "w" && this.playerColor === "white") ||
