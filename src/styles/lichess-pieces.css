@@ -15,14 +15,9 @@
   will-change: transform;
   pointer-events: none;
   /* ULTRA STRONG VISIBILITY */
-  filter: 
-    contrast(3.0) 
-    brightness(1.1) 
-    drop-shadow(0 0 2px #000) 
-    drop-shadow(0 0 4px #000) 
-    drop-shadow(0 0 6px #fff) 
-    drop-shadow(2px 2px 4px #000) 
-    drop-shadow(-2px -2px 4px #fff) !important;
+  filter: contrast(3) brightness(1.1) drop-shadow(0 0 2px #000)
+    drop-shadow(0 0 4px #000) drop-shadow(0 0 6px #fff)
+    drop-shadow(2px 2px 4px #000) drop-shadow(-2px -2px 4px #fff) !important;
 }
 
 .piece.dragging {

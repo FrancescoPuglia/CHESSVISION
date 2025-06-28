@@ -9,6 +9,7 @@ import { useChessGame } from "@ui/hooks/useChessGame";
 import { SpeechService } from "@services/speech/SpeechService";
 import { ChessgroundBoard } from "./ChessgroundBoard";
 import { useTranslation } from "@core/i18n/useTranslation";
+import { Chess } from "chess.js";
 
 interface ProfessionalEngineGameProps {
   isVisible: boolean;
@@ -52,6 +53,10 @@ export const ProfessionalEngineGame: React.FC<ProfessionalEngineGameProps> = ({
   const recognitionRef = useRef<any>(null);
   const isProcessingVoice = useRef(false);
   // const voiceQueueRef = useRef<string[]>([]);
+
+  // Move confirmation states
+  const [pendingMove, setPendingMove] = useState<string | null>(null);
+  const [isWaitingConfirmation, setIsWaitingConfirmation] = useState(false);
 
   // Initialize engine with selected Lichess level
   useEffect(() => {
@@ -190,6 +195,38 @@ export const ProfessionalEngineGame: React.FC<ProfessionalEngineGameProps> = ({
     gameState.isGameOver,
   ]);
 
+  // Move confirmation functions
+  const confirmMove = useCallback(async () => {
+    if (!pendingMove) return;
+
+    try {
+      gameActions.makeMove(pendingMove);
+      setGameStats((prev) => ({
+        ...prev,
+        playerMoves: prev.playerMoves + 1,
+      }));
+
+      if (speechService && isVoiceEnabled) {
+        await speechService.speak(`Hai giocato: ${pendingMove}`);
+      }
+    } catch (error) {
+      if (speechService && isVoiceEnabled) {
+        await speechService.speak("Errore nell'eseguire la mossa");
+      }
+    } finally {
+      setPendingMove(null);
+      setIsWaitingConfirmation(false);
+    }
+  }, [pendingMove, gameActions, speechService, isVoiceEnabled]);
+
+  const cancelMove = useCallback(async () => {
+    if (speechService && isVoiceEnabled) {
+      await speechService.speak("Mossa annullata");
+    }
+    setPendingMove(null);
+    setIsWaitingConfirmation(false);
+  }, [speechService, isVoiceEnabled]);
+
   // Voice command processor
   const processVoiceCommand = useCallback(
     async (transcript: string) => {
@@ -202,6 +239,28 @@ export const ProfessionalEngineGame: React.FC<ProfessionalEngineGameProps> = ({
         .toLowerCase()
         .replace(/[.,!?]/g, "")
         .trim();
+
+      // Handle confirmation commands when waiting for confirmation
+      if (isWaitingConfirmation) {
+        if (
+          cleanTranscript.includes("confermo") ||
+          cleanTranscript.includes("conferma") ||
+          cleanTranscript.includes("sì") ||
+          cleanTranscript.includes("si")
+        ) {
+          await confirmMove();
+          isProcessingVoice.current = false;
+          return;
+        } else if (
+          cleanTranscript.includes("annulla") ||
+          cleanTranscript.includes("no") ||
+          cleanTranscript.includes("cancella")
+        ) {
+          await cancelMove();
+          isProcessingVoice.current = false;
+          return;
+        }
+      }
 
       // Voice commands mapping
       const voiceCommands: VoiceCommand[] = [
@@ -295,19 +354,38 @@ export const ProfessionalEngineGame: React.FC<ProfessionalEngineGameProps> = ({
         isProcessingVoice.current = false;
       }, 500);
     },
-    [gameStarted, gameState.isGameOver, isEngineThinking, speechService],
+    [
+      gameStarted,
+      gameState.isGameOver,
+      isEngineThinking,
+      speechService,
+      isWaitingConfirmation,
+      confirmMove,
+      cancelMove,
+    ],
   );
 
   const makeVoiceMove = async (move: string) => {
     try {
-      gameActions.makeMove(move);
-      setGameStats((prev) => ({
-        ...prev,
-        playerMoves: prev.playerMoves + 1,
-      }));
+      // Check if the move is valid before asking for confirmation
+      const testGame = new Chess(gameState.game.getFen());
+      const isValidMove = testGame.move(move);
+
+      if (!isValidMove) {
+        if (speechService && isVoiceEnabled) {
+          await speechService.speak("Mossa non valida");
+        }
+        return;
+      }
+
+      // Request confirmation for the move
+      setPendingMove(move);
+      setIsWaitingConfirmation(true);
 
       if (speechService && isVoiceEnabled) {
-        await speechService.speak(`Hai giocato: ${move}`);
+        await speechService.speak(
+          `Vuoi giocare ${move}? Dì "confermo" o "annulla"`,
+        );
       }
     } catch (error) {
       if (speechService && isVoiceEnabled) {
@@ -503,381 +581,641 @@ export const ProfessionalEngineGame: React.FC<ProfessionalEngineGameProps> = ({
   if (!isVisible) return null;
 
   return (
-    <div
-      style={{
-        position: "fixed",
-        top: 0,
-        left: 0,
-        right: 0,
-        bottom: 0,
-        backgroundColor: "rgba(0,0,0,0.9)",
-        display: "flex",
-        alignItems: "center",
-        justifyContent: "center",
-        zIndex: 1000,
-      }}
-    >
+    <>
+      <style>
+        {`
+          @keyframes pulse {
+            0% {
+              transform: scale(1);
+              opacity: 1;
+            }
+            50% {
+              transform: scale(1.02);
+              opacity: 0.9;
+            }
+            100% {
+              transform: scale(1);
+              opacity: 1;
+            }
+          }
+        `}
+      </style>
       <div
         style={{
-          backgroundColor: "#0f0f0f",
-          borderRadius: "20px",
-          padding: "2rem",
-          maxWidth: "1200px",
-          width: "90%",
-          maxHeight: "90vh",
-          overflowY: "auto",
-          border: "3px solid #8b5cf6",
-          boxShadow: "0 25px 70px rgba(139,92,246,0.3)",
+          position: "fixed",
+          top: 0,
+          left: 0,
+          right: 0,
+          bottom: 0,
+          backgroundColor: "rgba(0,0,0,0.9)",
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+          zIndex: 1000,
         }}
       >
-        {/* Header */}
         <div
           style={{
-            display: "flex",
-            justifyContent: "space-between",
-            alignItems: "center",
-            marginBottom: "2rem",
-            borderBottom: "2px solid #333",
-            paddingBottom: "1rem",
+            backgroundColor: "#0f0f0f",
+            borderRadius: "20px",
+            padding: "2rem",
+            maxWidth: "1200px",
+            width: "90%",
+            maxHeight: "90vh",
+            overflowY: "auto",
+            border: "3px solid #8b5cf6",
+            boxShadow: "0 25px 70px rgba(139,92,246,0.3)",
           }}
         >
-          <h2 style={{ color: "#ffd700", margin: 0, fontSize: "2rem" }}>
-            🏆 Partita Professionale vs Motore
-          </h2>
-          <button
-            onClick={onClose}
+          {/* Header */}
+          <div
             style={{
-              background: "none",
-              border: "none",
-              color: "#666",
-              fontSize: "1.5rem",
-              cursor: "pointer",
-              transition: "color 0.3s",
+              display: "flex",
+              justifyContent: "space-between",
+              alignItems: "center",
+              marginBottom: "2rem",
+              borderBottom: "2px solid #333",
+              paddingBottom: "1rem",
             }}
-            onMouseEnter={(e) => (e.currentTarget.style.color = "#fff")}
-            onMouseLeave={(e) => (e.currentTarget.style.color = "#666")}
           >
-            ✕
-          </button>
-        </div>
+            <h2 style={{ color: "#ffd700", margin: 0, fontSize: "2rem" }}>
+              🏆 Partita Professionale vs Motore
+            </h2>
+            <button
+              onClick={onClose}
+              style={{
+                background: "none",
+                border: "none",
+                color: "#666",
+                fontSize: "1.5rem",
+                cursor: "pointer",
+                transition: "color 0.3s",
+              }}
+              onMouseEnter={(e) => (e.currentTarget.style.color = "#fff")}
+              onMouseLeave={(e) => (e.currentTarget.style.color = "#666")}
+            >
+              ✕
+            </button>
+          </div>
 
-        <div style={{ display: "flex", gap: "2rem" }}>
-          {/* Left Panel - Settings & Board */}
-          <div style={{ flex: 1 }}>
-            {/* Engine Settings */}
-            {!gameStarted && (
-              <div style={{ marginBottom: "2rem" }}>
-                <h3 style={{ color: "#8b5cf6", marginBottom: "1rem" }}>
-                  Selezione Livello ELO
-                </h3>
+          <div style={{ display: "flex", gap: "2rem" }}>
+            {/* Left Panel - Settings & Board */}
+            <div style={{ flex: 1 }}>
+              {/* Engine Settings */}
+              {!gameStarted && (
+                <div style={{ marginBottom: "2rem" }}>
+                  <h3 style={{ color: "#8b5cf6", marginBottom: "1rem" }}>
+                    Selezione Livello ELO
+                  </h3>
 
-                {/* ELO Slider */}
+                  {/* ELO Slider */}
+                  <div style={{ marginBottom: "2rem" }}>
+                    <div
+                      style={{
+                        display: "flex",
+                        justifyContent: "space-between",
+                        marginBottom: "0.5rem",
+                      }}
+                    >
+                      <span style={{ color: "#a0a0a0" }}>
+                        Livello: {selectedLevel}
+                      </span>
+                      <span style={{ color: "#ffd700" }}>
+                        {engine?.getLevelInfo() || ""}
+                      </span>
+                    </div>
+
+                    {/* Lichess Level Selector (1-8) */}
+                    <div
+                      style={{
+                        display: "grid",
+                        gridTemplateColumns: "repeat(4, 1fr)",
+                        gap: "0.5rem",
+                        marginTop: "1rem",
+                      }}
+                    >
+                      {[1, 2, 3, 4, 5, 6, 7, 8].map((level) => {
+                        const lichessLevel = LICHESS_LEVELS[level];
+                        const isSelected = selectedLevel === level;
+
+                        return (
+                          <button
+                            key={level}
+                            onClick={() => setSelectedLevel(level)}
+                            style={{
+                              padding: "0.75rem 0.5rem",
+                              backgroundColor: isSelected
+                                ? "#10b981"
+                                : "#2d3142",
+                              color: "white",
+                              border: isSelected
+                                ? "2px solid #20bf6b"
+                                : "2px solid transparent",
+                              borderRadius: "8px",
+                              cursor: "pointer",
+                              fontSize: "0.9rem",
+                              fontWeight: isSelected ? "bold" : "normal",
+                              transition: "all 0.3s ease",
+                              transform: isSelected
+                                ? "scale(1.05)"
+                                : "scale(1)",
+                              boxShadow: isSelected
+                                ? "0 4px 12px rgba(16, 185, 129, 0.3)"
+                                : "0 2px 4px rgba(0,0,0,0.1)",
+                            }}
+                            onMouseEnter={(e) => {
+                              if (!isSelected) {
+                                e.currentTarget.style.backgroundColor =
+                                  "#3d4663";
+                                e.currentTarget.style.transform = "scale(1.02)";
+                              }
+                            }}
+                            onMouseLeave={(e) => {
+                              if (!isSelected) {
+                                e.currentTarget.style.backgroundColor =
+                                  "#2d3142";
+                                e.currentTarget.style.transform = "scale(1)";
+                              }
+                            }}
+                          >
+                            <div
+                              style={{
+                                fontSize: "1.1rem",
+                                marginBottom: "0.2rem",
+                              }}
+                            >
+                              Livello {level}
+                            </div>
+                            <div style={{ fontSize: "0.7rem", opacity: 0.8 }}>
+                              ~{lichessLevel.elo} ELO
+                            </div>
+                          </button>
+                        );
+                      })}
+                    </div>
+                  </div>
+
+                  {/* Color Selection */}
+                  <div style={{ marginBottom: "1.5rem" }}>
+                    <label
+                      style={{
+                        color: "#a0a0a0",
+                        display: "block",
+                        marginBottom: "0.5rem",
+                      }}
+                    >
+                      Gioca con:
+                    </label>
+                    <div style={{ display: "flex", gap: "1rem" }}>
+                      <label
+                        style={{
+                          flex: 1,
+                          padding: "1rem",
+                          backgroundColor:
+                            playerColor === "white" ? "#8b5cf6" : "#2d3142",
+                          color: "white",
+                          borderRadius: "8px",
+                          cursor: "pointer",
+                          display: "flex",
+                          alignItems: "center",
+                          justifyContent: "center",
+                          gap: "0.5rem",
+                          transition: "all 0.3s",
+                        }}
+                      >
+                        <input
+                          type="radio"
+                          value="white"
+                          checked={playerColor === "white"}
+                          onChange={(e) =>
+                            setPlayerColor(e.target.value as "white" | "black")
+                          }
+                          style={{ display: "none" }}
+                        />
+                        <span style={{ fontSize: "1.5rem" }}>♔</span> Bianco
+                      </label>
+                      <label
+                        style={{
+                          flex: 1,
+                          padding: "1rem",
+                          backgroundColor:
+                            playerColor === "black" ? "#8b5cf6" : "#2d3142",
+                          color: "white",
+                          borderRadius: "8px",
+                          cursor: "pointer",
+                          display: "flex",
+                          alignItems: "center",
+                          justifyContent: "center",
+                          gap: "0.5rem",
+                          transition: "all 0.3s",
+                        }}
+                      >
+                        <input
+                          type="radio"
+                          value="black"
+                          checked={playerColor === "black"}
+                          onChange={(e) =>
+                            setPlayerColor(e.target.value as "white" | "black")
+                          }
+                          style={{ display: "none" }}
+                        />
+                        <span style={{ fontSize: "1.5rem" }}>♚</span> Nero
+                      </label>
+                    </div>
+                  </div>
+
+                  {/* Voice Settings */}
+                  <div style={{ marginBottom: "1.5rem" }}>
+                    <label
+                      style={{
+                        color: "#a0a0a0",
+                        display: "flex",
+                        alignItems: "center",
+                        gap: "0.5rem",
+                        cursor: "pointer",
+                      }}
+                    >
+                      <input
+                        type="checkbox"
+                        checked={continuousListening}
+                        onChange={(e) =>
+                          setContinuousListening(e.target.checked)
+                        }
+                        style={{
+                          width: "20px",
+                          height: "20px",
+                          cursor: "pointer",
+                        }}
+                      />
+                      🎤 Microfono sempre attivo (Comandi vocali continui)
+                    </label>
+                  </div>
+
+                  <button
+                    onClick={startNewGame}
+                    disabled={!engine?.isEngineReady()}
+                    style={{
+                      width: "100%",
+                      padding: "1.2rem",
+                      backgroundColor: engine?.isEngineReady()
+                        ? "#10b981"
+                        : "#666",
+                      color: "white",
+                      border: "none",
+                      borderRadius: "10px",
+                      cursor: engine?.isEngineReady()
+                        ? "pointer"
+                        : "not-allowed",
+                      fontSize: "1.1rem",
+                      fontWeight: "bold",
+                      transition: "all 0.3s",
+                    }}
+                  >
+                    {engine?.isEngineReady()
+                      ? "🚀 Inizia Partita Professionale"
+                      : "⏳ Caricamento motore avanzato..."}
+                  </button>
+                </div>
+              )}
+
+              {/* Chess Board */}
+              {gameStarted && (
                 <div style={{ marginBottom: "2rem" }}>
                   <div
                     style={{
                       display: "flex",
                       justifyContent: "space-between",
-                      marginBottom: "0.5rem",
-                    }}
-                  >
-                    <span style={{ color: "#a0a0a0" }}>
-                      Livello: {selectedLevel}
-                    </span>
-                    <span style={{ color: "#ffd700" }}>
-                      {engine?.getLevelInfo() || ""}
-                    </span>
-                  </div>
-
-                  {/* Lichess Level Selector (1-8) */}
-                  <div
-                    style={{
-                      display: "grid",
-                      gridTemplateColumns: "repeat(4, 1fr)",
-                      gap: "0.5rem",
-                      marginTop: "1rem",
-                    }}
-                  >
-                    {[1, 2, 3, 4, 5, 6, 7, 8].map((level) => {
-                      const lichessLevel = LICHESS_LEVELS[level];
-                      const isSelected = selectedLevel === level;
-
-                      return (
-                        <button
-                          key={level}
-                          onClick={() => setSelectedLevel(level)}
-                          style={{
-                            padding: "0.75rem 0.5rem",
-                            backgroundColor: isSelected ? "#10b981" : "#2d3142",
-                            color: "white",
-                            border: isSelected
-                              ? "2px solid #20bf6b"
-                              : "2px solid transparent",
-                            borderRadius: "8px",
-                            cursor: "pointer",
-                            fontSize: "0.9rem",
-                            fontWeight: isSelected ? "bold" : "normal",
-                            transition: "all 0.3s ease",
-                            transform: isSelected ? "scale(1.05)" : "scale(1)",
-                            boxShadow: isSelected
-                              ? "0 4px 12px rgba(16, 185, 129, 0.3)"
-                              : "0 2px 4px rgba(0,0,0,0.1)",
-                          }}
-                          onMouseEnter={(e) => {
-                            if (!isSelected) {
-                              e.currentTarget.style.backgroundColor = "#3d4663";
-                              e.currentTarget.style.transform = "scale(1.02)";
-                            }
-                          }}
-                          onMouseLeave={(e) => {
-                            if (!isSelected) {
-                              e.currentTarget.style.backgroundColor = "#2d3142";
-                              e.currentTarget.style.transform = "scale(1)";
-                            }
-                          }}
-                        >
-                          <div
-                            style={{
-                              fontSize: "1.1rem",
-                              marginBottom: "0.2rem",
-                            }}
-                          >
-                            Livello {level}
-                          </div>
-                          <div style={{ fontSize: "0.7rem", opacity: 0.8 }}>
-                            ~{lichessLevel.elo} ELO
-                          </div>
-                        </button>
-                      );
-                    })}
-                  </div>
-                </div>
-
-                {/* Color Selection */}
-                <div style={{ marginBottom: "1.5rem" }}>
-                  <label
-                    style={{
-                      color: "#a0a0a0",
-                      display: "block",
-                      marginBottom: "0.5rem",
-                    }}
-                  >
-                    Gioca con:
-                  </label>
-                  <div style={{ display: "flex", gap: "1rem" }}>
-                    <label
-                      style={{
-                        flex: 1,
-                        padding: "1rem",
-                        backgroundColor:
-                          playerColor === "white" ? "#8b5cf6" : "#2d3142",
-                        color: "white",
-                        borderRadius: "8px",
-                        cursor: "pointer",
-                        display: "flex",
-                        alignItems: "center",
-                        justifyContent: "center",
-                        gap: "0.5rem",
-                        transition: "all 0.3s",
-                      }}
-                    >
-                      <input
-                        type="radio"
-                        value="white"
-                        checked={playerColor === "white"}
-                        onChange={(e) =>
-                          setPlayerColor(e.target.value as "white" | "black")
-                        }
-                        style={{ display: "none" }}
-                      />
-                      <span style={{ fontSize: "1.5rem" }}>♔</span> Bianco
-                    </label>
-                    <label
-                      style={{
-                        flex: 1,
-                        padding: "1rem",
-                        backgroundColor:
-                          playerColor === "black" ? "#8b5cf6" : "#2d3142",
-                        color: "white",
-                        borderRadius: "8px",
-                        cursor: "pointer",
-                        display: "flex",
-                        alignItems: "center",
-                        justifyContent: "center",
-                        gap: "0.5rem",
-                        transition: "all 0.3s",
-                      }}
-                    >
-                      <input
-                        type="radio"
-                        value="black"
-                        checked={playerColor === "black"}
-                        onChange={(e) =>
-                          setPlayerColor(e.target.value as "white" | "black")
-                        }
-                        style={{ display: "none" }}
-                      />
-                      <span style={{ fontSize: "1.5rem" }}>♚</span> Nero
-                    </label>
-                  </div>
-                </div>
-
-                {/* Voice Settings */}
-                <div style={{ marginBottom: "1.5rem" }}>
-                  <label
-                    style={{
-                      color: "#a0a0a0",
-                      display: "flex",
                       alignItems: "center",
-                      gap: "0.5rem",
-                      cursor: "pointer",
+                      marginBottom: "1rem",
                     }}
                   >
-                    <input
-                      type="checkbox"
-                      checked={continuousListening}
-                      onChange={(e) => setContinuousListening(e.target.checked)}
+                    <h3 style={{ color: "#8b5cf6", margin: 0 }}>Scacchiera</h3>
+                    <button
+                      onClick={() => setBoardHidden(!boardHidden)}
                       style={{
-                        width: "20px",
-                        height: "20px",
+                        padding: "0.5rem 1rem",
+                        backgroundColor: "#2d3142",
+                        color: "white",
+                        border: "none",
+                        borderRadius: "6px",
                         cursor: "pointer",
                       }}
-                    />
-                    🎤 Microfono sempre attivo (Comandi vocali continui)
-                  </label>
+                    >
+                      {boardHidden ? "👁️ Mostra" : "🙈 Nascondi"} Scacchiera
+                    </button>
+                  </div>
+
+                  {!boardHidden && (
+                    <div
+                      style={{
+                        backgroundColor: "#1a1a1a",
+                        padding: "1rem",
+                        borderRadius: "10px",
+                        display: "flex",
+                        justifyContent: "center",
+                      }}
+                    >
+                      <ChessgroundBoard
+                        position={gameState.game.getBoard()}
+                        isVisible={true}
+                        onMove={(from, to) => {
+                          // Convert from/to notation to SAN notation
+                          try {
+                            const moveString = `${from}${to}`;
+                            gameActions.makeMove(moveString);
+                          } catch (error) {
+                            console.error("Invalid move:", error);
+                          }
+                        }}
+                        orientation={playerColor}
+                        size={500}
+                      />
+                    </div>
+                  )}
                 </div>
+              )}
+            </div>
 
-                <button
-                  onClick={startNewGame}
-                  disabled={!engine?.isEngineReady()}
-                  style={{
-                    width: "100%",
-                    padding: "1.2rem",
-                    backgroundColor: engine?.isEngineReady()
-                      ? "#10b981"
-                      : "#666",
-                    color: "white",
-                    border: "none",
-                    borderRadius: "10px",
-                    cursor: engine?.isEngineReady() ? "pointer" : "not-allowed",
-                    fontSize: "1.1rem",
-                    fontWeight: "bold",
-                    transition: "all 0.3s",
-                  }}
-                >
-                  {engine?.isEngineReady()
-                    ? "🚀 Inizia Partita Professionale"
-                    : "⏳ Caricamento motore avanzato..."}
-                </button>
-              </div>
-            )}
-
-            {/* Chess Board */}
-            {gameStarted && (
-              <div style={{ marginBottom: "2rem" }}>
-                <div
-                  style={{
-                    display: "flex",
-                    justifyContent: "space-between",
-                    alignItems: "center",
-                    marginBottom: "1rem",
-                  }}
-                >
-                  <h3 style={{ color: "#8b5cf6", margin: 0 }}>Scacchiera</h3>
-                  <button
-                    onClick={() => setBoardHidden(!boardHidden)}
-                    style={{
-                      padding: "0.5rem 1rem",
-                      backgroundColor: "#2d3142",
-                      color: "white",
-                      border: "none",
-                      borderRadius: "6px",
-                      cursor: "pointer",
-                    }}
-                  >
-                    {boardHidden ? "👁️ Mostra" : "🙈 Nascondi"} Scacchiera
-                  </button>
-                </div>
-
-                {!boardHidden && (
+            {/* Right Panel - Game Interface */}
+            <div style={{ flex: 1 }}>
+              {gameStarted && (
+                <>
+                  {/* Game Status */}
                   <div
                     style={{
                       backgroundColor: "#1a1a1a",
-                      padding: "1rem",
+                      padding: "1.5rem",
                       borderRadius: "10px",
-                      display: "flex",
-                      justifyContent: "center",
+                      marginBottom: "1.5rem",
+                      textAlign: "center",
+                      border: "2px solid #333",
                     }}
                   >
-                    <ChessgroundBoard
-                      position={gameState.game.getBoard()}
-                      isVisible={true}
-                      onMove={(from, to) => {
-                        // Convert from/to notation to SAN notation
-                        try {
-                          const moveString = `${from}${to}`;
-                          gameActions.makeMove(moveString);
-                        } catch (error) {
-                          console.error("Invalid move:", error);
-                        }
-                      }}
-                      orientation={playerColor}
-                      size={500}
-                    />
-                  </div>
-                )}
-              </div>
-            )}
-          </div>
-
-          {/* Right Panel - Game Interface */}
-          <div style={{ flex: 1 }}>
-            {gameStarted && (
-              <>
-                {/* Game Status */}
-                <div
-                  style={{
-                    backgroundColor: "#1a1a1a",
-                    padding: "1.5rem",
-                    borderRadius: "10px",
-                    marginBottom: "1.5rem",
-                    textAlign: "center",
-                    border: "2px solid #333",
-                  }}
-                >
-                  <div
-                    style={{
-                      color: "#ffd700",
-                      fontSize: "1.3rem",
-                      fontWeight: "bold",
-                      marginBottom: "0.5rem",
-                    }}
-                  >
-                    {getGameStatus()}
-                  </div>
-                  {isEngineThinking && (
                     <div
                       style={{
-                        color: "#8b5cf6",
-                        marginTop: "0.5rem",
-                        display: "flex",
-                        alignItems: "center",
-                        justifyContent: "center",
-                        gap: "0.5rem",
+                        color: "#ffd700",
+                        fontSize: "1.3rem",
+                        fontWeight: "bold",
+                        marginBottom: "0.5rem",
                       }}
                     >
-                      <div className="thinking-spinner">⚙️</div>
-                      Analizzando posizione...
+                      {getGameStatus()}
                     </div>
-                  )}
-                  {showEvaluation && engineEvaluation && !boardHidden && (
-                    <div style={{ color: "#10b981", marginTop: "0.5rem" }}>
-                      {engineEvaluation}
-                    </div>
-                  )}
-                </div>
+                    {isEngineThinking && (
+                      <div
+                        style={{
+                          color: "#8b5cf6",
+                          marginTop: "0.5rem",
+                          display: "flex",
+                          alignItems: "center",
+                          justifyContent: "center",
+                          gap: "0.5rem",
+                        }}
+                      >
+                        <div className="thinking-spinner">⚙️</div>
+                        Analizzando posizione...
+                      </div>
+                    )}
+                    {showEvaluation && engineEvaluation && !boardHidden && (
+                      <div style={{ color: "#10b981", marginTop: "0.5rem" }}>
+                        {engineEvaluation}
+                      </div>
+                    )}
+                  </div>
 
-                {/* Voice Control Panel */}
-                {isVoiceEnabled && (
+                  {/* Move Confirmation Indicator */}
+                  {isWaitingConfirmation && pendingMove && (
+                    <div
+                      style={{
+                        backgroundColor: "#ff6b6b",
+                        padding: "1.5rem",
+                        borderRadius: "10px",
+                        marginBottom: "1.5rem",
+                        border: "2px solid #ff4444",
+                        textAlign: "center",
+                        animation: "pulse 1s infinite",
+                      }}
+                    >
+                      <div
+                        style={{
+                          color: "#ffffff",
+                          fontSize: "1.4rem",
+                          fontWeight: "bold",
+                          marginBottom: "0.5rem",
+                        }}
+                      >
+                        🎤 CONFERMA RICHIESTA
+                      </div>
+                      <div style={{ color: "#ffdddd", fontSize: "1.2rem" }}>
+                        Vuoi giocare: <strong>{pendingMove}</strong>?
+                      </div>
+                      <div style={{ color: "#ffcccc", marginTop: "0.5rem" }}>
+                        Dì "CONFERMO" per eseguire o "ANNULLA" per cancellare
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Voice Control Panel */}
+                  {isVoiceEnabled && (
+                    <div
+                      style={{
+                        backgroundColor: "#1a1a1a",
+                        padding: "1.5rem",
+                        borderRadius: "10px",
+                        marginBottom: "1.5rem",
+                        border: "2px solid #333",
+                      }}
+                    >
+                      <h4
+                        style={{
+                          color: "#8b5cf6",
+                          marginTop: 0,
+                          marginBottom: "1rem",
+                        }}
+                      >
+                        🎤 Controllo Vocale
+                      </h4>
+
+                      {/* Voice Mode Toggle */}
+                      <div style={{ marginBottom: "1rem" }}>
+                        <div
+                          style={{
+                            display: "flex",
+                            gap: "0.5rem",
+                            alignItems: "center",
+                            marginBottom: "0.5rem",
+                          }}
+                        >
+                          <label
+                            style={{ color: "#a0a0a0", fontSize: "0.9rem" }}
+                          >
+                            Modalità microfono:
+                          </label>
+                        </div>
+                        <div style={{ display: "flex", gap: "0.5rem" }}>
+                          <button
+                            onClick={() => setContinuousListening(true)}
+                            style={{
+                              flex: 1,
+                              padding: "0.75rem",
+                              backgroundColor: continuousListening
+                                ? "#10b981"
+                                : "#374151",
+                              color: "white",
+                              border: "none",
+                              borderRadius: "6px",
+                              cursor: "pointer",
+                              fontSize: "0.9rem",
+                              transition: "all 0.3s",
+                            }}
+                          >
+                            🔴 Sempre Attivo
+                          </button>
+                          <button
+                            onClick={() => setContinuousListening(false)}
+                            style={{
+                              flex: 1,
+                              padding: "0.75rem",
+                              backgroundColor: !continuousListening
+                                ? "#10b981"
+                                : "#374151",
+                              color: "white",
+                              border: "none",
+                              borderRadius: "6px",
+                              cursor: "pointer",
+                              fontSize: "0.9rem",
+                              transition: "all 0.3s",
+                            }}
+                          >
+                            🎯 Su Richiesta
+                          </button>
+                        </div>
+                      </div>
+
+                      {/* Voice Status */}
+                      <div
+                        style={{
+                          backgroundColor: isListening ? "#065f46" : "#2d3142",
+                          padding: "1rem",
+                          borderRadius: "8px",
+                          textAlign: "center",
+                          border: `2px solid ${isListening ? "#10b981" : "#444"}`,
+                          transition: "all 0.3s",
+                        }}
+                      >
+                        <div
+                          style={{
+                            color: isListening ? "#10b981" : "#666",
+                            display: "flex",
+                            alignItems: "center",
+                            justifyContent: "center",
+                            gap: "0.5rem",
+                          }}
+                        >
+                          {isListening ? (
+                            <>
+                              <span className="pulse-dot"></span>
+                              Microfono attivo - Pronuncia la tua mossa
+                            </>
+                          ) : continuousListening ? (
+                            <>🎤 In attesa di comando vocale...</>
+                          ) : (
+                            <>🎤 Modalità manuale - Usa il pulsante o digita</>
+                          )}
+                        </div>
+                      </div>
+
+                      {/* Manual Voice Trigger (only in non-continuous mode) */}
+                      {!continuousListening && (
+                        <div style={{ marginTop: "1rem", textAlign: "center" }}>
+                          <button
+                            onClick={() => {
+                              if (!isListening) {
+                                startListening();
+                              } else {
+                                stopListening();
+                              }
+                            }}
+                            style={{
+                              padding: "0.75rem 1.5rem",
+                              backgroundColor: isListening
+                                ? "#ef4444"
+                                : "#10b981",
+                              color: "white",
+                              border: "none",
+                              borderRadius: "8px",
+                              cursor: "pointer",
+                              fontSize: "1rem",
+                              transition: "all 0.3s",
+                            }}
+                          >
+                            {isListening
+                              ? "🛑 Ferma Ascolto"
+                              : "🎤 Inizia Ascolto"}
+                          </button>
+                        </div>
+                      )}
+                    </div>
+                  )}
+
+                  {/* Move Input */}
+                  <div style={{ marginBottom: "1.5rem" }}>
+                    <div
+                      style={{
+                        display: "flex",
+                        gap: "0.5rem",
+                        marginBottom: "0.5rem",
+                      }}
+                    >
+                      <input
+                        type="text"
+                        value={moveInput}
+                        onChange={(e) => setMoveInput(e.target.value)}
+                        placeholder="Inserisci mossa (es. e4, Nf3, O-O)"
+                        disabled={isEngineThinking || gameState.isGameOver}
+                        style={{
+                          flex: 1,
+                          padding: "1rem",
+                          backgroundColor: "#2d3142",
+                          color: "white",
+                          border: "2px solid #444",
+                          borderRadius: "8px",
+                          fontSize: "1rem",
+                        }}
+                        onKeyPress={(e) => {
+                          if (e.key === "Enter") {
+                            gameActions.makeMove(moveInput.trim());
+                            setMoveInput("");
+                          }
+                        }}
+                      />
+                      <button
+                        onClick={() => {
+                          gameActions.makeMove(moveInput.trim());
+                          setMoveInput("");
+                        }}
+                        disabled={
+                          !moveInput.trim() ||
+                          isEngineThinking ||
+                          gameState.isGameOver
+                        }
+                        style={{
+                          padding: "1rem 1.5rem",
+                          backgroundColor: "#8b5cf6",
+                          color: "white",
+                          border: "none",
+                          borderRadius: "8px",
+                          cursor: "pointer",
+                          fontSize: "1.1rem",
+                          transition: "all 0.3s",
+                        }}
+                      >
+                        ➤
+                      </button>
+                    </div>
+                  </div>
+
+                  {/* Game Stats */}
                   <div
                     style={{
                       backgroundColor: "#1a1a1a",
@@ -887,291 +1225,96 @@ export const ProfessionalEngineGame: React.FC<ProfessionalEngineGameProps> = ({
                       border: "2px solid #333",
                     }}
                   >
-                    <h4
-                      style={{
-                        color: "#8b5cf6",
-                        marginTop: 0,
-                        marginBottom: "1rem",
-                      }}
-                    >
-                      🎤 Controllo Vocale
+                    <h4 style={{ color: "#8b5cf6", marginTop: 0 }}>
+                      📊 Statistiche
                     </h4>
-
-                    {/* Voice Mode Toggle */}
-                    <div style={{ marginBottom: "1rem" }}>
-                      <div
-                        style={{
-                          display: "flex",
-                          gap: "0.5rem",
-                          alignItems: "center",
-                          marginBottom: "0.5rem",
-                        }}
-                      >
-                        <label style={{ color: "#a0a0a0", fontSize: "0.9rem" }}>
-                          Modalità microfono:
-                        </label>
-                      </div>
-                      <div style={{ display: "flex", gap: "0.5rem" }}>
-                        <button
-                          onClick={() => setContinuousListening(true)}
-                          style={{
-                            flex: 1,
-                            padding: "0.75rem",
-                            backgroundColor: continuousListening
-                              ? "#10b981"
-                              : "#374151",
-                            color: "white",
-                            border: "none",
-                            borderRadius: "6px",
-                            cursor: "pointer",
-                            fontSize: "0.9rem",
-                            transition: "all 0.3s",
-                          }}
-                        >
-                          🔴 Sempre Attivo
-                        </button>
-                        <button
-                          onClick={() => setContinuousListening(false)}
-                          style={{
-                            flex: 1,
-                            padding: "0.75rem",
-                            backgroundColor: !continuousListening
-                              ? "#10b981"
-                              : "#374151",
-                            color: "white",
-                            border: "none",
-                            borderRadius: "6px",
-                            cursor: "pointer",
-                            fontSize: "0.9rem",
-                            transition: "all 0.3s",
-                          }}
-                        >
-                          🎯 Su Richiesta
-                        </button>
-                      </div>
-                    </div>
-
-                    {/* Voice Status */}
                     <div
                       style={{
-                        backgroundColor: isListening ? "#065f46" : "#2d3142",
-                        padding: "1rem",
-                        borderRadius: "8px",
-                        textAlign: "center",
-                        border: `2px solid ${isListening ? "#10b981" : "#444"}`,
-                        transition: "all 0.3s",
+                        display: "grid",
+                        gridTemplateColumns: "1fr 1fr",
+                        gap: "1rem",
+                        color: "#a0a0a0",
                       }}
                     >
-                      <div
-                        style={{
-                          color: isListening ? "#10b981" : "#666",
-                          display: "flex",
-                          alignItems: "center",
-                          justifyContent: "center",
-                          gap: "0.5rem",
-                        }}
-                      >
-                        {isListening ? (
-                          <>
-                            <span className="pulse-dot"></span>
-                            Microfono attivo - Pronuncia la tua mossa
-                          </>
-                        ) : continuousListening ? (
-                          <>🎤 In attesa di comando vocale...</>
-                        ) : (
-                          <>🎤 Modalità manuale - Usa il pulsante o digita</>
-                        )}
+                      <div>Tue mosse: {gameStats.playerMoves}</div>
+                      <div>Mosse motore: {gameStats.engineMoves}</div>
+                      <div>
+                        Tempo medio motore: {Math.round(gameStats.avgThinkTime)}
+                        ms
                       </div>
+                      <div>Livello Motore: {selectedLevel}</div>
                     </div>
-
-                    {/* Manual Voice Trigger (only in non-continuous mode) */}
-                    {!continuousListening && (
-                      <div style={{ marginTop: "1rem", textAlign: "center" }}>
-                        <button
-                          onClick={() => {
-                            if (!isListening) {
-                              startListening();
-                            } else {
-                              stopListening();
-                            }
-                          }}
-                          style={{
-                            padding: "0.75rem 1.5rem",
-                            backgroundColor: isListening
-                              ? "#ef4444"
-                              : "#10b981",
-                            color: "white",
-                            border: "none",
-                            borderRadius: "8px",
-                            cursor: "pointer",
-                            fontSize: "1rem",
-                            transition: "all 0.3s",
-                          }}
-                        >
-                          {isListening
-                            ? "🛑 Ferma Ascolto"
-                            : "🎤 Inizia Ascolto"}
-                        </button>
-                      </div>
-                    )}
                   </div>
-                )}
 
-                {/* Move Input */}
-                <div style={{ marginBottom: "1.5rem" }}>
-                  <div
-                    style={{
-                      display: "flex",
-                      gap: "0.5rem",
-                      marginBottom: "0.5rem",
-                    }}
-                  >
-                    <input
-                      type="text"
-                      value={moveInput}
-                      onChange={(e) => setMoveInput(e.target.value)}
-                      placeholder="Inserisci mossa (es. e4, Nf3, O-O)"
-                      disabled={isEngineThinking || gameState.isGameOver}
+                  {/* Game Actions */}
+                  <div style={{ display: "flex", gap: "0.5rem" }}>
+                    <button
+                      onClick={startNewGame}
                       style={{
                         flex: 1,
                         padding: "1rem",
-                        backgroundColor: "#2d3142",
-                        color: "white",
-                        border: "2px solid #444",
-                        borderRadius: "8px",
-                        fontSize: "1rem",
-                      }}
-                      onKeyPress={(e) => {
-                        if (e.key === "Enter") {
-                          gameActions.makeMove(moveInput.trim());
-                          setMoveInput("");
-                        }
-                      }}
-                    />
-                    <button
-                      onClick={() => {
-                        gameActions.makeMove(moveInput.trim());
-                        setMoveInput("");
-                      }}
-                      disabled={
-                        !moveInput.trim() ||
-                        isEngineThinking ||
-                        gameState.isGameOver
-                      }
-                      style={{
-                        padding: "1rem 1.5rem",
-                        backgroundColor: "#8b5cf6",
+                        backgroundColor: "#6b7280",
                         color: "white",
                         border: "none",
                         borderRadius: "8px",
                         cursor: "pointer",
-                        fontSize: "1.1rem",
                         transition: "all 0.3s",
                       }}
                     >
-                      ➤
+                      🔄 Nuova Partita
+                    </button>
+                    <button
+                      onClick={resignGame}
+                      style={{
+                        flex: 1,
+                        padding: "1rem",
+                        backgroundColor: "#dc2626",
+                        color: "white",
+                        border: "none",
+                        borderRadius: "8px",
+                        cursor: "pointer",
+                        transition: "all 0.3s",
+                      }}
+                    >
+                      🏳️ Abbandona
                     </button>
                   </div>
-                </div>
+                </>
+              )}
 
-                {/* Game Stats */}
+              {/* Voice Commands Help */}
+              {continuousListening && (
                 <div
                   style={{
-                    backgroundColor: "#1a1a1a",
+                    marginTop: "2rem",
                     padding: "1.5rem",
+                    backgroundColor: "rgba(139,92,246,0.1)",
                     borderRadius: "10px",
-                    marginBottom: "1.5rem",
-                    border: "2px solid #333",
+                    fontSize: "0.9rem",
+                    color: "#a0a0a0",
+                    border: "1px solid #8b5cf6",
                   }}
                 >
-                  <h4 style={{ color: "#8b5cf6", marginTop: 0 }}>
-                    📊 Statistiche
-                  </h4>
-                  <div
-                    style={{
-                      display: "grid",
-                      gridTemplateColumns: "1fr 1fr",
-                      gap: "1rem",
-                      color: "#a0a0a0",
-                    }}
-                  >
-                    <div>Tue mosse: {gameStats.playerMoves}</div>
-                    <div>Mosse motore: {gameStats.engineMoves}</div>
-                    <div>
-                      Tempo medio motore: {Math.round(gameStats.avgThinkTime)}ms
-                    </div>
-                    <div>Livello Motore: {selectedLevel}</div>
-                  </div>
+                  <strong style={{ color: "#8b5cf6" }}>
+                    🎤 Comandi Vocali Attivi:
+                  </strong>
+                  <ul style={{ margin: "0.5rem 0", paddingLeft: "1rem" }}>
+                    <li>Mosse: "e quattro", "cavallo f tre", "torre d uno"</li>
+                    <li>Arrocco: "arrocco corto", "arrocco lungo"</li>
+                    <li>Pezzi: re, regina, torre, alfiere, cavallo</li>
+                    <li>
+                      Comandi: "nuova partita", "abbandona", "nascondi
+                      scacchiera"
+                    </li>
+                    <li>Il microfono è sempre attivo durante la partita</li>
+                  </ul>
                 </div>
-
-                {/* Game Actions */}
-                <div style={{ display: "flex", gap: "0.5rem" }}>
-                  <button
-                    onClick={startNewGame}
-                    style={{
-                      flex: 1,
-                      padding: "1rem",
-                      backgroundColor: "#6b7280",
-                      color: "white",
-                      border: "none",
-                      borderRadius: "8px",
-                      cursor: "pointer",
-                      transition: "all 0.3s",
-                    }}
-                  >
-                    🔄 Nuova Partita
-                  </button>
-                  <button
-                    onClick={resignGame}
-                    style={{
-                      flex: 1,
-                      padding: "1rem",
-                      backgroundColor: "#dc2626",
-                      color: "white",
-                      border: "none",
-                      borderRadius: "8px",
-                      cursor: "pointer",
-                      transition: "all 0.3s",
-                    }}
-                  >
-                    🏳️ Abbandona
-                  </button>
-                </div>
-              </>
-            )}
-
-            {/* Voice Commands Help */}
-            {continuousListening && (
-              <div
-                style={{
-                  marginTop: "2rem",
-                  padding: "1.5rem",
-                  backgroundColor: "rgba(139,92,246,0.1)",
-                  borderRadius: "10px",
-                  fontSize: "0.9rem",
-                  color: "#a0a0a0",
-                  border: "1px solid #8b5cf6",
-                }}
-              >
-                <strong style={{ color: "#8b5cf6" }}>
-                  🎤 Comandi Vocali Attivi:
-                </strong>
-                <ul style={{ margin: "0.5rem 0", paddingLeft: "1rem" }}>
-                  <li>Mosse: "e quattro", "cavallo f tre", "torre d uno"</li>
-                  <li>Arrocco: "arrocco corto", "arrocco lungo"</li>
-                  <li>Pezzi: re, regina, torre, alfiere, cavallo</li>
-                  <li>
-                    Comandi: "nuova partita", "abbandona", "nascondi scacchiera"
-                  </li>
-                  <li>Il microfono è sempre attivo durante la partita</li>
-                </ul>
-              </div>
-            )}
+              )}
+            </div>
           </div>
         </div>
-      </div>
 
-      <style>{`
+        <style>{`
         @keyframes pulse {
           0% { opacity: 1; }
           50% { opacity: 0.5; }
@@ -1197,6 +1340,7 @@ export const ProfessionalEngineGame: React.FC<ProfessionalEngineGameProps> = ({
           100% { transform: rotate(360deg); }
         }
       `}</style>
-    </div>
+      </div>
+    </>
   );
 };
