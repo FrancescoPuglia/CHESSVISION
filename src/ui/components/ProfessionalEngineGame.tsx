@@ -32,7 +32,7 @@ export const ProfessionalEngineGame: React.FC<ProfessionalEngineGameProps> = ({
   const {} = useTranslation();
   const [gameState, gameActions] = useChessGame();
   const [engine, setEngine] = useState<ProfessionalStockfish | null>(null);
-  const [selectedLevel, setSelectedLevel] = useState('professional-1'); // Professional level default
+  const [selectedLevel, setSelectedLevel] = useState("professional-1"); // Professional level default
   const [isEngineThinking, setIsEngineThinking] = useState(false);
   const [gameStarted, setGameStarted] = useState(false);
   const [playerColor, setPlayerColor] = useState<"white" | "black">("white");
@@ -64,7 +64,9 @@ export const ProfessionalEngineGame: React.FC<ProfessionalEngineGameProps> = ({
 
     const initEngine = async () => {
       try {
+        console.log("🔧 Initializing Professional Stockfish...");
         await professionalStockfish.initialize();
+        console.log("✅ Professional Stockfish initialized successfully");
         setEngine(professionalStockfish);
         engineRef.current = professionalStockfish;
 
@@ -80,7 +82,8 @@ export const ProfessionalEngineGame: React.FC<ProfessionalEngineGameProps> = ({
           }
         });
       } catch (error) {
-        console.error("Failed to initialize professional engine:", error);
+        console.error("❌ Failed to initialize professional engine:", error);
+        console.log("🔄 Will use fallback mode");
       }
     };
 
@@ -475,12 +478,20 @@ export const ProfessionalEngineGame: React.FC<ProfessionalEngineGameProps> = ({
   const makeEngineMove = async () => {
     if (!engine || isEngineThinking) return;
 
+    console.log(`🤖 Engine making move at level: ${selectedLevel}`);
     setIsEngineThinking(true);
     const startTime = Date.now();
 
     try {
       const currentFen = gameState.game.getFen();
-      const engineMove = await engine.analyzePosition(currentFen, selectedLevel);
+      console.log(`🔍 Analyzing position: ${currentFen}`);
+      const engineMove = await engine.analyzePosition(
+        currentFen,
+        selectedLevel,
+      );
+      console.log(
+        `🎯 Engine suggests: ${engineMove.move} (depth: ${engineMove.depth}, elo: ${engineMove.elo})`,
+      );
 
       // Convert UCI to SAN
       const tempChess = gameState.game.clone();
@@ -685,7 +696,8 @@ export const ProfessionalEngineGame: React.FC<ProfessionalEngineGameProps> = ({
                       }}
                     >
                       <span style={{ color: "#a0a0a0" }}>
-                        Livello Attuale: {engine?.getLevelInfo(selectedLevel) || selectedLevel}
+                        Livello Attuale:{" "}
+                        {engine?.getLevelInfo(selectedLevel) || selectedLevel}
                       </span>
                     </div>
 
@@ -702,10 +714,29 @@ export const ProfessionalEngineGame: React.FC<ProfessionalEngineGameProps> = ({
                         const isSelected = selectedLevel === level.key;
 
                         const getLevelColor = (elo: number) => {
-                          if (elo >= 2200) return { bg: "#8b5cf6", border: "#a78bfa", glow: "147, 51, 234" };
-                          if (elo >= 1800) return { bg: "#3b82f6", border: "#60a5fa", glow: "59, 130, 246" };
-                          if (elo >= 1200) return { bg: "#10b981", border: "#34d399", glow: "16, 185, 129" };
-                          return { bg: "#6b7280", border: "#9ca3af", glow: "107, 114, 128" };
+                          if (elo >= 2200)
+                            return {
+                              bg: "#8b5cf6",
+                              border: "#a78bfa",
+                              glow: "147, 51, 234",
+                            };
+                          if (elo >= 1800)
+                            return {
+                              bg: "#3b82f6",
+                              border: "#60a5fa",
+                              glow: "59, 130, 246",
+                            };
+                          if (elo >= 1200)
+                            return {
+                              bg: "#10b981",
+                              border: "#34d399",
+                              glow: "16, 185, 129",
+                            };
+                          return {
+                            bg: "#6b7280",
+                            border: "#9ca3af",
+                            glow: "107, 114, 128",
+                          };
                         };
 
                         const colors = getLevelColor(level.elo);
@@ -716,7 +747,9 @@ export const ProfessionalEngineGame: React.FC<ProfessionalEngineGameProps> = ({
                             onClick={() => setSelectedLevel(level.key)}
                             style={{
                               padding: "1rem",
-                              backgroundColor: isSelected ? colors.bg : "#2d3142",
+                              backgroundColor: isSelected
+                                ? colors.bg
+                                : "#2d3142",
                               color: "white",
                               border: isSelected
                                 ? `2px solid ${colors.border}`
@@ -726,7 +759,9 @@ export const ProfessionalEngineGame: React.FC<ProfessionalEngineGameProps> = ({
                               fontSize: "0.85rem",
                               fontWeight: isSelected ? "bold" : "normal",
                               transition: "all 0.3s ease",
-                              transform: isSelected ? "scale(1.05)" : "scale(1)",
+                              transform: isSelected
+                                ? "scale(1.05)"
+                                : "scale(1)",
                               boxShadow: isSelected
                                 ? `0 4px 20px rgba(${colors.glow}, 0.4)`
                                 : "0 2px 8px rgba(0,0,0,0.2)",
@@ -734,25 +769,45 @@ export const ProfessionalEngineGame: React.FC<ProfessionalEngineGameProps> = ({
                             }}
                             onMouseEnter={(e) => {
                               if (!isSelected) {
-                                e.currentTarget.style.backgroundColor = "#3d4663";
+                                e.currentTarget.style.backgroundColor =
+                                  "#3d4663";
                                 e.currentTarget.style.transform = "scale(1.02)";
                               }
                             }}
                             onMouseLeave={(e) => {
                               if (!isSelected) {
-                                e.currentTarget.style.backgroundColor = "#2d3142";
+                                e.currentTarget.style.backgroundColor =
+                                  "#2d3142";
                                 e.currentTarget.style.transform = "scale(1)";
                               }
                             }}
                           >
-                            <div style={{ fontSize: "1rem", marginBottom: "0.3rem", fontWeight: "600" }}>
+                            <div
+                              style={{
+                                fontSize: "1rem",
+                                marginBottom: "0.3rem",
+                                fontWeight: "600",
+                              }}
+                            >
                               {level.name}
                             </div>
-                            <div style={{ fontSize: "0.75rem", opacity: 0.9, color: "#ffd700" }}>
+                            <div
+                              style={{
+                                fontSize: "0.75rem",
+                                opacity: 0.9,
+                                color: "#ffd700",
+                              }}
+                            >
                               {level.elo} ELO
                             </div>
                             {level.elo >= 2200 && (
-                              <div style={{ fontSize: "0.65rem", opacity: 0.7, marginTop: "0.2rem" }}>
+                              <div
+                                style={{
+                                  fontSize: "0.65rem",
+                                  opacity: 0.7,
+                                  marginTop: "0.2rem",
+                                }}
+                              >
                                 🏆 Professionale
                               </div>
                             )}
@@ -912,32 +967,30 @@ export const ProfessionalEngineGame: React.FC<ProfessionalEngineGameProps> = ({
                     </button>
                   </div>
 
-                  {!boardHidden && (
-                    <div
-                      style={{
-                        backgroundColor: "#1a1a1a",
-                        padding: "1rem",
-                        borderRadius: "10px",
-                        display: "flex",
-                        justifyContent: "center",
+                  <div
+                    style={{
+                      backgroundColor: "#1a1a1a",
+                      padding: "1rem",
+                      borderRadius: "10px",
+                      display: "flex",
+                      justifyContent: "center",
+                    }}
+                  >
+                    <InteractiveChessBoard
+                      position={gameState.game.getBoard()}
+                      isVisible={!boardHidden}
+                      game={gameState.game}
+                      onMove={(move) => {
+                        try {
+                          gameActions.makeMove(move.san);
+                        } catch (error) {
+                          console.error("Invalid move:", error);
+                        }
                       }}
-                    >
-                      <InteractiveChessBoard
-                        position={gameState.game.getBoard()}
-                        isVisible={true}
-                        game={gameState.game}
-                        onMove={(move) => {
-                          try {
-                            gameActions.makeMove(move.san);
-                          } catch (error) {
-                            console.error("Invalid move:", error);
-                          }
-                        }}
-                        allowMoves={!isEngineThinking && !gameState.isGameOver}
-                        showCoordinates={true}
-                      />
-                    </div>
-                  )}
+                      allowMoves={!isEngineThinking && !gameState.isGameOver}
+                      showCoordinates={true}
+                    />
+                  </div>
                 </div>
               )}
             </div>
