@@ -671,7 +671,14 @@ export class StockfishNNUE {
 
   private calculateMaterialAfterMove(_chess: Chess, move: any): number {
     // Calcola il guadagno materiale netto
-    const pieceValues: Record<string, number> = { p: 1, n: 3, b: 3, r: 5, q: 9, k: 0 };
+    const pieceValues: Record<string, number> = {
+      p: 1,
+      n: 3,
+      b: 3,
+      r: 5,
+      q: 9,
+      k: 0,
+    };
 
     let gain = 0;
     if (move.captured) {
@@ -687,7 +694,13 @@ export class StockfishNNUE {
 
     // Materiale
     if (move.captured) {
-      const pieceValues: Record<string, number> = { p: 1, n: 3, b: 3, r: 5, q: 9 };
+      const pieceValues: Record<string, number> = {
+        p: 1,
+        n: 3,
+        b: 3,
+        r: 5,
+        q: 9,
+      };
       value += pieceValues[move.captured.toLowerCase()] || 0;
     }
 
@@ -859,7 +872,13 @@ export class StockfishNNUE {
 
     // Fattore materiale
     if (move.captured) {
-      const pieceValues: Record<string, number> = { p: 100, n: 300, b: 300, r: 500, q: 900 };
+      const pieceValues: Record<string, number> = {
+        p: 100,
+        n: 300,
+        b: 300,
+        r: 500,
+        q: 900,
+      };
       evaluation += pieceValues[move.captured.toLowerCase()] || 0;
     }
 
