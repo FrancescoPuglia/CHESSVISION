@@ -36,7 +36,8 @@
       "Bash(wget:*)",
       "Bash(for piece in wK wQ wR wB wN wP bK bQ bR bB bN bP)",
       "Bash(do wget:*)",
-      "Bash(done)"
+      "Bash(done)",
+      "Bash(npm run preview:*)"
     ],
     "deny": []
   }

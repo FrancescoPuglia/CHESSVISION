@@ -136,7 +136,7 @@ export const InteractiveChessBoard: React.FC<InteractiveChessBoardProps> = ({
     return isLight ? BOARD_COLORS.light : BOARD_COLORS.dark;
   };
 
-  if (!isVisible) {
+  if (isVisible) {
     return (
       <div
         className={`chess-board-hidden ${className}`}
