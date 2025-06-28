@@ -2,12 +2,12 @@
 /* eslint-disable no-unused-vars, react-hooks/exhaustive-deps, react/no-unescaped-entities, no-empty-pattern */
 import React, { useState, useEffect, useRef, useCallback } from "react";
 import {
-  StockfishAdvanced,
+  LichessStockfishService,
   LICHESS_LEVELS,
-} from "@services/engine/StockfishAdvanced";
+} from "@services/engine/LichessStockfishService";
 import { useChessGame } from "@ui/hooks/useChessGame";
 import { SpeechService } from "@services/speech/SpeechService";
-import { ChessgroundBoard } from "./ChessgroundBoard";
+import { InteractiveChessBoard } from "./InteractiveChessBoard";
 import { useTranslation } from "@core/i18n/useTranslation";
 import { Chess } from "chess.js";
 
@@ -31,7 +31,7 @@ export const ProfessionalEngineGame: React.FC<ProfessionalEngineGameProps> = ({
 }) => {
   const {} = useTranslation();
   const [gameState, gameActions] = useChessGame();
-  const [engine, setEngine] = useState<StockfishAdvanced | null>(null);
+  const [engine, setEngine] = useState<LichessStockfishService | null>(null);
   const [selectedLevel, setSelectedLevel] = useState(6); // Lichess Level 1-8 (Default: ~1900 ELO)
   const [isEngineThinking, setIsEngineThinking] = useState(false);
   const [gameStarted, setGameStarted] = useState(false);
@@ -49,7 +49,7 @@ export const ProfessionalEngineGame: React.FC<ProfessionalEngineGameProps> = ({
     accuracy: 100,
   });
 
-  const engineRef = useRef<StockfishAdvanced | null>(null);
+  const engineRef = useRef<LichessStockfishService | null>(null);
   const recognitionRef = useRef<any>(null);
   const isProcessingVoice = useRef(false);
   // const voiceQueueRef = useRef<string[]>([]);
@@ -62,7 +62,7 @@ export const ProfessionalEngineGame: React.FC<ProfessionalEngineGameProps> = ({
   useEffect(() => {
     if (!isVisible) return;
 
-    const stockfish = new StockfishAdvanced(selectedLevel);
+    const stockfish = new LichessStockfishService(selectedLevel);
     setEngine(stockfish);
     engineRef.current = stockfish;
 
@@ -512,10 +512,7 @@ export const ProfessionalEngineGame: React.FC<ProfessionalEngineGameProps> = ({
         }));
 
         if (isVoiceEnabled && speechService) {
-          await speechService.speak(
-            `Motore gioca: ${san}. ` +
-              `Confidenza: ${Math.round((engineMove.confidence || 0) * 100)}%`,
-          );
+          await speechService.speak(`Motore gioca: ${san}`);
         }
       } else {
         console.warn("Engine move failed, no valid SAN generated");
@@ -681,7 +678,9 @@ export const ProfessionalEngineGame: React.FC<ProfessionalEngineGameProps> = ({
                         Livello: {selectedLevel}
                       </span>
                       <span style={{ color: "#ffd700" }}>
-                        {engine?.getLevelInfo() || ""}
+                        {LICHESS_LEVELS[selectedLevel]?.elo
+                          ? `${LICHESS_LEVELS[selectedLevel].elo} ELO`
+                          : ""}
                       </span>
                     </div>
 
@@ -915,20 +914,19 @@ export const ProfessionalEngineGame: React.FC<ProfessionalEngineGameProps> = ({
                         justifyContent: "center",
                       }}
                     >
-                      <ChessgroundBoard
+                      <InteractiveChessBoard
                         position={gameState.game.getBoard()}
                         isVisible={true}
-                        onMove={(from, to) => {
-                          // Convert from/to notation to SAN notation
+                        game={gameState.game}
+                        onMove={(move) => {
                           try {
-                            const moveString = `${from}${to}`;
-                            gameActions.makeMove(moveString);
+                            gameActions.makeMove(move.san);
                           } catch (error) {
                             console.error("Invalid move:", error);
                           }
                         }}
-                        orientation={playerColor}
-                        size={500}
+                        allowMoves={!isEngineThinking && !gameState.isGameOver}
+                        showCoordinates={true}
                       />
                     </div>
                   )}

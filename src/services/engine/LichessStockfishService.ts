@@ -26,75 +26,75 @@ export interface LichessLevelSettings {
 export const LICHESS_LEVELS: Record<number, LichessLevelSettings> = {
   1: {
     level: 1,
-    elo: 400,
-    skillLevel: -9,
-    depth: 5,
-    moveTime: 50,
-    error: 50,
-    contempt: -90,
+    elo: 1800,
+    skillLevel: 10,
+    depth: 8,
+    moveTime: 500,
+    error: 10,
+    contempt: 0,
   },
   2: {
     level: 2,
-    elo: 500,
-    skillLevel: -5,
-    depth: 5,
-    moveTime: 100,
-    error: 35,
-    contempt: -70,
+    elo: 2000,
+    skillLevel: 12,
+    depth: 10,
+    moveTime: 1000,
+    error: 8,
+    contempt: 0,
   },
   3: {
     level: 3,
-    elo: 800,
-    skillLevel: -1,
-    depth: 5,
-    moveTime: 150,
-    error: 20,
-    contempt: -50,
+    elo: 2200,
+    skillLevel: 14,
+    depth: 12,
+    moveTime: 1500,
+    error: 6,
+    contempt: 0,
   },
   4: {
     level: 4,
-    elo: 1100,
-    skillLevel: 3,
-    depth: 5,
-    moveTime: 200,
-    error: 15,
-    contempt: -30,
+    elo: 2400,
+    skillLevel: 16,
+    depth: 14,
+    moveTime: 2000,
+    error: 4,
+    contempt: 0,
   },
   5: {
     level: 5,
-    elo: 1500,
-    skillLevel: 7,
-    depth: 5,
-    moveTime: 300,
-    error: 10,
-    contempt: -10,
+    elo: 2600,
+    skillLevel: 18,
+    depth: 16,
+    moveTime: 3000,
+    error: 2,
+    contempt: 0,
   },
   6: {
     level: 6,
-    elo: 1900,
-    skillLevel: 11,
-    depth: 8,
-    moveTime: 400,
-    error: 5,
-    contempt: 10,
+    elo: 2800,
+    skillLevel: 19,
+    depth: 18,
+    moveTime: 4000,
+    error: 1,
+    contempt: 0,
   },
   7: {
     level: 7,
-    elo: 2300,
-    skillLevel: 15,
-    depth: 13,
-    moveTime: 500,
-    error: 2,
-    contempt: 30,
+    elo: 3000,
+    skillLevel: 20,
+    depth: 20,
+    moveTime: 5000,
+    error: 0,
+    contempt: 0,
   },
   8: {
     level: 8,
-    elo: 2700,
+    elo: 3200,
     skillLevel: 20,
-    depth: 22,
-    moveTime: 1000,
+    depth: 25,
+    moveTime: 10000,
     error: 0,
-    contempt: 50,
+    contempt: 0,
   },
 };
 
@@ -227,6 +227,9 @@ export class LichessStockfishService {
 
   private handleEngineInfo(line: string): void {
     // Parse evaluation info for stronger levels
+    if (this.evaluationCallback) {
+      this.evaluationCallback(line);
+    }
     if (line.includes("score cp")) {
       const match = line.match(/score cp (-?\d+)/);
       if (match) {
@@ -338,6 +341,20 @@ export class LichessStockfishService {
       this.readyCallback = callback;
     }
   }
+
+  public getBestMove(fen: string): Promise<EngineMove> {
+    return new Promise((resolve) => {
+      const game = new Chess(fen);
+      this.findBestMove(game, resolve);
+    });
+  }
+
+  public onEvaluation(callback: (info: string) => void): void {
+    // Store evaluation callback - would be called in handleEngineInfo
+    this.evaluationCallback = callback;
+  }
+
+  private evaluationCallback: ((info: string) => void) | null = null;
 
   public destroy(): void {
     if (this.worker) {
