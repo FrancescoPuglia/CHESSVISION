@@ -916,7 +916,7 @@ export const ProfessionalEngineGame: React.FC<ProfessionalEngineGameProps> = ({
                     >
                       <InteractiveChessBoard
                         position={gameState.game.getBoard()}
-                        isVisible={true}
+                        isVisible={false}
                         game={gameState.game}
                         onMove={(move) => {
                           try {
