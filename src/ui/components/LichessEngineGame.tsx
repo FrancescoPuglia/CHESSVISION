@@ -1,6 +1,10 @@
 // src/ui/components/LichessEngineGame.tsx
 import React, { useState, useEffect, useCallback } from "react";
-import { lichessEngine, LichessGameState, LICHESS_LEVELS } from "@services/engine/LichessEngineAPI";
+import {
+  lichessEngine,
+  LichessGameState,
+  LICHESS_LEVELS,
+} from "@services/engine/LichessEngineAPI";
 import { useChessGame } from "@ui/hooks/useChessGame";
 import { InteractiveChessBoard } from "./InteractiveChessBoard";
 import { Chess } from "chess.js";
@@ -27,24 +31,23 @@ export const LichessEngineGame: React.FC<LichessEngineGameProps> = ({
   const startGame = async () => {
     setIsConnecting(true);
     setStatus("🔄 Connessione a Lichess...");
-    
+
     try {
       // Crea partita su Lichess
       const gameId = await lichessEngine.createGame(selectedLevel, playerColor);
       setLichessGameId(gameId);
-      
+
       // Registra callback per aggiornamenti
       lichessEngine.onGameStateUpdate((state: LichessGameState) => {
         handleLichessUpdate(state);
       });
-      
+
       setGameStarted(true);
       setIsConnecting(false);
       setStatus("✅ Connesso! Gioca contro Stockfish VERO di Lichess");
-      
+
       // Reset scacchiera locale
       gameActions.resetGame();
-      
     } catch (error) {
       console.error("Failed to start Lichess game:", error);
       setStatus("❌ Errore connessione Lichess");
@@ -53,50 +56,56 @@ export const LichessEngineGame: React.FC<LichessEngineGameProps> = ({
   };
 
   // Gestisce aggiornamenti da Lichess
-  const handleLichessUpdate = useCallback((state: LichessGameState) => {
-    console.log("📥 Lichess update:", state);
-    
-    // Aggiorna posizione locale
-    const chess = new Chess();
-    chess.load(state.fen);
-    
-    // Se Stockfish ha mosso, aggiorna la nostra scacchiera
-    const lastEngineMove = lichessEngine.getLastEngineMove(state.moves);
-    if (lastEngineMove && !state.isMyTurn) {
-      // Converti UCI in oggetto mossa
-      const from = lastEngineMove.substring(0, 2);
-      const to = lastEngineMove.substring(2, 4);
-      const promotion = lastEngineMove.substring(4, 5);
-      
-      console.log(`🤖 Stockfish moved: ${lastEngineMove}`);
-      
-      // Applica mossa sulla scacchiera locale
-      gameActions.makeMove(`${from}${to}${promotion}`);
-    }
-    
-    // Aggiorna stato partita
-    if (state.status !== "started" && state.status !== "created") {
-      setStatus(`🏁 Partita terminata: ${state.status}`);
-      setGameStarted(false);
-    }
-  }, [gameActions]);
+  const handleLichessUpdate = useCallback(
+    (state: LichessGameState) => {
+      console.log("📥 Lichess update:", state);
+
+      // Aggiorna posizione locale
+      const chess = new Chess();
+      chess.load(state.fen);
+
+      // Se Stockfish ha mosso, aggiorna la nostra scacchiera
+      const lastEngineMove = lichessEngine.getLastEngineMove(state.moves);
+      if (lastEngineMove && !state.isMyTurn) {
+        // Converti UCI in oggetto mossa
+        const from = lastEngineMove.substring(0, 2);
+        const to = lastEngineMove.substring(2, 4);
+        const promotion = lastEngineMove.substring(4, 5);
+
+        console.log(`🤖 Stockfish moved: ${lastEngineMove}`);
+
+        // Applica mossa sulla scacchiera locale
+        gameActions.makeMove(`${from}${to}${promotion}`);
+      }
+
+      // Aggiorna stato partita
+      if (state.status !== "started" && state.status !== "created") {
+        setStatus(`🏁 Partita terminata: ${state.status}`);
+        setGameStarted(false);
+      }
+    },
+    [gameActions],
+  );
 
   // Gestisce mosse del giocatore
-  const handlePlayerMove = useCallback(async (move: { from: string; to: string; san: string }) => {
-    if (!gameStarted || !lichessGameId) return;
-    
-    // Invia mossa a Lichess in formato UCI
-    const uciMove = `${move.from}${move.to}`;
-    console.log(`📤 Sending move to Lichess: ${uciMove}`);
-    
-    const success = await lichessEngine.makeMove(uciMove);
-    
-    if (!success) {
-      // Annulla mossa se Lichess la rifiuta
-      gameActions.undoMove();
-      setStatus("❌ Mossa non valida");
-    }
-  }, [gameStarted, lichessGameId, gameActions]);
+  const handlePlayerMove = useCallback(
+    async (move: { from: string; to: string; san: string }) => {
+      if (!gameStarted || !lichessGameId) return;
+
+      // Invia mossa a Lichess in formato UCI
+      const uciMove = `${move.from}${move.to}`;
+      console.log(`📤 Sending move to Lichess: ${uciMove}`);
+
+      const success = await lichessEngine.makeMove(uciMove);
+
+      if (!success) {
+        // Annulla mossa se Lichess la rifiuta
+        gameActions.undoMove();
+        setStatus("❌ Mossa non valida");
+      }
+    },
+    [gameStarted, lichessGameId, gameActions],
+  );
 
   // Cleanup
   useEffect(() => {
@@ -194,7 +203,9 @@ export const LichessEngineGame: React.FC<LichessEngineGameProps> = ({
                     style={{
                       padding: "1rem",
                       backgroundColor:
-                        selectedLevel === parseInt(level) ? "#81b64c" : "#2a2a2a",
+                        selectedLevel === parseInt(level)
+                          ? "#81b64c"
+                          : "#2a2a2a",
                       color: "white",
                       border: "none",
                       borderRadius: "8px",
@@ -215,15 +226,20 @@ export const LichessEngineGame: React.FC<LichessEngineGameProps> = ({
 
             {/* Selezione colore */}
             <div style={{ marginBottom: "2rem" }}>
-              <h3 style={{ color: "#fff", marginBottom: "1rem" }}>
-                Gioca con
-              </h3>
-              <div style={{ display: "flex", gap: "1rem", justifyContent: "center" }}>
+              <h3 style={{ color: "#fff", marginBottom: "1rem" }}>Gioca con</h3>
+              <div
+                style={{
+                  display: "flex",
+                  gap: "1rem",
+                  justifyContent: "center",
+                }}
+              >
                 <button
                   onClick={() => setPlayerColor("white")}
                   style={{
                     padding: "1rem 2rem",
-                    backgroundColor: playerColor === "white" ? "#f0f0f0" : "#2a2a2a",
+                    backgroundColor:
+                      playerColor === "white" ? "#f0f0f0" : "#2a2a2a",
                     color: playerColor === "white" ? "#000" : "#fff",
                     border: "none",
                     borderRadius: "8px",
@@ -236,7 +252,8 @@ export const LichessEngineGame: React.FC<LichessEngineGameProps> = ({
                   onClick={() => setPlayerColor("black")}
                   style={{
                     padding: "1rem 2rem",
-                    backgroundColor: playerColor === "black" ? "#333" : "#2a2a2a",
+                    backgroundColor:
+                      playerColor === "black" ? "#333" : "#2a2a2a",
                     color: "#fff",
                     border: "2px solid #666",
                     borderRadius: "8px",
@@ -287,7 +304,8 @@ export const LichessEngineGame: React.FC<LichessEngineGameProps> = ({
               }}
             >
               <div style={{ color: "#fff" }}>
-                <strong>Stockfish Livello {selectedLevel}</strong> ({LICHESS_LEVELS[selectedLevel].name})
+                <strong>Stockfish Livello {selectedLevel}</strong> (
+                {LICHESS_LEVELS[selectedLevel].name})
               </div>
               <div style={{ display: "flex", gap: "1rem" }}>
                 <button

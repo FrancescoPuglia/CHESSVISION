@@ -2,7 +2,7 @@
 /**
  * 🎯 LICHESS ENGINE API - MOTORI VERI E FORTI
  * Usa l'API di Lichess per giocare contro Stockfish REALE
- * 
+ *
  * Vantaggi:
  * - Stockfish VERO di Lichess (non simulazioni)
  * - 8 livelli di difficoltà reali (1-8)
@@ -22,13 +22,29 @@ export interface LichessGameState {
   gameId: string;
   fen: string;
   moves: string;
-  status: "created" | "started" | "aborted" | "mate" | "resign" | "stalemate" | "timeout" | "draw" | "outoftime" | "cheat" | "noStart" | "unknownFinish" | "variantEnd";
+  status:
+    | "created"
+    | "started"
+    | "aborted"
+    | "mate"
+    | "resign"
+    | "stalemate"
+    | "timeout"
+    | "draw"
+    | "outoftime"
+    | "cheat"
+    | "noStart"
+    | "unknownFinish"
+    | "variantEnd";
   winner?: "white" | "black";
   isMyTurn: boolean;
 }
 
 // Livelli Lichess ufficiali (1-8)
-export const LICHESS_LEVELS: Record<number, { name: string; strength: number }> = {
+export const LICHESS_LEVELS: Record<
+  number,
+  { name: string; strength: number }
+> = {
   1: { name: "Livello 1 (800 ELO)", strength: 1 },
   2: { name: "Livello 2 (1100 ELO)", strength: 2 },
   3: { name: "Livello 3 (1400 ELO)", strength: 3 },
@@ -44,13 +60,16 @@ export class LichessEngineAPI {
   private eventSource: EventSource | null = null;
   private playerColor: "white" | "black" = "white";
   private gameStateCallback: ((state: LichessGameState) => void) | null = null;
-  
+
   /**
    * 🚀 CREA UNA NUOVA PARTITA CONTRO STOCKFISH DI LICHESS
    */
-  async createGame(level: number = 4, color: "white" | "black" | "random" = "white"): Promise<string> {
+  async createGame(
+    level: number = 4,
+    color: "white" | "black" | "random" = "white",
+  ): Promise<string> {
     console.log(`🎮 Creating Lichess game vs Stockfish level ${level}...`);
-    
+
     try {
       // Challenge AI endpoint di Lichess
       const response = await fetch("https://lichess.org/api/challenge/ai", {
@@ -72,12 +91,14 @@ export class LichessEngineAPI {
       const data = await response.json();
       this.currentGameId = data.id || null;
       this.playerColor = data.color === "white" ? "white" : "black";
-      
-      console.log(`✅ Game created! ID: ${this.currentGameId}, You play: ${this.playerColor}`);
-      
+
+      console.log(
+        `✅ Game created! ID: ${this.currentGameId}, You play: ${this.playerColor}`,
+      );
+
       // Inizia a ricevere eventi della partita
       this.startGameStream();
-      
+
       return this.currentGameId!; // We know it's not null here
     } catch (error) {
       console.error("❌ Failed to create Lichess game:", error);
@@ -90,11 +111,11 @@ export class LichessEngineAPI {
    */
   private startGameStream(): void {
     if (!this.currentGameId) return;
-    
+
     const streamUrl = `https://lichess.org/api/board/game/stream/${this.currentGameId}`;
-    
+
     this.eventSource = new EventSource(streamUrl);
-    
+
     this.eventSource.onmessage = (event) => {
       if (event.data) {
         try {
@@ -133,7 +154,7 @@ export class LichessEngineAPI {
    */
   private handleGameState(state: any): void {
     const chess = new Chess();
-    
+
     // Applica tutte le mosse
     if (state.moves) {
       const moves = state.moves.split(" ");
@@ -143,11 +164,11 @@ export class LichessEngineAPI {
           const from = move.substring(0, 2);
           const to = move.substring(2, 4);
           const promotion = move.substring(4, 5);
-          
+
           chess.move({
             from,
             to,
-            promotion: promotion || undefined
+            promotion: promotion || undefined,
           });
         }
       }
@@ -163,7 +184,11 @@ export class LichessEngineAPI {
     };
 
     // Se è il turno di Stockfish e non ci sono ancora mosse
-    if (!this.isMyTurn(chess, state.moves) && !state.moves && this.playerColor === "black") {
+    if (
+      !this.isMyTurn(chess, state.moves) &&
+      !state.moves &&
+      this.playerColor === "black"
+    ) {
       console.log("⏳ Waiting for Stockfish's first move...");
     }
 
@@ -173,8 +198,12 @@ export class LichessEngineAPI {
     }
 
     // Se la partita è finita
-    if (["mate", "resign", "stalemate", "timeout", "draw"].includes(state.status)) {
-      console.log(`🏁 Game ended: ${state.status}${state.winner ? `, winner: ${state.winner}` : ""}`);
+    if (
+      ["mate", "resign", "stalemate", "timeout", "draw"].includes(state.status)
+    ) {
+      console.log(
+        `🏁 Game ended: ${state.status}${state.winner ? `, winner: ${state.winner}` : ""}`,
+      );
       this.cleanup();
     }
   }
@@ -184,8 +213,10 @@ export class LichessEngineAPI {
    */
   private isMyTurn(chess: Chess, _moves: string): boolean {
     const turn = chess.turn();
-    return (turn === "w" && this.playerColor === "white") || 
-           (turn === "b" && this.playerColor === "black");
+    return (
+      (turn === "w" && this.playerColor === "white") ||
+      (turn === "b" && this.playerColor === "black")
+    );
   }
 
   /**
@@ -203,7 +234,7 @@ export class LichessEngineAPI {
         `https://lichess.org/api/board/game/${this.currentGameId}/move/${move}`,
         {
           method: "POST",
-        }
+        },
       );
 
       if (!response.ok) {
@@ -225,14 +256,15 @@ export class LichessEngineAPI {
    */
   getLastEngineMove(moves: string): string | null {
     if (!moves) return null;
-    
+
     const moveList = moves.split(" ");
     const lastMove = moveList[moveList.length - 1];
-    
+
     // Verifica che sia una mossa del motore
-    const isEngineTurn = (moveList.length % 2 === 1 && this.playerColor === "black") ||
-                        (moveList.length % 2 === 0 && this.playerColor === "white");
-    
+    const isEngineTurn =
+      (moveList.length % 2 === 1 && this.playerColor === "black") ||
+      (moveList.length % 2 === 0 && this.playerColor === "white");
+
     return isEngineTurn ? lastMove : null;
   }
 
@@ -247,7 +279,9 @@ export class LichessEngineAPI {
    * 🎯 OTTIENI URL PARTITA SU LICHESS
    */
   getGameUrl(): string | null {
-    return this.currentGameId ? `https://lichess.org/${this.currentGameId}` : null;
+    return this.currentGameId
+      ? `https://lichess.org/${this.currentGameId}`
+      : null;
   }
 
   /**
@@ -261,7 +295,7 @@ export class LichessEngineAPI {
         `https://lichess.org/api/board/game/${this.currentGameId}/resign`,
         {
           method: "POST",
-        }
+        },
       );
       console.log("🏳️ Game resigned");
     } catch (error) {
