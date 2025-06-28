@@ -353,12 +353,12 @@ export class LichessStockfishService {
   public getBestMove(fen: string): Promise<EngineMove> {
     return new Promise((resolve) => {
       const game = new Chess(fen);
-      
+
       if (this.isFallbackMode) {
         this.generateFallbackMove(game, resolve);
         return;
       }
-      
+
       this.findBestMove(game, resolve);
     });
   }
@@ -381,47 +381,57 @@ export class LichessStockfishService {
     this.currentGame = null;
   }
 
-  private generateFallbackMove(game: Chess, callback: (move: EngineMove) => void): void {
+  private generateFallbackMove(
+    game: Chess,
+    callback: (move: EngineMove) => void,
+  ): void {
     console.log("Generating fallback move for level", this.currentLevel);
-    
-    setTimeout(() => {
-      const moves = game.moves({ verbose: true });
-      if (moves.length === 0) {
-        console.warn("No legal moves available");
-        return;
-      }
 
-      // Select move based on level (higher levels = slightly better moves)
-      let selectedMove;
-      if (this.currentLevel <= 2) {
-        // Truly random for weak levels
-        selectedMove = moves[Math.floor(Math.random() * moves.length)];
-      } else if (this.currentLevel <= 5) {
-        // Prefer center and development moves
-        const centerMoves = moves.filter(move => 
-          ['e4', 'e5', 'd4', 'd5', 'Nf3', 'Nc3', 'Bc4', 'Bb5'].includes(move.san)
-        );
-        selectedMove = centerMoves.length > 0 && Math.random() > 0.3 
-          ? centerMoves[Math.floor(Math.random() * centerMoves.length)]
-          : moves[Math.floor(Math.random() * moves.length)];
-      } else {
-        // Avoid obviously bad moves
-        const goodMoves = moves.filter(move => !move.san.includes('??'));
-        selectedMove = goodMoves.length > 0 
-          ? goodMoves[Math.floor(Math.random() * goodMoves.length)]
-          : moves[Math.floor(Math.random() * moves.length)];
-      }
+    setTimeout(
+      () => {
+        const moves = game.moves({ verbose: true });
+        if (moves.length === 0) {
+          console.warn("No legal moves available");
+          return;
+        }
 
-      const uciMove = `${selectedMove.from}${selectedMove.to}${selectedMove.promotion || ''}`;
-      const engineMove: EngineMove = {
-        move: uciMove,
-        depth: this.settings.depth,
-        time: this.settings.moveTime,
-      };
+        // Select move based on level (higher levels = slightly better moves)
+        let selectedMove;
+        if (this.currentLevel <= 2) {
+          // Truly random for weak levels
+          selectedMove = moves[Math.floor(Math.random() * moves.length)];
+        } else if (this.currentLevel <= 5) {
+          // Prefer center and development moves
+          const centerMoves = moves.filter((move) =>
+            ["e4", "e5", "d4", "d5", "Nf3", "Nc3", "Bc4", "Bb5"].includes(
+              move.san,
+            ),
+          );
+          selectedMove =
+            centerMoves.length > 0 && Math.random() > 0.3
+              ? centerMoves[Math.floor(Math.random() * centerMoves.length)]
+              : moves[Math.floor(Math.random() * moves.length)];
+        } else {
+          // Avoid obviously bad moves
+          const goodMoves = moves.filter((move) => !move.san.includes("??"));
+          selectedMove =
+            goodMoves.length > 0
+              ? goodMoves[Math.floor(Math.random() * goodMoves.length)]
+              : moves[Math.floor(Math.random() * moves.length)];
+        }
 
-      console.log("Fallback engine move:", engineMove);
-      callback(engineMove);
-    }, Math.min(this.settings.moveTime, 1000)); // Max 1 second delay
+        const uciMove = `${selectedMove.from}${selectedMove.to}${selectedMove.promotion || ""}`;
+        const engineMove: EngineMove = {
+          move: uciMove,
+          depth: this.settings.depth,
+          time: this.settings.moveTime,
+        };
+
+        console.log("Fallback engine move:", engineMove);
+        callback(engineMove);
+      },
+      Math.min(this.settings.moveTime, 1000),
+    ); // Max 1 second delay
   }
 
   private sendCommand(command: string): void {
