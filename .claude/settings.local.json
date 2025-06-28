@@ -39,7 +39,9 @@
       "Bash(done)",
       "Bash(npm run preview:*)",
       "Bash(node:*)",
-      "Bash(npm --version)"
+      "Bash(npm --version)",
+      "Bash(git config:*)",
+      "Bash(npx vitest run:*)"
     ],
     "deny": []
   }

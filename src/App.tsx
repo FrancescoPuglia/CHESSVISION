@@ -12,6 +12,7 @@ import { PgnParser, PgnCollection } from "./core/pgn/PgnParser";
 import { FnsParser } from "./core/fns/FnsParser";
 import { EngineGame } from "./ui/components/EngineGame";
 import { ProfessionalEngineGame } from "./ui/components/ProfessionalEngineGame";
+import { LichessEngineGame } from "./ui/components/LichessEngineGame";
 import { StudyMode } from "./ui/components/StudyMode";
 import { TacticalMode } from "./ui/components/TacticalMode";
 import { ReadMode } from "./ui/components/ReadMode";
@@ -42,6 +43,7 @@ function App() {
   const [isTimerActive, setIsTimerActive] = useState(false);
   const [showEngineGame, setShowEngineGame] = useState(false);
   const [showProfessionalEngine, setShowProfessionalEngine] = useState(false);
+  const [showLichessEngine, setShowLichessEngine] = useState(false);
   const [showStudyMode, setShowStudyMode] = useState(false);
   const [showTacticalMode, setShowTacticalMode] = useState(false);
   const [showReadMode, setShowReadMode] = useState(false);
@@ -946,6 +948,42 @@ function App() {
               }}
             >
               🏆 MOTORE PROFESSIONALE (ELO 1200-3000)
+            </button>
+
+            <button
+              onClick={() => setShowLichessEngine(true)}
+              style={{
+                width: "100%",
+                marginTop: "0.5rem",
+                padding: "1rem",
+                background: "linear-gradient(135deg, #81b64c 0%, #5e8d3a 100%)",
+                color: "white",
+                border: "2px solid #a3d977",
+                borderRadius: "8px",
+                cursor: "pointer",
+                fontSize: "1rem",
+                fontWeight: "bold",
+                boxShadow: "0 4px 15px rgba(129, 182, 76, 0.4)",
+                transition: "all 0.3s",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                gap: "0.5rem",
+              }}
+              onMouseEnter={(e) => {
+                e.currentTarget.style.transform = "scale(1.05)";
+                e.currentTarget.style.boxShadow =
+                  "0 6px 20px rgba(129, 182, 76, 0.6)";
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.transform = "scale(1)";
+                e.currentTarget.style.boxShadow =
+                  "0 4px 15px rgba(129, 182, 76, 0.4)";
+              }}
+            >
+              <span style={{ fontSize: "1.2rem" }}>♞</span>
+              LICHESS STOCKFISH VERO (800-2850 ELO)
+              <span style={{ fontSize: "0.8rem", opacity: 0.9 }}>ONLINE</span>
             </button>
 
             {currentCollection && currentCollection.studies.length > 0 && (
@@ -2137,6 +2175,14 @@ function App() {
         isVisible={showVoiceSettings}
         onClose={() => setShowVoiceSettings(false)}
       />
+
+      {/* Lichess Engine Game - REAL STOCKFISH */}
+      {showLichessEngine && (
+        <LichessEngineGame
+          isVisible={showLichessEngine}
+          onClose={() => setShowLichessEngine(false)}
+        />
+      )}
 
       {/* Blind Mode Panel - ACCESSIBILITY SYSTEM */}
       {blindModeService.current && (
