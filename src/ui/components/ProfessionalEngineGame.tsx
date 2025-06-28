@@ -2,9 +2,9 @@
 /* eslint-disable no-unused-vars, react-hooks/exhaustive-deps, react/no-unescaped-entities, no-empty-pattern */
 import React, { useState, useEffect, useRef, useCallback } from "react";
 import {
-  LichessStockfishService,
-  LICHESS_LEVELS,
-} from "@services/engine/LichessStockfishService";
+  ProfessionalStockfish,
+  professionalStockfish,
+} from "@services/engine/ProfessionalStockfish";
 import { useChessGame } from "@ui/hooks/useChessGame";
 import { SpeechService } from "@services/speech/SpeechService";
 import { InteractiveChessBoard } from "./InteractiveChessBoard";
@@ -31,8 +31,8 @@ export const ProfessionalEngineGame: React.FC<ProfessionalEngineGameProps> = ({
 }) => {
   const {} = useTranslation();
   const [gameState, gameActions] = useChessGame();
-  const [engine, setEngine] = useState<LichessStockfishService | null>(null);
-  const [selectedLevel, setSelectedLevel] = useState(6); // Lichess Level 1-8 (Default: ~1900 ELO)
+  const [engine, setEngine] = useState<ProfessionalStockfish | null>(null);
+  const [selectedLevel, setSelectedLevel] = useState('professional-1'); // Professional level default
   const [isEngineThinking, setIsEngineThinking] = useState(false);
   const [gameStarted, setGameStarted] = useState(false);
   const [playerColor, setPlayerColor] = useState<"white" | "black">("white");
@@ -49,7 +49,7 @@ export const ProfessionalEngineGame: React.FC<ProfessionalEngineGameProps> = ({
     accuracy: 100,
   });
 
-  const engineRef = useRef<LichessStockfishService | null>(null);
+  const engineRef = useRef<ProfessionalStockfish | null>(null);
   const recognitionRef = useRef<any>(null);
   const isProcessingVoice = useRef(false);
   // const voiceQueueRef = useRef<string[]>([]);
@@ -58,30 +58,40 @@ export const ProfessionalEngineGame: React.FC<ProfessionalEngineGameProps> = ({
   const [pendingMove, setPendingMove] = useState<string | null>(null);
   const [isWaitingConfirmation, setIsWaitingConfirmation] = useState(false);
 
-  // Initialize engine with selected Lichess level
+  // Initialize professional engine
   useEffect(() => {
     if (!isVisible) return;
 
-    const stockfish = new LichessStockfishService(selectedLevel);
-    setEngine(stockfish);
-    engineRef.current = stockfish;
+    const initEngine = async () => {
+      try {
+        await professionalStockfish.initialize();
+        setEngine(professionalStockfish);
+        engineRef.current = professionalStockfish;
 
-    stockfish.onEvaluation((info: string) => {
-      // Parse engine evaluation info
-      if (info.includes("score cp")) {
-        const cpMatch = info.match(/score cp (-?\d+)/);
-        if (cpMatch) {
-          const centipawns = parseInt(cpMatch[1]);
-          const evaluation = (centipawns / 100).toFixed(2);
-          setEngineEvaluation(`Eval: ${evaluation}`);
-        }
+        professionalStockfish.onEvaluation((info: string) => {
+          // Parse engine evaluation info
+          if (info.includes("score cp")) {
+            const cpMatch = info.match(/score cp (-?\d+)/);
+            if (cpMatch) {
+              const centipawns = parseInt(cpMatch[1]);
+              const evaluation = (centipawns / 100).toFixed(2);
+              setEngineEvaluation(`Eval: ${evaluation}`);
+            }
+          }
+        });
+      } catch (error) {
+        console.error("Failed to initialize professional engine:", error);
       }
-    });
+    };
+
+    initEngine();
 
     return () => {
-      stockfish.destroy();
+      // Don't destroy singleton, just reset reference
+      setEngine(null);
+      engineRef.current = null;
     };
-  }, [selectedLevel, isVisible]);
+  }, [isVisible]);
 
   // Initialize continuous voice recognition
   useEffect(() => {
@@ -470,7 +480,7 @@ export const ProfessionalEngineGame: React.FC<ProfessionalEngineGameProps> = ({
 
     try {
       const currentFen = gameState.game.getFen();
-      const engineMove = await engine.getBestMove(currentFen);
+      const engineMove = await engine.analyzePosition(currentFen, selectedLevel);
 
       // Convert UCI to SAN
       const tempChess = gameState.game.clone();
@@ -662,10 +672,10 @@ export const ProfessionalEngineGame: React.FC<ProfessionalEngineGameProps> = ({
               {!gameStarted && (
                 <div style={{ marginBottom: "2rem" }}>
                   <h3 style={{ color: "#8b5cf6", marginBottom: "1rem" }}>
-                    Selezione Livello ELO
+                    🎯 Livelli Professionali
                   </h3>
 
-                  {/* ELO Slider */}
+                  {/* Professional Level Selector */}
                   <div style={{ marginBottom: "2rem" }}>
                     <div
                       style={{
@@ -675,79 +685,77 @@ export const ProfessionalEngineGame: React.FC<ProfessionalEngineGameProps> = ({
                       }}
                     >
                       <span style={{ color: "#a0a0a0" }}>
-                        Livello: {selectedLevel}
-                      </span>
-                      <span style={{ color: "#ffd700" }}>
-                        {LICHESS_LEVELS[selectedLevel]?.elo
-                          ? `${LICHESS_LEVELS[selectedLevel].elo} ELO`
-                          : ""}
+                        Livello Attuale: {engine?.getLevelInfo(selectedLevel) || selectedLevel}
                       </span>
                     </div>
 
-                    {/* Lichess Level Selector (1-8) */}
+                    {/* Professional Level Grid */}
                     <div
                       style={{
                         display: "grid",
-                        gridTemplateColumns: "repeat(4, 1fr)",
-                        gap: "0.5rem",
+                        gridTemplateColumns: "repeat(2, 1fr)",
+                        gap: "0.75rem",
                         marginTop: "1rem",
                       }}
                     >
-                      {[1, 2, 3, 4, 5, 6, 7, 8].map((level) => {
-                        const lichessLevel = LICHESS_LEVELS[level];
-                        const isSelected = selectedLevel === level;
+                      {professionalStockfish.getAllLevels().map((level) => {
+                        const isSelected = selectedLevel === level.key;
+
+                        const getLevelColor = (elo: number) => {
+                          if (elo >= 2200) return { bg: "#8b5cf6", border: "#a78bfa", glow: "147, 51, 234" };
+                          if (elo >= 1800) return { bg: "#3b82f6", border: "#60a5fa", glow: "59, 130, 246" };
+                          if (elo >= 1200) return { bg: "#10b981", border: "#34d399", glow: "16, 185, 129" };
+                          return { bg: "#6b7280", border: "#9ca3af", glow: "107, 114, 128" };
+                        };
+
+                        const colors = getLevelColor(level.elo);
 
                         return (
                           <button
-                            key={level}
-                            onClick={() => setSelectedLevel(level)}
+                            key={level.key}
+                            onClick={() => setSelectedLevel(level.key)}
                             style={{
-                              padding: "0.75rem 0.5rem",
-                              backgroundColor: isSelected
-                                ? "#10b981"
-                                : "#2d3142",
+                              padding: "1rem",
+                              backgroundColor: isSelected ? colors.bg : "#2d3142",
                               color: "white",
                               border: isSelected
-                                ? "2px solid #20bf6b"
+                                ? `2px solid ${colors.border}`
                                 : "2px solid transparent",
-                              borderRadius: "8px",
+                              borderRadius: "12px",
                               cursor: "pointer",
-                              fontSize: "0.9rem",
+                              fontSize: "0.85rem",
                               fontWeight: isSelected ? "bold" : "normal",
                               transition: "all 0.3s ease",
-                              transform: isSelected
-                                ? "scale(1.05)"
-                                : "scale(1)",
+                              transform: isSelected ? "scale(1.05)" : "scale(1)",
                               boxShadow: isSelected
-                                ? "0 4px 12px rgba(16, 185, 129, 0.3)"
-                                : "0 2px 4px rgba(0,0,0,0.1)",
+                                ? `0 4px 20px rgba(${colors.glow}, 0.4)`
+                                : "0 2px 8px rgba(0,0,0,0.2)",
+                              textAlign: "left",
                             }}
                             onMouseEnter={(e) => {
                               if (!isSelected) {
-                                e.currentTarget.style.backgroundColor =
-                                  "#3d4663";
+                                e.currentTarget.style.backgroundColor = "#3d4663";
                                 e.currentTarget.style.transform = "scale(1.02)";
                               }
                             }}
                             onMouseLeave={(e) => {
                               if (!isSelected) {
-                                e.currentTarget.style.backgroundColor =
-                                  "#2d3142";
+                                e.currentTarget.style.backgroundColor = "#2d3142";
                                 e.currentTarget.style.transform = "scale(1)";
                               }
                             }}
                           >
-                            <div
-                              style={{
-                                fontSize: "1.1rem",
-                                marginBottom: "0.2rem",
-                              }}
-                            >
-                              Livello {level}
+                            <div style={{ fontSize: "1rem", marginBottom: "0.3rem", fontWeight: "600" }}>
+                              {level.name}
                             </div>
-                            <div style={{ fontSize: "0.7rem", opacity: 0.8 }}>
-                              ~{lichessLevel.elo} ELO
+                            <div style={{ fontSize: "0.75rem", opacity: 0.9, color: "#ffd700" }}>
+                              {level.elo} ELO
                             </div>
+                            {level.elo >= 2200 && (
+                              <div style={{ fontSize: "0.65rem", opacity: 0.7, marginTop: "0.2rem" }}>
+                                🏆 Professionale
+                              </div>
+                            )}
                           </button>
                         );
                       })}
