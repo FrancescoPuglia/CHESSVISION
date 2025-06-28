@@ -268,7 +268,9 @@ export class StockfishNNUE {
         // Safety timeout - molto più breve per fallback rapido
         setTimeout(() => {
           if (!this.isReady) {
-            console.warn("⏰ Engine initialization timeout, using fast fallback");
+            console.warn(
+              "⏰ Engine initialization timeout, using fast fallback",
+            );
             this.createFastFallback();
             this.isInitializing = false;
             resolve(); // Continue with fallback
@@ -388,11 +390,14 @@ export class StockfishNNUE {
    * 🚀 MOTORE LOCALE VELOCE E INTELLIGENTE
    * Algoritmo ottimizzato per livelli ELO realistici
    */
-  private generateFastMove(fen: string, level: EngineLevel): Promise<EngineMove> {
+  private generateFastMove(
+    fen: string,
+    level: EngineLevel,
+  ): Promise<EngineMove> {
     return new Promise((resolve) => {
       const chess = new Chess(fen);
       const moves = chess.moves({ verbose: true });
-      
+
       if (moves.length === 0) {
         resolve({
           move: "none",
@@ -406,34 +411,37 @@ export class StockfishNNUE {
 
       // Simula tempo di pensiero realistico
       const thinkTime = Math.min(level.timeLimit * 0.7, 1000);
-      
-      setTimeout(() => {
-        let selectedMove;
-        
-        if (level.elo >= 2400) {
-          // Livello professionale: logica avanzata
-          selectedMove = this.selectProfessionalMove(chess, moves);
-        } else if (level.elo >= 2000) {
-          // Livello avanzato: principi solidi
-          selectedMove = this.selectAdvancedMove(chess, moves);
-        } else if (level.elo >= 1500) {
-          // Livello intermedio: sviluppo e tattica
-          selectedMove = this.selectIntermediateMove(chess, moves);
-        } else {
-          // Livello principiante: mosse basilari
-          selectedMove = this.selectBeginnerMove(chess, moves);
-        }
 
-        const uciMove = `${selectedMove.from}${selectedMove.to}${selectedMove.promotion || ""}`;
-        
-        resolve({
-          move: uciMove,
-          elo: level.elo,
-          depth: level.depth,
-          time: thinkTime,
-          confidence: this.calculateConfidence(level),
-        });
-      }, Math.max(thinkTime, 100));
+      setTimeout(
+        () => {
+          let selectedMove;
+
+          if (level.elo >= 2400) {
+            // Livello professionale: logica avanzata
+            selectedMove = this.selectProfessionalMove(chess, moves);
+          } else if (level.elo >= 2000) {
+            // Livello avanzato: principi solidi
+            selectedMove = this.selectAdvancedMove(chess, moves);
+          } else if (level.elo >= 1500) {
+            // Livello intermedio: sviluppo e tattica
+            selectedMove = this.selectIntermediateMove(chess, moves);
+          } else {
+            // Livello principiante: mosse basilari
+            selectedMove = this.selectBeginnerMove(chess, moves);
+          }
+
+          const uciMove = `${selectedMove.from}${selectedMove.to}${selectedMove.promotion || ""}`;
+
+          resolve({
+            move: uciMove,
+            elo: level.elo,
+            depth: level.depth,
+            time: thinkTime,
+            confidence: this.calculateConfidence(level),
+          });
+        },
+        Math.max(thinkTime, 100),
+      );
     });
   }
 
@@ -459,20 +467,22 @@ export class StockfishNNUE {
 
     // 3. Preferisci sviluppo e controllo centro
     const goodMoves = safeMoves.filter((move) =>
-      ["e4", "e5", "d4", "d5", "Nf3", "Nc3", "Bc4", "Bb5"].includes(move.san)
+      ["e4", "e5", "d4", "d5", "Nf3", "Nc3", "Bc4", "Bb5"].includes(move.san),
     );
 
-    return goodMoves.length > 0 
+    return goodMoves.length > 0
       ? goodMoves[Math.floor(Math.random() * goodMoves.length)]
       : safeMoves[0] || moves[0];
   }
 
   private selectAdvancedMove(_chess: Chess, moves: any[]): any {
     // Preferisci catture e sviluppo
-    const goodMoves = moves.filter((move) => 
-      move.captured || ["e4", "d4", "Nf3", "Nc3"].some(m => move.san.includes(m))
+    const goodMoves = moves.filter(
+      (move) =>
+        move.captured ||
+        ["e4", "d4", "Nf3", "Nc3"].some((m) => move.san.includes(m)),
     );
-    
+
     return goodMoves.length > 0
       ? goodMoves[Math.floor(Math.random() * goodMoves.length)]
       : moves[Math.floor(Math.random() * Math.min(moves.length, 5))];
@@ -481,7 +491,7 @@ export class StockfishNNUE {
   private selectIntermediateMove(_chess: Chess, moves: any[]): any {
     // Centro e sviluppo basilare
     const centerMoves = moves.filter((move) =>
-      ["e4", "e5", "d4", "d5"].some(center => move.san.includes(center))
+      ["e4", "e5", "d4", "d5"].some((center) => move.san.includes(center)),
     );
 
     return centerMoves.length > 0 && Math.random() > 0.3
@@ -491,8 +501,8 @@ export class StockfishNNUE {
 
   private selectBeginnerMove(_chess: Chess, moves: any[]): any {
     // Principalmente casuale con piccola preferenza per centro
-    return Math.random() > 0.7 
-      ? moves.find(m => ["e4", "e5", "d4", "d5"].includes(m.san)) || moves[0]
+    return Math.random() > 0.7
+      ? moves.find((m) => ["e4", "e5", "d4", "d5"].includes(m.san)) || moves[0]
       : moves[Math.floor(Math.random() * moves.length)];
   }
 
