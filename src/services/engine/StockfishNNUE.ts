@@ -225,7 +225,7 @@ export class StockfishNNUE {
     // Nessun download, nessuna attesa
     this.createFastFallback();
     this.isInitializing = false;
-    
+
     return Promise.resolve();
   }
 
@@ -324,7 +324,7 @@ export class StockfishNNUE {
       );
     });
     */
-    
+
     // Non dovremmo mai arrivare qui con il motore locale
     throw new Error("Worker engine not available");
   }
