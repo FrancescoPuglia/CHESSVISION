@@ -4,6 +4,7 @@ import {
   lichessEngine,
   LICHESS_LEVELS,
 } from "@services/engine/LichessEngineAPI";
+import { StockfishService } from "@services/engine/StockfishService";
 import { useChessGame } from "@ui/hooks/useChessGame";
 import { InteractiveChessBoard } from "./InteractiveChessBoard";
 import { SpeechService } from "@services/speech/SpeechService";
@@ -31,34 +32,67 @@ export const LichessEngineGame: React.FC<LichessEngineGameProps> = ({
   const [status, setStatus] = useState<string>("");
   const [continuousListening, setContinuousListening] = useState(true);
   const [isListening, setIsListening] = useState(false);
+  const [isEngineThinking, setIsEngineThinking] = useState(false);
   const recognitionRef = useRef<any>(null);
   const isProcessingVoice = useRef(false);
+  const engineRef = useRef<StockfishService | null>(null);
 
-  // Inizializza gioco con Lichess
+  // Inizializza motore Stockfish locale
   const startGame = async () => {
     setIsConnecting(true);
-    setStatus("🔄 Connessione a Lichess...");
+    setStatus("🔄 Avvio Stockfish professionale...");
 
     try {
       // Reset scacchiera locale PRIMA di iniziare
       gameActions.resetGame();
 
-      // Crea partita su Lichess
-      const gameId = await lichessEngine.createGame(selectedLevel, playerColor);
-      setLichessGameId(gameId);
+      // Inizializza motore Stockfish locale
+      if (!engineRef.current) {
+        // Mappa i livelli Lichess ai preset del motore
+        const strengthMap = {
+          1: "beginner",
+          2: "beginner",
+          3: "intermediate",
+          4: "intermediate",
+          5: "advanced",
+          6: "advanced",
+          7: "expert",
+          8: "master",
+        } as const;
 
-      // Registra callback per aggiornamenti (CORS-disabled)
-      lichessEngine.onGameStateUpdate();
+        const strength =
+          strengthMap[selectedLevel as keyof typeof strengthMap] ||
+          "intermediate";
+        engineRef.current = new StockfishService(strength);
+
+        // Attendi che il motore sia pronto
+        await new Promise<void>((resolve) => {
+          const checkReady = () => {
+            if (engineRef.current?.isEngineReady()) {
+              resolve();
+            } else {
+              setTimeout(checkReady, 100);
+            }
+          };
+          checkReady();
+        });
+      }
+
+      // Simula game ID per compatibilità
+      const gameId = `stockfish-local-${Date.now()}`;
+      setLichessGameId(gameId);
 
       setGameStarted(true);
       setIsConnecting(false);
-      setStatus("✅ Connesso! Gioca contro Stockfish VERO di Lichess");
+      setStatus("✅ Connesso! Gioca contro Stockfish professionale");
 
       // Annuncia l'inizio della partita
       if (speechService && isVoiceEnabled) {
         const colorText = playerColor === "white" ? "bianco" : "nero";
+        const levelInfo =
+          LICHESS_LEVELS[selectedLevel]?.name || `Livello ${selectedLevel}`;
         await speechService.speak(
-          `Partita iniziata contro Stockfish livello ${selectedLevel}. ` +
+          `Partita iniziata contro Stockfish ${levelInfo}. ` +
             `Giochi con i pezzi ${colorText}. ` +
             `${continuousListening ? "Microfono sempre attivo." : ""}`,
         );
@@ -66,16 +100,7 @@ export const LichessEngineGame: React.FC<LichessEngineGameProps> = ({
 
       // Se il giocatore gioca con il nero, Stockfish muove per primo
       if (playerColor === "black") {
-        setStatus("⏳ Stockfish sta pensando...");
-        // Simula la prima mossa di Stockfish
-        setTimeout(async () => {
-          gameActions.makeMove("e4");
-          await speakMove("e4");
-          setStatus("✅ Tocca a te!");
-          if (speechService && isVoiceEnabled) {
-            await speechService.speak("Tocca a te, quale mossa vuoi fare?");
-          }
-        }, 2000);
+        setTimeout(() => makeEngineMove(), 1000);
       } else {
         // Se il giocatore è bianco, chiedi la prima mossa
         if (speechService && isVoiceEnabled) {
@@ -83,8 +108,8 @@ export const LichessEngineGame: React.FC<LichessEngineGameProps> = ({
         }
       }
     } catch (error) {
-      console.error("Failed to start Lichess game:", error);
-      setStatus("❌ Errore connessione Lichess");
+      console.error("Failed to start engine game:", error);
+      setStatus("❌ Errore avvio motore Stockfish");
       setIsConnecting(false);
     }
   };
@@ -149,71 +174,84 @@ export const LichessEngineGame: React.FC<LichessEngineGameProps> = ({
     [speechService, isVoiceEnabled],
   );
 
+  // Fa muovere il motore Stockfish
+  const makeEngineMove = useCallback(async () => {
+    if (
+      !engineRef.current ||
+      !gameStarted ||
+      gameState.isGameOver ||
+      isEngineThinking
+    ) {
+      return;
+    }
+
+    setIsEngineThinking(true);
+    setStatus("⏳ Stockfish sta pensando...");
+
+    try {
+      const fen = gameState.game.getFen();
+      const engineMove = await engineRef.current.getBestMove(fen);
+
+      if (engineMove?.move) {
+        // Converte UCI in SAN
+        const from = engineMove.move.substring(0, 2);
+        const to = engineMove.move.substring(2, 4);
+        const promotion = engineMove.move.substring(4, 5);
+
+        try {
+          const moveObj: any = { from, to };
+          if (promotion) moveObj.promotion = promotion;
+
+          const chess = gameState.game.getInternalChess();
+          const moveResult = chess.move(moveObj);
+
+          if (moveResult) {
+            gameActions.makeMove(moveResult.san);
+            await speakMove(moveResult.san);
+            setStatus("✅ Tocca a te!");
+
+            if (speechService && isVoiceEnabled) {
+              await speechService.speak("Tocca a te, quale mossa vuoi fare?");
+            }
+          }
+        } catch (e) {
+          console.error("Errore nell'applicare la mossa del motore:", e);
+          setStatus("❌ Errore motore");
+        }
+      } else {
+        setStatus("❌ Motore non ha trovato mosse");
+      }
+    } catch (error) {
+      console.error("Errore motore:", error);
+      setStatus("❌ Errore motore Stockfish");
+    } finally {
+      setIsEngineThinking(false);
+    }
+  }, [
+    gameStarted,
+    gameState.isGameOver,
+    gameState.game,
+    isEngineThinking,
+    gameActions,
+    speakMove,
+    speechService,
+    isVoiceEnabled,
+  ]);
+
   // Gestisce mosse del giocatore
   const handlePlayerMove = useCallback(
     async (move: { from: string; to: string; san: string }) => {
-      if (!gameStarted || !lichessGameId) return;
+      if (!gameStarted || !lichessGameId || isEngineThinking) return;
 
-      // Invia mossa a Lichess in formato UCI
-      const uciMove = `${move.from}${move.to}`;
-      console.log(`📤 Sending move to Lichess: ${uciMove}`);
+      console.log(`📤 Player move: ${move.san}`);
 
-      const success = await lichessEngine.makeMove(uciMove);
+      // Annuncia la mossa del giocatore
+      await speakMove(move.san);
 
-      if (success) {
-        // Annuncia la mossa
-        await speakMove(move.san);
-
-        // Simula risposta di Stockfish dopo 1-3 secondi
-        setStatus("⏳ Stockfish sta pensando...");
-        setTimeout(
-          async () => {
-            const engineMoves = [
-              "Nf3",
-              "d4",
-              "c4",
-              "Nc3",
-              "Bc4",
-              "Nf6",
-              "d5",
-              "e5",
-            ];
-            const randomMove =
-              engineMoves[Math.floor(Math.random() * engineMoves.length)];
-            try {
-              gameActions.makeMove(randomMove);
-              await speakMove(randomMove);
-              setStatus("✅ Tocca a te!");
-              // Chiedi la prossima mossa
-              if (speechService && isVoiceEnabled) {
-                await speechService.speak("Tocca a te, quale mossa vuoi fare?");
-              }
-            } catch (e) {
-              // Se la mossa casuale non è valida, prova con una semplice
-              setStatus("✅ Tocca a te!");
-              if (speechService && isVoiceEnabled) {
-                await speechService.speak("Tocca a te, quale mossa vuoi fare?");
-              }
-            }
-          },
-          1500 + Math.random() * 1500,
-        );
-      } else {
-        // Annulla mossa se Lichess la rifiuta
-        gameActions.undoMove();
-        setStatus("❌ Mossa non valida");
-        await speakMessage("Mossa non valida, riprova");
-      }
+      // Fa muovere il motore dopo un breve delay
+      setTimeout(() => makeEngineMove(), 1000 + Math.random() * 1000);
     },
-    [
-      gameStarted,
-      lichessGameId,
-      gameActions,
-      speechService,
-      isVoiceEnabled,
-      speakMove,
-      speakMessage,
-    ],
+    [gameStarted, lichessGameId, isEngineThinking, speakMove, makeEngineMove],
   );
 
   // Processa comandi vocali
@@ -256,11 +294,8 @@ export const LichessEngineGame: React.FC<LichessEngineGameProps> = ({
               if (result) {
                 gameActions.makeMove(move);
                 await speakMove(move);
-                // Notify Lichess about the move
-                if (result.from && result.to && lichessGameId) {
-                  const uciMove = `${result.from}${result.to}`;
-                  await lichessEngine.makeMove(uciMove);
-                }
+                // Fa muovere il motore dopo la mossa vocale
+                setTimeout(() => makeEngineMove(), 1000 + Math.random() * 1000);
               } else {
                 await speakMessage("Mossa non valida");
               }
@@ -281,7 +316,7 @@ export const LichessEngineGame: React.FC<LichessEngineGameProps> = ({
       speakMove,
       speakMessage,
       gameState.game,
-      lichessGameId,
+      makeEngineMove,
     ],
   );
 
@@ -393,6 +428,16 @@ export const LichessEngineGame: React.FC<LichessEngineGameProps> = ({
     processVoiceCommand,
   ]);
 
+  // Cleanup motore
+  useEffect(() => {
+    return () => {
+      if (engineRef.current) {
+        engineRef.current.destroy();
+        engineRef.current = null;
+      }
+    };
+  }, []);
+
   // Cleanup
   useEffect(() => {
     return () => {
@@ -441,7 +486,7 @@ export const LichessEngineGame: React.FC<LichessEngineGameProps> = ({
           }}
         >
           <h2 style={{ color: "#fff", margin: 0, fontSize: "1.8rem" }}>
-            🎮 Gioca contro Stockfish di Lichess
+            🎮 Stockfish Professionale
           </h2>
           <button
             onClick={() => {
@@ -467,7 +512,8 @@ export const LichessEngineGame: React.FC<LichessEngineGameProps> = ({
           // Setup iniziale
           <div style={{ textAlign: "center" }}>
             <p style={{ color: "#ccc", marginBottom: "2rem" }}>
-              Gioca contro il VERO Stockfish di Lichess - Nessuna simulazione!
+              Motore Stockfish professionale con livelli calibrati - Forza
+              reale!
             </p>
 
             {/* Selezione livello */}
@@ -701,21 +747,19 @@ export const LichessEngineGame: React.FC<LichessEngineGameProps> = ({
               showCoordinates={true}
             />
 
-            {/* Link partita Lichess */}
+            {/* Info motore */}
             {lichessGameId && (
               <div style={{ textAlign: "center", marginTop: "1rem" }}>
-                <a
-                  href={`https://lichess.org/${lichessGameId}`}
-                  target="_blank"
-                  rel="noopener noreferrer"
+                <div
                   style={{
                     color: "#81b64c",
-                    textDecoration: "none",
                     fontSize: "0.9rem",
                   }}
                 >
-                  📺 Vedi partita su Lichess →
-                </a>
+                  🚀 Motore: Stockfish{" "}
+                  {LICHESS_LEVELS[selectedLevel]?.name ||
+                    `Livello ${selectedLevel}`}
+                </div>
               </div>
             )}
           </div>
