@@ -1,10 +1,10 @@
 // src/ui/components/LichessEngineGame.tsx
 import React, { useState, useEffect, useCallback, useRef } from "react";
+import { LICHESS_LEVELS } from "@services/engine/LichessEngineAPI";
 import {
-  lichessEngine,
-  LICHESS_LEVELS,
-} from "@services/engine/LichessEngineAPI";
-import { StockfishService } from "@services/engine/StockfishService";
+  lichessAPI,
+  LichessGameEvent,
+} from "@services/engine/LichessAPIService";
 import { useChessGame } from "@ui/hooks/useChessGame";
 import { InteractiveChessBoard } from "./InteractiveChessBoard";
 import { SpeechService } from "@services/speech/SpeechService";
@@ -35,56 +35,35 @@ export const LichessEngineGame: React.FC<LichessEngineGameProps> = ({
   const [isEngineThinking, setIsEngineThinking] = useState(false);
   const recognitionRef = useRef<any>(null);
   const isProcessingVoice = useRef(false);
-  const engineRef = useRef<StockfishService | null>(null);
+  const gameRef = useRef<string | null>(null);
+  const streamRef = useRef<boolean>(false);
 
-  // Inizializza motore Stockfish locale
+  // Inizializza gioco con vera API Lichess
   const startGame = async () => {
     setIsConnecting(true);
-    setStatus("🔄 Avvio Stockfish professionale...");
+    setStatus("🔄 Connessione a Lichess...");
 
     try {
       // Reset scacchiera locale PRIMA di iniziare
       gameActions.resetGame();
 
-      // Inizializza motore Stockfish locale
-      if (!engineRef.current) {
-        // Mappa i livelli Lichess ai preset del motore
-        const strengthMap = {
-          1: "beginner",
-          2: "beginner",
-          3: "intermediate",
-          4: "intermediate",
-          5: "advanced",
-          6: "advanced",
-          7: "expert",
-          8: "master",
-        } as const;
+      // Crea sfida AI su Lichess
+      const timeLimit = 600; // 10 minuti
+      const increment = 0;
+      const gameData = await lichessAPI.challengeAI(
+        selectedLevel,
+        timeLimit,
+        increment,
+        playerColor,
+      );
 
-        const strength =
-          strengthMap[selectedLevel as keyof typeof strengthMap] ||
-          "intermediate";
-        engineRef.current = new StockfishService(strength);
-
-        // Attendi che il motore sia pronto
-        await new Promise<void>((resolve) => {
-          const checkReady = () => {
-            if (engineRef.current?.isEngineReady()) {
-              resolve();
-            } else {
-              setTimeout(checkReady, 100);
-            }
-          };
-          checkReady();
-        });
-      }
-
-      // Simula game ID per compatibilità
-      const gameId = `stockfish-local-${Date.now()}`;
+      const gameId = gameData.id;
+      gameRef.current = gameId;
       setLichessGameId(gameId);
 
       setGameStarted(true);
       setIsConnecting(false);
-      setStatus("✅ Connesso! Gioca contro Stockfish professionale");
+      setStatus("✅ Connesso! Gioca contro Stockfish VERO di Lichess");
 
       // Annuncia l'inizio della partita
       if (speechService && isVoiceEnabled) {
@@ -92,24 +71,25 @@ export const LichessEngineGame: React.FC<LichessEngineGameProps> = ({
         const levelInfo =
           LICHESS_LEVELS[selectedLevel]?.name || `Livello ${selectedLevel}`;
         await speechService.speak(
-          `Partita iniziata contro Stockfish ${levelInfo}. ` +
+          `Partita iniziata contro Stockfish ${levelInfo} di Lichess. ` +
             `Giochi con i pezzi ${colorText}. ` +
             `${continuousListening ? "Microfono sempre attivo." : ""}`,
         );
       }
 
-      // Se il giocatore gioca con il nero, Stockfish muove per primo
-      if (playerColor === "black") {
-        setTimeout(() => makeEngineMove(), 1000);
-      } else {
-        // Se il giocatore è bianco, chiedi la prima mossa
-        if (speechService && isVoiceEnabled) {
-          await speechService.speak("Tocca a te, quale mossa vuoi fare?");
-        }
+      // Avvia streaming degli eventi del gioco
+      if (!streamRef.current) {
+        streamRef.current = true;
+        lichessAPI.streamGame(gameId, handleLichessEvent);
+      }
+
+      // Se il giocatore è bianco, chiedi la prima mossa
+      if (playerColor === "white" && speechService && isVoiceEnabled) {
+        await speechService.speak("Tocca a te, quale mossa vuoi fare?");
       }
     } catch (error) {
-      console.error("Failed to start engine game:", error);
-      setStatus("❌ Errore avvio motore Stockfish");
+      console.error("Failed to start Lichess game:", error);
+      setStatus("❌ Errore connessione Lichess");
       setIsConnecting(false);
     }
   };
@@ -174,84 +154,210 @@ export const LichessEngineGame: React.FC<LichessEngineGameProps> = ({
     [speechService, isVoiceEnabled],
   );
 
-  // Fa muovere il motore Stockfish
-  const makeEngineMove = useCallback(async () => {
-    if (
-      !engineRef.current ||
-      !gameStarted ||
-      gameState.isGameOver ||
-      isEngineThinking
-    ) {
-      return;
-    }
+  // Gestisce eventi dal stream Lichess
+  const handleLichessEvent = useCallback(
+    async (event: LichessGameEvent) => {
+      try {
+        if (event.type === "gameFull") {
+          // Evento iniziale con stato completo del gioco
+          console.log("🎮 Gioco iniziato:", event);
 
-    setIsEngineThinking(true);
-    setStatus("⏳ Stockfish sta pensando...");
-
-    try {
-      const fen = gameState.game.getFen();
-      const engineMove = await engineRef.current.getBestMove(fen);
-
-      if (engineMove?.move) {
-        // Converte UCI in SAN
-        const from = engineMove.move.substring(0, 2);
-        const to = engineMove.move.substring(2, 4);
-        const promotion = engineMove.move.substring(4, 5);
-
-        try {
-          const moveObj: any = { from, to };
-          if (promotion) moveObj.promotion = promotion;
-
-          const chess = gameState.game.getInternalChess();
-          const moveResult = chess.move(moveObj);
-
-          if (moveResult) {
-            gameActions.makeMove(moveResult.san);
-            await speakMove(moveResult.san);
-            setStatus("✅ Tocca a te!");
-
-            if (speechService && isVoiceEnabled) {
-              await speechService.speak("Tocca a te, quale mossa vuoi fare?");
+          // Applica le mosse se ce ne sono
+          if (event.state?.moves) {
+            const moves = event.state.moves
+              .trim()
+              .split(" ")
+              .filter((m) => m);
+            for (const move of moves) {
+              applyUCIMove(move);
             }
           }
-        } catch (e) {
-          console.error("Errore nell'applicare la mossa del motore:", e);
-          setStatus("❌ Errore motore");
+
+          // Determina se è il nostro turno
+          if (event.state) {
+            updateGameStatus({
+              type: "gameState",
+              moves: event.state.moves,
+              wtime: event.state.wtime,
+              btime: event.state.btime,
+              status: event.state.status,
+              winner: event.state.winner,
+            });
+          }
+        } else if (event.type === "gameState") {
+          // Aggiornamento stato (nuova mossa, fine gioco, etc.)
+          console.log("📥 Aggiornamento gioco:", event);
+
+          // Applica tutte le mosse dal server (rebuilding approach)
+          gameActions.resetGame();
+          if (event.moves) {
+            const moves = event.moves
+              .trim()
+              .split(" ")
+              .filter((m) => m);
+            for (const move of moves) {
+              applyUCIMove(move);
+            }
+
+            // Se c'è una nuova mossa, è dell'avversario
+            if (moves.length > 0) {
+              const lastMove = moves[moves.length - 1];
+              const lastMoveSAN = convertUCItoSAN(lastMove);
+              if (lastMoveSAN) {
+                await speakMove(lastMoveSAN);
+              }
+            }
+          }
+
+          updateGameStatus({
+            type: "gameState",
+            moves: event.moves || "",
+            wtime: event.wtime || 0,
+            btime: event.btime || 0,
+            status: event.status || "started",
+            winner: event.winner,
+          });
+        }
+      } catch (error) {
+        console.error("Errore gestione evento Lichess:", error);
+      }
+    },
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [gameActions, speakMove],
+  );
+
+  // Applica una mossa UCI alla scacchiera locale
+  const applyUCIMove = useCallback(
+    (uciMove: string) => {
+      try {
+        const from = uciMove.substring(0, 2);
+        const to = uciMove.substring(2, 4);
+        const promotion = uciMove.substring(4, 5);
+
+        const chess = gameState.game.getInternalChess();
+        const moveObj: any = { from, to };
+        if (promotion) moveObj.promotion = promotion;
+
+        const moveResult = chess.move(moveObj);
+        if (moveResult) {
+          gameActions.makeMove(moveResult.san);
+        }
+      } catch (e) {
+        console.error("Errore applicazione mossa UCI:", e);
+      }
+    },
+    [gameState.game, gameActions],
+  );
+
+  // Converte UCI in SAN per l'audio
+  const convertUCItoSAN = useCallback(
+    (uciMove: string): string | null => {
+      try {
+        const chess = gameState.game.getInternalChess();
+        const from = uciMove.substring(0, 2);
+        const to = uciMove.substring(2, 4);
+        const promotion = uciMove.substring(4, 5);
+
+        const moveObj: any = { from, to };
+        if (promotion) moveObj.promotion = promotion;
+
+        const moveResult = chess.move(moveObj);
+        chess.undo(); // Undo per non modificare lo stato
+        return moveResult?.san || null;
+      } catch (e) {
+        return null;
+      }
+    },
+    [gameState.game],
+  );
+
+  // Aggiorna lo status del gioco
+  const updateGameStatus = useCallback(
+    async (gameStateData: {
+      type: string;
+      moves: string;
+      wtime: number;
+      btime: number;
+      status: string;
+      winner?: string;
+    }) => {
+      setIsEngineThinking(false);
+
+      if (gameStateData.status === "started") {
+        // Determina di chi è il turno
+        const moves = gameStateData.moves
+          .trim()
+          .split(" ")
+          .filter((m) => m);
+        const isWhiteTurn = moves.length % 2 === 0;
+        const isMyTurn =
+          (playerColor === "white" && isWhiteTurn) ||
+          (playerColor === "black" && !isWhiteTurn);
+
+        if (isMyTurn) {
+          setStatus("✅ Tocca a te!");
+          if (speechService && isVoiceEnabled) {
+            await speechService.speak("Tocca a te, quale mossa vuoi fare?");
+          }
+        } else {
+          setStatus("⏳ Stockfish sta pensando...");
+          setIsEngineThinking(true);
         }
       } else {
-        setStatus("❌ Motore non ha trovato mosse");
+        // Gioco finito
+        let resultMessage = "Partita terminata";
+        if (gameStateData.status === "mate") {
+          const winner = gameStateData.winner === "white" ? "Bianco" : "Nero";
+          resultMessage = `Scacco matto! Vince ${winner}`;
+        } else if (gameStateData.status === "resign") {
+          resultMessage = "Partita terminata per abbandono";
+        } else if (gameStateData.status === "draw") {
+          resultMessage = "Partita patta";
+        }
+
+        setStatus(`🏁 ${resultMessage}`);
+        setGameStarted(false);
+
+        if (speechService && isVoiceEnabled) {
+          await speechService.speak(resultMessage);
+        }
       }
-    } catch (error) {
-      console.error("Errore motore:", error);
-      setStatus("❌ Errore motore Stockfish");
-    } finally {
-      setIsEngineThinking(false);
-    }
-  }, [
-    gameStarted,
-    gameState.isGameOver,
-    gameState.game,
-    isEngineThinking,
-    gameActions,
-    speakMove,
-    speechService,
-    isVoiceEnabled,
-  ]);
+    },
+    [playerColor, speechService, isVoiceEnabled],
+  );
 
   // Gestisce mosse del giocatore
   const handlePlayerMove = useCallback(
     async (move: { from: string; to: string; san: string }) => {
-      if (!gameStarted || !lichessGameId || isEngineThinking) return;
+      if (!gameStarted || !gameRef.current || isEngineThinking) return;
 
-      console.log(`📤 Player move: ${move.san}`);
+      console.log(`📤 Invio mossa a Lichess: ${move.san}`);
 
-      // Annuncia la mossa del giocatore
-      await speakMove(move.san);
+      // Converti in UCI
+      const uciMove = `${move.from}${move.to}`;
 
-      // Fa muovere il motore dopo un breve delay
-      setTimeout(() => makeEngineMove(), 1000 + Math.random() * 1000);
+      try {
+        const success = await lichessAPI.makeMove(gameRef.current, uciMove);
+
+        if (success) {
+          // Annuncia la mossa del giocatore
+          await speakMove(move.san);
+          setStatus("⏳ Stockfish sta pensando...");
+          setIsEngineThinking(true);
+        } else {
+          // Mossa non accettata - ripristina la posizione
+          gameActions.undoMove();
+          setStatus("❌ Mossa non valida");
+          await speakMessage("Mossa non valida, riprova");
+        }
+      } catch (error) {
+        console.error("Errore invio mossa:", error);
+        gameActions.undoMove();
+        setStatus("❌ Errore connessione");
+        await speakMessage("Errore di connessione");
+      }
     },
-    [gameStarted, lichessGameId, isEngineThinking, speakMove, makeEngineMove],
+    [gameStarted, isEngineThinking, speakMove, speakMessage, gameActions],
   );
 
   // Processa comandi vocali
@@ -294,8 +400,13 @@ export const LichessEngineGame: React.FC<LichessEngineGameProps> = ({
               if (result) {
                 gameActions.makeMove(move);
                 await speakMove(move);
-                // Fa muovere il motore dopo la mossa vocale
-                setTimeout(() => makeEngineMove(), 1000 + Math.random() * 1000);
+                // La mossa viene inviata a Lichess via handlePlayerMove
+                const moveObj = {
+                  from: move.substring(0, 2),
+                  to: move.substring(2, 4),
+                  san: move,
+                };
+                await handlePlayerMove(moveObj);
               } else {
                 await speakMessage("Mossa non valida");
               }
@@ -316,7 +427,7 @@ export const LichessEngineGame: React.FC<LichessEngineGameProps> = ({
       speakMove,
       speakMessage,
       gameState.game,
-      makeEngineMove,
+      handlePlayerMove,
     ],
   );
 
@@ -428,24 +539,15 @@ export const LichessEngineGame: React.FC<LichessEngineGameProps> = ({
     processVoiceCommand,
   ]);
 
-  // Cleanup motore
+  // Cleanup Lichess API
   useEffect(() => {
     return () => {
-      if (engineRef.current) {
-        engineRef.current.destroy();
-        engineRef.current = null;
+      if (gameRef.current && streamRef.current) {
+        lichessAPI.stopGameStream(gameRef.current);
+        streamRef.current = false;
       }
     };
   }, []);
-
-  // Cleanup
-  useEffect(() => {
-    return () => {
-      if (gameStarted) {
-        lichessEngine.destroy();
-      }
-    };
-  }, [gameStarted]);
 
   if (!isVisible) return null;
 
@@ -489,9 +591,10 @@ export const LichessEngineGame: React.FC<LichessEngineGameProps> = ({
             🎮 Stockfish Professionale
           </h2>
           <button
-            onClick={() => {
-              if (gameStarted) {
-                lichessEngine.resign();
+            onClick={async () => {
+              if (gameStarted && gameRef.current) {
+                await lichessAPI.resign(gameRef.current);
+                setGameStarted(false);
               }
               onClose();
             }}
@@ -682,9 +785,11 @@ export const LichessEngineGame: React.FC<LichessEngineGameProps> = ({
                   {boardHidden ? "👁️ Mostra" : "🙈 Blindfold"}
                 </button>
                 <button
-                  onClick={() => {
-                    lichessEngine.resign();
-                    setGameStarted(false);
+                  onClick={async () => {
+                    if (gameRef.current) {
+                      await lichessAPI.resign(gameRef.current);
+                      setGameStarted(false);
+                    }
                   }}
                   style={{
                     padding: "0.5rem 1rem",
