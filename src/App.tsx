@@ -2181,6 +2181,8 @@ function App() {
         <LichessEngineGame
           isVisible={showLichessEngine}
           onClose={() => setShowLichessEngine(false)}
+          speechService={speechService.current}
+          isVoiceEnabled={isVoiceEnabled}
         />
       )}
 
