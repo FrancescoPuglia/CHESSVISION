@@ -319,8 +319,9 @@ export class LichessAPIService {
   }
 }
 
-// Singleton con token configurato
-export const lichessAPI = new LichessAPIService("lip_N4a0clTuekafqEPP2BtC");
+// Singleton con token configurato da variabile ambiente
+const lichessToken = import.meta.env.VITE_LICHESS_TOKEN || "TOKEN_NON_CONFIGURATO";
+export const lichessAPI = new LichessAPIService(lichessToken);
 
 /**
  * 🔧 FUNZIONE DI UTILITY PER TESTARE CORS
