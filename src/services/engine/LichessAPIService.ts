@@ -63,6 +63,40 @@ export class LichessAPIService {
     this.token = token;
   }
 
+  /**
+   * 🔍 TESTA LA CONNESSIONE E IL TOKEN
+   */
+  async testConnection(): Promise<{
+    success: boolean;
+    user?: any;
+    error?: string;
+  }> {
+    try {
+      const response = await fetch(`${this.baseUrl}/account`, {
+        headers: {
+          Authorization: `Bearer ${this.token}`,
+        },
+      });
+
+      if (!response.ok) {
+        if (response.status === 401) {
+          return { success: false, error: "Token non valido o scaduto" };
+        }
+        return { success: false, error: `Errore API: ${response.status}` };
+      }
+
+      const user = await response.json();
+      console.log("✅ Token valido, utente:", user.username);
+      return { success: true, user };
+    } catch (error: any) {
+      console.error("❌ Test connessione fallito:", error);
+      return {
+        success: false,
+        error: "Errore di rete - impossibile raggiungere Lichess",
+      };
+    }
+  }
+
   private getHeaders(): Record<string, string> {
     return {
       Authorization: `Bearer ${this.token}`,
@@ -92,24 +126,63 @@ export class LichessAPIService {
     console.log(
       `🎮 Creating Lichess AI challenge - Level ${level}, Time ${timeLimit}+${increment}`,
     );
+    console.log(`🔗 URL: ${url}`);
+    console.log(`🔑 Token: ${this.token.substring(0, 10)}...`);
+    console.log(`📝 Params:`, params.toString());
 
-    const response = await fetch(url, {
-      method: "POST",
-      headers: this.getHeaders(),
-      body: params,
-    });
+    try {
+      const response = await fetch(url, {
+        method: "POST",
+        headers: this.getHeaders(),
+        body: params,
+      });
 
-    if (!response.ok) {
-      const error = await response.text();
-      throw new Error(
-        `Failed to create AI challenge: ${response.status} - ${error}`,
+      console.log(`📡 Response status: ${response.status}`);
+      console.log(
+        `📡 Response headers:`,
+        Object.fromEntries(response.headers.entries()),
       );
+
+      if (!response.ok) {
+        const error = await response.text();
+        console.error(`❌ Lichess API Error: ${response.status} - ${error}`);
+
+        // Errori specifici
+        if (response.status === 401) {
+          throw new Error(
+            "Token non valido o scaduto. Verifica il token Lichess.",
+          );
+        } else if (response.status === 429) {
+          throw new Error("Troppe richieste. Attendi un momento e riprova.");
+        } else if (
+          response.status === 0 ||
+          response.status.toString().startsWith("5")
+        ) {
+          throw new Error("Errore di rete. Verifica la connessione internet.");
+        }
+
+        throw new Error(`Errore API Lichess (${response.status}): ${error}`);
+      }
+
+      const data = await response.json();
+      console.log("✅ AI challenge created:", data);
+
+      return data as LichessGameData;
+    } catch (networkError: any) {
+      console.error("❌ Network error:", networkError);
+
+      if (
+        networkError.name === "TypeError" &&
+        networkError.message.includes("fetch")
+      ) {
+        throw new Error(
+          "Errore di connessione: impossibile raggiungere Lichess. " +
+            "Potrebbe essere un problema CORS o di rete.",
+        );
+      }
+
+      throw networkError;
     }
-
-    const data = await response.json();
-    console.log("✅ AI challenge created:", data);
-
-    return data as LichessGameData;
   }
 
   /**
@@ -248,3 +321,65 @@ export class LichessAPIService {
 
 // Singleton con token configurato
 export const lichessAPI = new LichessAPIService("lip_N4a0clTuekafqEPP2BtC");
+
+/**
+ * 🔧 FUNZIONE DI UTILITY PER TESTARE CORS
+ */
+export const testLichessAccess = async (): Promise<{
+  corsIssue: boolean;
+  networkIssue: boolean;
+  tokenIssue: boolean;
+  details: string;
+}> => {
+  try {
+    // Test semplice senza token per verificare CORS
+    const corsTest = await fetch("https://lichess.org/api/status", {
+      method: "GET",
+    });
+
+    if (corsTest.ok) {
+      console.log("✅ CORS OK - Lichess è raggiungibile");
+
+      // Ora testa con token
+      const tokenTest = await lichessAPI.testConnection();
+      if (!tokenTest.success) {
+        return {
+          corsIssue: false,
+          networkIssue: false,
+          tokenIssue: true,
+          details: tokenTest.error || "Token non valido",
+        };
+      }
+
+      return {
+        corsIssue: false,
+        networkIssue: false,
+        tokenIssue: false,
+        details: "Tutto OK",
+      };
+    } else {
+      return {
+        corsIssue: true,
+        networkIssue: false,
+        tokenIssue: false,
+        details: `CORS bloccato: ${corsTest.status}`,
+      };
+    }
+  } catch (error: any) {
+    if (error.name === "TypeError" && error.message.includes("fetch")) {
+      return {
+        corsIssue: true,
+        networkIssue: false,
+        tokenIssue: false,
+        details: "CORS Policy blocca le richieste cross-origin",
+      };
+    }
+
+    return {
+      corsIssue: false,
+      networkIssue: true,
+      tokenIssue: false,
+      details: `Errore di rete: ${error.message}`,
+    };
+  }
+};

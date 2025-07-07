@@ -4,6 +4,7 @@ import { LICHESS_LEVELS } from "@services/engine/LichessEngineAPI";
 import {
   lichessAPI,
   LichessGameEvent,
+  testLichessAccess,
 } from "@services/engine/LichessAPIService";
 import { useChessGame } from "@ui/hooks/useChessGame";
 import { InteractiveChessBoard } from "./InteractiveChessBoard";
@@ -41,13 +42,21 @@ export const LichessEngineGame: React.FC<LichessEngineGameProps> = ({
   // Inizializza gioco con vera API Lichess
   const startGame = async () => {
     setIsConnecting(true);
-    setStatus("🔄 Connessione a Lichess...");
+    setStatus("🔄 Verifica connessione Lichess...");
 
     try {
-      // Reset scacchiera locale PRIMA di iniziare
+      // 1. Prima testa la connessione e il token
+      const connectionTest = await lichessAPI.testConnection();
+      if (!connectionTest.success) {
+        throw new Error(connectionTest.error || "Errore di connessione");
+      }
+
+      setStatus("🔄 Connessione verificata, creazione partita...");
+
+      // 2. Reset scacchiera locale PRIMA di iniziare
       gameActions.resetGame();
 
-      // Crea sfida AI su Lichess
+      // 3. Crea sfida AI su Lichess
       const timeLimit = 600; // 10 minuti
       const increment = 0;
       const gameData = await lichessAPI.challengeAI(
@@ -87,9 +96,25 @@ export const LichessEngineGame: React.FC<LichessEngineGameProps> = ({
       if (playerColor === "white" && speechService && isVoiceEnabled) {
         await speechService.speak("Tocca a te, quale mossa vuoi fare?");
       }
-    } catch (error) {
+    } catch (error: any) {
       console.error("Failed to start Lichess game:", error);
-      setStatus("❌ Errore connessione Lichess");
+
+      // Test diagnostico per capire il problema
+      const diagnostic = await testLichessAccess();
+      console.log("🔍 Diagnostic results:", diagnostic);
+
+      let errorMessage = "❌ Errore connessione Lichess";
+      if (diagnostic.corsIssue) {
+        errorMessage = "❌ CORS Error: Browser blocca connessione Lichess";
+      } else if (diagnostic.tokenIssue) {
+        errorMessage = "❌ Token non valido o scaduto";
+      } else if (diagnostic.networkIssue) {
+        errorMessage = "❌ Errore di rete - verifica connessione";
+      } else {
+        errorMessage = `❌ ${error.message}`;
+      }
+
+      setStatus(errorMessage);
       setIsConnecting(false);
     }
   };
